@@ -1,0 +1,140 @@
+.html5-player {
+  position: relative;
+  height: 360px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  touch-action: manipulation;
+}
+
+.html5-player--auto-hide .html5-player__chrome {
+  opacity: 0;
+  transition: opacity .1s cubic-bezier(0.4,0.0,1,1);
+}
+
+.html5-player.html5-player--fullscreen {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+}
+
+.html5-player__video {
+  position: relative;
+}
+
+.html5-player__video video {
+  width: 100%;
+}
+
+.html5-player__subtitles {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+
+@keyframes html5-player-bezel-fadeout {
+  0% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+.html5-player__bezel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  z-index: 19;
+  margin-left: -26px;
+  margin-top: -26px;
+  background: rgba(0,0,0,.5);
+  border-radius: 26px;
+  animation-play-state: running;
+  animation: html5-player-bezel-fadeout .5s linear 1 normal forwards;
+  pointer-events: none;
+}
+
+.html5-player__bezel-icon {
+  width: 36px;
+  height: 36px;
+  margin: 8px;
+}
+
+.html5-player__bezel-icon svg {
+  pointer-events: none;
+}
+
+.html5-player__chrome {
+  position: absolute;
+  bottom: 0;
+  height: 36px;
+  width: 100%;
+  z-index: 60;
+  padding-top: 3px;
+  text-align: left;
+  direction: ltr;
+
+  color: #ffffff;
+  text-shadow: 0 0 2px rgba(0,0,0,.5);
+
+  transition: opacity .25s cubic-bezier(0.0,0.0,0.2,1);
+}
+
+.html5-player__controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  z-index: 22;
+}
+
+.html5-player__time {
+  
+}
+
+.html5-player__gradiant {
+  height: 98px;
+  width: 100%;
+  position: absolute;
+  background-repeat: repeat-x;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAADGCAYAAAAT+OqFAAAAdklEQVQoz42QQQ7AIAgEF/T/D+kbq/RWAlnQyyazA4aoAB4FsBSA/bFjuF1EOL7VbrIrBuusmrt4ZZORfb6ehbWdnRHEIiITaEUKa5EJqUakRSaEYBJSCY2dEstQY7AuxahwXFrvZmWl2rh4JZ07z9dLtesfNj5q0FU3A5ObbwAAAABJRU5ErkJggg==);
+  transition: opacity .25s cubic-bezier(0.0,0.0,0.2,1);
+  pointer-events: none;
+}
+
+.html5-player__gradiant--bottom {
+  bottom: 0;
+  z-index: 22;
+  background-position: bottom;
+}
+
+.html5-player__progress-bar-container {
+  display: block;
+  position: absolute;
+  width: 100%;
+  bottom: 35px;
+  height: 5px;
+}
+
+.html5-player__progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 31;
+  outline: none;
+}
+
+.libjass-subs {
+  user-select: none;
+  pointer-events: none;
+}
