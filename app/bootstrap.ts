@@ -11,9 +11,6 @@ class Bootstrap {
   private player: Player = new Player();
 
   constructor() {
-    let flashPlayer = document.querySelector("#showmedia_video_player");
-    flashPlayer.parentNode.removeChild(flashPlayer);
-
     this.wrapper = document.querySelector("#showmedia_video_box");
     this.wrapper.textContent = "Loading HTML5 player...";
 
