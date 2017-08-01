@@ -23,13 +23,19 @@ class Bootstrap {
     this.player.attach(this.wrapper);
 
     var video = await Video.fromDocument(location.href, document, true);
-    let stream = video.streams[0];
+    if (video.streams.length > 0) {
+      let stream = video.streams[0];
 
-    if (stream.nextUrl) {
-      this.player.setNextVideo(NextVideo.fromUrlUsingDocument(stream.nextUrl));
+      if (stream.nextUrl) {
+        this.player.setNextVideo(NextVideo.fromUrlUsingDocument(stream.nextUrl));
+      }
+
+      console.log(stream.subtitles[0].toAss());
+
+      this.player.setStream(stream);
+    } else {
+      //let stream = await Stream.fromUrl(location.href, video.videoId, "trailer", '0', '');
     }
-
-    this.player.setStream(stream);
   }
 }
 

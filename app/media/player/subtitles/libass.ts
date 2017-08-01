@@ -48,11 +48,12 @@ export class LibAssSubtitle extends SubtitleEngine {
   setTrack(subtitle: Subtitle) {
     this.subtitle = subtitle;
 
+    let ass = subtitle.toAss();
     if (this.initialized) {
-      this.libass.setTrack(subtitle.toAss());
+      this.libass.setTrack(ass);
     } else {
       this.initialized = true;
-      this.libass.init(subtitle.toAss());
+      this.libass.init(ass);
     }
   }
 
