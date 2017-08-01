@@ -48,7 +48,7 @@ yarn run start
   subtitle is displayed (in most cases this will be English).
 - Add more fonts. Currently, only Arial is available. Should be quite easy, but
   some testing needs to be done for this.
-- Investigate issues with subtitles being scaled 120% on the Y axis and how to
+- Investigate issues with subtitles being scaled 120% on the X axis and how to
   fix it. On some subtitles the scaleX is set to 120% instead of 100% and causes
   some weird strecthed out subtitles.
 - Prevent user from right clicking on the video element. There's no reason for
