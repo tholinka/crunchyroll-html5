@@ -11,7 +11,10 @@ class Bootstrap {
   private player: Player = new Player();
 
   constructor() {
-    this.wrapper = document.querySelector("#showmedia_video_player");
+    let flashPlayer = document.querySelector("#showmedia_video_player");
+    flashPlayer.parentNode.removeChild(flashPlayer);
+
+    this.wrapper = document.querySelector("#showmedia_video_box");
     this.wrapper.textContent = "Loading HTML5 player...";
 
     importCSSByUrl("https://fonts.googleapis.com/css?family=Noto+Sans");
@@ -29,8 +32,6 @@ class Bootstrap {
       if (stream.nextUrl) {
         this.player.setNextVideo(NextVideo.fromUrlUsingDocument(stream.nextUrl));
       }
-
-      console.log(stream.subtitles[0].toAss());
 
       this.player.setStream(stream);
     } else {
