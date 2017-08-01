@@ -91,12 +91,15 @@ export class Player extends EventTarget {
   private nextVideo: NextVideo;
   private nextVideoButton: HTMLElement;
 
+  private wide: boolean = false;
+
   constructor() {
     super();
 
     this.playerElement = document.createElement("div");
     this.playerElement.setAttribute("tabindex", "-1");
-    this.playerElement.className = "html5-player";
+    this.playerElement.className = "html5-player"
+      + (this.wide ? " html5-player--wide" : "");
 
     this.videoWrapper = document.createElement("div");
     this.videoWrapper.className = "html5-player__video";
@@ -458,15 +461,18 @@ export class Player extends EventTarget {
 
   private handleSubtitleResize(): void {
     var rect = this.subtitleEngine.getRect();
+    const wrapperRect = this.videoWrapper.getBoundingClientRect();
+    const videoRect = this.videoElement.getBoundingClientRect();
 
     var el = <HTMLElement> this.subtitleEngine.getElement();
     el.style.width = rect.width + "px";
     el.style.height = rect.height + "px";
-    el.style.left = rect.x + "px";
 
-    var offset = this.videoWrapper.getBoundingClientRect().top
-      - this.videoElement.getBoundingClientRect().top;
-    el.style.top = (rect.y - offset) + "px";
+    var offsetLeft = wrapperRect.left - videoRect.left;
+    var offsetTop = wrapperRect.top - videoRect.top;
+
+    el.style.left = (rect.x - offsetLeft) + "px";
+    el.style.top = (rect.y - offsetTop) + "px";
   }
 
   private handleKeyDown(e: KeyboardEvent) {
@@ -790,6 +796,15 @@ export class Player extends EventTarget {
 
   unmute(): void {
     this.videoElement.muted = false;
+  }
+
+  setWide(wide: boolean) {
+    this.wide = wide;
+    if (wide) {
+      this.playerElement.classList.add("html5-player--wide")
+    } else {
+      this.playerElement.classList.remove("html5-player--wide")
+    }
   }
 
   getVolume(): number {

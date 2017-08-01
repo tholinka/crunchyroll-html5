@@ -12,6 +12,10 @@ class Bootstrap {
 
   constructor() {
     this.wrapper = document.querySelector("#showmedia_video_box");
+    if (!this.wrapper) {
+      this.wrapper = document.querySelector("#showmedia_video_box_wide");
+      this.player.setWide(true);
+    }
     this.wrapper.textContent = "Loading HTML5 player...";
 
     importCSSByUrl("https://fonts.googleapis.com/css?family=Noto+Sans");
@@ -23,6 +27,7 @@ class Bootstrap {
     this.player.attach(this.wrapper);
 
     var video = await Video.fromDocument(location.href, document, true);
+
     if (video.streams.length > 0) {
       let stream = video.streams[0];
 
