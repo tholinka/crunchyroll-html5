@@ -12,8 +12,8 @@ export abstract class SubtitleEngine extends EventTarget {
   abstract attach(element: HTMLVideoElement);
   abstract detach();
   abstract getElement(): Element;
-  abstract setSubtitle(subtitle: Subtitle);
-  abstract getSubtitle(): Subtitle;
+  abstract setTrack(subtitle: Subtitle);
+  abstract getTrack(): Subtitle;
   abstract getRect(): ISubtitleRect;
   abstract resize();
 }

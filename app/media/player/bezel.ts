@@ -20,11 +20,7 @@ export class BezelElement extends EventTarget {
 
     this.element.appendChild(this.iconElement);
 
-    this.handler.listen(this.element, 'animationend', this.handleAnimationEnd);
-  }
-
-  private handleAnimationEnd() {
-    this.element.style.display = "none";
+    this.handler.listen(this.element, 'animationend', this.stop);
   }
 
   protected disposeInternal() {

@@ -96,7 +96,12 @@ export class Stream {
     public subtitles: Subtitle[],
     public mediaId: string,
     public mediaType: string,
-    public encodeId: string
+    public encodeId: string,
+    public thumbnailUrl: string,
+    public episodeNumber: string,
+    public episodeTitle: string,
+    public seriesTitle: string,
+    public nextUrl: string
   ) {}
 
   static async fromUrl(url: string, videoId: string, fmt: string, streamFormat: string, streamQuality: string): Promise<Stream> {
@@ -121,6 +126,13 @@ export class Stream {
     var height: number = parseInt(streamInfo.querySelector("metadata height").textContent, 10);
     var duration: number = parseFloat(streamInfo.querySelector("metadata duration").textContent);
 
+    var thumbnailUrl: string = doc.querySelector("media_metadata episode_image_url").textContent;
+    var nextUrl: string = doc.getElementsByTagName("default:nextUrl")[0].textContent;
+
+    var episodeTitle: string = doc.querySelector("episode_title").textContent;
+    var episodeNumber: string = doc.querySelector("episode_number").textContent;
+    var seriesTitle: string = doc.querySelector("series_title").textContent;
+
     var subtitles: Subtitle[] = [];
     var subtitleElements = doc.querySelectorAll("subtitles subtitle");
     for (let i = 0; i < subtitleElements.length; i++) {
@@ -141,7 +153,9 @@ export class Stream {
       subtitles.push(subtitle);
     }
 
-    return new Stream(file, fmt, width, height, duration, subtitles, mediaId, mediaType, encodeId);
+    return new Stream(file, fmt, width, height, duration, subtitles, mediaId,
+      mediaType, encodeId, thumbnailUrl, episodeNumber, episodeTitle,
+      seriesTitle, nextUrl);
   }
 }
 
@@ -307,6 +321,7 @@ export class Subtitle {
 
 export class Video {
   constructor(
+    public url: string,
     public videoId: string,
     public title: string,
     public description: string,
@@ -326,9 +341,9 @@ export class Video {
     var webpageUrl: string = m[2];
     var videoId: string = m[3];
 
-    var note = doc.querySelector(".showmedia-trailer-notice");
+    /*var note = doc.querySelector(".showmedia-trailer-notice");
     if (note && note.textContent.trim() !== "")
-      throw new Error(note.textContent.trim());
+      throw new Error(note.textContent.trim());*/
 
     if (doc.documentElement.innerText.indexOf("To view this, please log in to verify you are 18 or older.") !== -1)
       throw new Error("User is required to log in.");
@@ -365,7 +380,7 @@ export class Video {
       streams.push(await Stream.fromUrl(url, videoId, fmts[i], streamFormat, streamQuality));
     }
 
-    return new Video(videoId, title, description, streams);
+    return new Video(url, videoId, title, description, streams);
   }
 
   static async fromUrl(url: string, onlyDefault: boolean = false): Promise<Video> {

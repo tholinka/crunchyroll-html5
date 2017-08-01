@@ -31,6 +31,8 @@ export class Listener implements IListener {
     this.removed = false;
     if (this.src instanceof EventTarget) {
       this.src.addEventListener(this.type, <EventListener> this.proxy, this.capture);
+    } else {
+      this.src.listenByListener(this);
     }
   }
 
@@ -38,6 +40,8 @@ export class Listener implements IListener {
     this.removed = true;
     if (this.src instanceof EventTarget) {
       this.src.removeEventListener(this.type, <EventListener> this.proxy, this.capture);
+    } else {
+      this.src.unlistenByListener(this);
     }
   }
 }

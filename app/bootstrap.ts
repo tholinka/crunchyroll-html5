@@ -1,24 +1,38 @@
 import { Video, Stream, Subtitle } from './media/video';
+import { NextVideo } from './media/nextvideo';
 import { Player } from './media/player';
 import * as request from 'request-promise-native';
+import { importCSS, importCSSByUrl } from './utils/css';
 
-const libjassCss = require('raw-loader!libjass/libjass.css');
 const css = require('raw-loader!./styles.css');
 
-var wrapper = document.querySelector("#showmedia_video_player");
-wrapper.textContent = "Loading HTML5 player...";
+class Bootstrap {
+  private wrapper: Element;
+  private player: Player = new Player();
 
-var style = document.createElement("style");
-style.appendChild(document.createTextNode(libjassCss + "\n" + css));
+  constructor() {
+    this.wrapper = document.querySelector("#showmedia_video_player");
+    this.wrapper.textContent = "Loading HTML5 player...";
 
-document.body.appendChild(style);
+    importCSSByUrl("https://fonts.googleapis.com/css?family=Noto+Sans");
+    importCSS(css);
+  }
+
+  async run() {
+    this.wrapper.innerHTML = "";
+    this.player.attach(this.wrapper);
+
+    var video = await Video.fromDocument(location.href, document, true);
+    let stream = video.streams[0];
+
+    if (stream.nextUrl) {
+      this.player.setNextVideo(NextVideo.fromUrlUsingDocument(stream.nextUrl));
+    }
+
+    this.player.setStream(stream);
+  }
+}
 
 if (Video.validateUrl(location.href)) {
-  Video.fromDocument(location.href, document, true)
-  .then(video => {
-    var player = new Player();
-    player.setStream(video.streams[0]);
-    wrapper.innerHTML = "";
-    player.attach(wrapper);
-  });
+  (new Bootstrap()).run();
 }

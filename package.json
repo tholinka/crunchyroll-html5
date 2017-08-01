@@ -24,6 +24,7 @@
     "@types/lodash": "^4.14.71",
     "ajv": "^5.2.2",
     "big-integer": "^1.6.23",
+    "binary-loader": "^0.0.1",
     "css-loader": "^0.28.4",
     "hls.js": "^0.7.11",
     "imports-loader": "^0.7.1",

@@ -19,6 +19,14 @@ export class EventTarget extends Disposable implements IEventTarget {
     this._listeners = null;
   }
 
+  listenByListener(listener: IListener): boolean {
+    for (let i = 0; i < this._listeners.length; i++) {
+      if (listener.equals(this._listeners[i]))
+        return false;
+    }
+    this._listeners.push(listener);
+  }
+
   listen(type: string, fn, capture: boolean = false, handler?: any): IListener {
     var listener = new Listener(this, type, fn, capture, handler);
     for (let i = 0; i < this._listeners.length; i++) {
@@ -26,7 +34,6 @@ export class EventTarget extends Disposable implements IEventTarget {
         return this._listeners[i];
     }
     this._listeners.push(listener);
-    listener.listen();
 
     return listener;
   }
@@ -34,7 +41,6 @@ export class EventTarget extends Disposable implements IEventTarget {
   unlistenByListener(listener: IListener): boolean {
     const index = this._listeners.indexOf(listener);
     if (index === -1) return false;
-    listener.unlisten();
     this._listeners.splice(index, 1);
   }
 
@@ -48,10 +54,10 @@ export class EventTarget extends Disposable implements IEventTarget {
   }
   
   dispatchEvent(type: string, payload: any) {
-    if (!this._listeners[type])
-      return;
-    for (let i = 0; i < this._listeners[type].length; i++) {
-      this._listeners[type][i](payload);
+    for (let i = 0; i < this._listeners.length; i++) {
+      let listener = this._listeners[i];
+      if (listener.type !== type) continue;
+      listener.proxy(payload);
     }
   }
 }

@@ -29,12 +29,22 @@ export class EventHandler extends Disposable {
   }
 
   listen(src: EventTarget|LEventTarget, type: string, fn, capture: boolean = false, handler?: any): EventHandler {
-    var listener = new Listener(src, type, fn, capture, handler || this.handler);
-    const index = this._listeners.indexOf(listener);
-    if (index !== -1) return this;
-
-    listener.listen();
-    this._listeners.push(listener);
+    if (src instanceof LEventTarget) {
+      let listener = src.listen(type, fn, capture, handler || this.handler);
+      for (let i = 0; i < this._listeners.length; i++) {
+        if (listener.equals(this._listeners[i]))
+          return this;
+      }
+      this._listeners.push(listener);
+    } else {
+      let listener = new Listener(src, type, fn, capture, handler || this.handler);
+      for (let i = 0; i < this._listeners.length; i++) {
+        if (listener.equals(this._listeners[i]))
+          return this;
+      }
+      this._listeners.push(listener);
+      listener.listen();
+    }
 
     return this;
   }

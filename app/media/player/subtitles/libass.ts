@@ -8,6 +8,8 @@ export class LibAssSubtitle extends SubtitleEngine {
   private subtitle: Subtitle;
   private handler: EventHandler = new EventHandler();
 
+  private initialized: boolean = false;
+
   constructor() {
     super();
 
@@ -43,12 +45,18 @@ export class LibAssSubtitle extends SubtitleEngine {
     return this.libass.getCanvas();
   }
 
-  setSubtitle(subtitle: Subtitle) {
+  setTrack(subtitle: Subtitle) {
     this.subtitle = subtitle;
-    this.libass.init(subtitle.toAss());
+
+    if (this.initialized) {
+      this.libass.setTrack(subtitle.toAss());
+    } else {
+      this.initialized = true;
+      this.libass.init(subtitle.toAss());
+    }
   }
 
-  getSubtitle(): Subtitle {
+  getTrack(): Subtitle {
     return this.subtitle;
   }
 
@@ -66,5 +74,4 @@ export class LibAssSubtitle extends SubtitleEngine {
   resize() {
     this.libass.resize();
   }
-
 }

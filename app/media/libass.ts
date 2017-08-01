@@ -1,14 +1,15 @@
 import { EventTarget } from '../events/eventtarget';
 import { EventHandler } from '../events/eventhandler';
 import * as _ from 'lodash';
+import { binaryToBlob } from '../utils/blob';
 
 const libassWorkerJS = require('raw-loader!../../vendor/JavascriptSubtitlesOctopus/subtitles-octopus-worker.js');
-const libassWorkerData = require('raw-loader!../../vendor/JavascriptSubtitlesOctopus/subtitles-octopus-worker.data');
-const libassWorkerJSMem = require('raw-loader!../../vendor/JavascriptSubtitlesOctopus/subtitles-octopus-worker.js.mem');
+const libassDefaultFont = require('binary-loader!../../vendor/JavascriptSubtitlesOctopus/default.ttf');
+const libassFontsConfig = require('raw-loader!../../vendor/JavascriptSubtitlesOctopus/fonts.conf');
 
 const libassWorkerUrl = URL.createObjectURL(new Blob([libassWorkerJS], { type: "text/javascript" }));
-const libassDataUrl = URL.createObjectURL(new Blob([libassWorkerData], { type: "application/octet-stream" }));
-const libassMemUrl = URL.createObjectURL(new Blob([libassWorkerJSMem], { type: "application/octet-stream" }));
+const libassDefaultFontUrl = URL.createObjectURL(binaryToBlob(libassDefaultFont, "application/octet-stream"));
+const libassFontsConfigUrl = URL.createObjectURL(new Blob([libassFontsConfig], { type: "application/xml" }));
 
 interface IVideoRect {
   width: number,
@@ -22,22 +23,7 @@ interface IEvent {
 }
 
 interface IEventData {
-  target: string,
-  content?: string,
-  method?: string,
-  op?: string,
-  type?: string,
-  attributes?: Canvas2DContextAttributes,
-  width?: number,
-  height?: number,
-  buffer?: any,
-  image?: any,
-  time?: number,
-  value?: any;
-  object?: string;
-  property?: string;
-  id?: number,
-  src?: string
+  [key: string]: any
 }
 
 export interface ILibAssOptions {
@@ -90,7 +76,11 @@ export class LibAss extends EventTarget {
       subUrl: url,
       subContent: content,
       fonts: this.fonts,
-      availableFonts: this.availableFonts
+      availableFonts: this.availableFonts,
+      files: {
+        'fonts.conf': { url: libassFontsConfigUrl },
+        'default.ttf': { url: libassDefaultFontUrl }
+      }
     });
   }
   
@@ -114,7 +104,22 @@ export class LibAss extends EventTarget {
   }
 
   detach() {
+    this.video = null;
     this.videoHandler.clear();
+  }
+
+  setTrack(content: string) {
+    this.worker.postMessage({
+      target: 'set-track',
+      content: content
+    });
+  }
+
+  setTrackByUrl(url: string) {
+    this.worker.postMessage({
+      target: 'set-track-by-url',
+      url: url
+    });
   }
 
   resize(width?: number, height?: number) {
@@ -236,7 +241,6 @@ export class LibAss extends EventTarget {
     this.worker = new Worker(libassWorkerUrl);
     this.worker.onerror = error => this.onWorkerError(error);
     this.worker.onmessage = event => this.onWorkerMessage(event);
-    this.worker.postMessage([libassDataUrl, libassMemUrl]);
   }
 
   private onWorkerError(error) {
@@ -251,7 +255,7 @@ export class LibAss extends EventTarget {
     var data = event.data;
     switch (data.target) {
       case 'stdout':
-        console.log(data.content);
+        //console.log(data.content);
         break;
       case 'stderr':
         console.error(data.content);
@@ -281,7 +285,7 @@ export class LibAss extends EventTarget {
             if (this.lastRenderTime <= data.time) {
               this.lastRenderTime = data.time;
               this.renderFramesData = data;
-              window.requestAnimationFrame(() => this.renderFrame());
+              window.requestAnimationFrame(() => this.renderFrames());
             }
             break;
           case 'setObjectProperty':
