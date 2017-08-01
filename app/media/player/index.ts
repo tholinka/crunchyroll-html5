@@ -12,26 +12,19 @@ import { parseAndFormatTime } from '../../utils/time';
 import { BezelElement } from './bezel';
 import { ProgressBarElement, IHover } from './progressbar';
 import { AnimationButton } from './animation-button';
+import { VolumeSvg, VolumeSvgState } from './volume-svg';
+import { VolumeSlider } from './volume-slider';
 import { Tooltip, Flags as TooltipFlags } from './tooltip';
 import { getOffsetRect, getClientRect, IRect } from '../../utils/offset';
 
 import { SubtitleEngine } from './subtitles/isubtitle';
 import { LibAssSubtitle } from './subtitles/libass';
 
+import { ICON_PLAY, ICON_PAUSE, ICON_SEEK_BACK, ICON_SEEK_FORWARD, ICON_VOLUME, ICON_VOLUME_HIGH } from '../../assets/svg-paths';
+
 export enum PlaybackState {
   UNSTARTED, PLAYING, PAUSED, BUFFERING, ENDED
 }
-
-const ICON_PLAY = "M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z";
-const ICON_PAUSE = "M 12,26 16,26 16,10 12,10 z M 21,26 25,26 25,10 21,10 z";
-const ICON_PREV = "m 12,12 h 2 v 12 h -2 z m 3.5,6 8.5,6 V 12 z";
-const ICON_NEXT = "M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z";
-const ICON_VOLUME_MUTE = "m 21.48,17.98 c 0,-1.77 -1.02,-3.29 -2.5,-4.03 v 2.21 l 2.45,2.45 c .03,-0.2 .05,-0.41 .05,-0.63 z m 2.5,0 c 0,.94 -0.2,1.82 -0.54,2.64 l 1.51,1.51 c .66,-1.24 1.03,-2.65 1.03,-4.15 0,-4.28 -2.99,-7.86 -7,-8.76 v 2.05 c 2.89,.86 5,3.54 5,6.71 z M 9.25,8.98 l -1.27,1.26 4.72,4.73 H 7.98 v 6 H 11.98 l 5,5 v -6.73 l 4.25,4.25 c -0.67,.52 -1.42,.93 -2.25,1.18 v 2.06 c 1.38,-0.31 2.63,-0.95 3.69,-1.81 l 2.04,2.05 1.27,-1.27 -9,-9 -7.72,-7.72 z m 7.72,.99 -2.09,2.08 2.09,2.09 V 9.98 z";
-const ICON_VOLUME = "M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,19.77 21.5,18 C21.5,16.26 20.48,14.74 19,14 Z";
-const ICON_VOLUME_HIGH = "M19,11.29 C21.89,12.15 24,14.83 24,18 C24,21.17 21.89,23.85 19,24.71 L19,26.77 C23.01,25.86 26,22.28 26,18 C26,13.72 23.01,10.14 19,9.23 L19,11.29 Z";
-const ICON_VOLUME_LOW = "M19,11.29 C21.89,12.15 24,14.83 24,18 C24,21.17 21.89,23.85 19,24.71 L19,24.77 C21.89,23.85 24,21.17 24,18 C24,14.83 21.89,12.15 19,11.29 L19,11.29 Z";
-const ICON_SEEK_BACK = "M 18,11 V 7 l -5,5 5,5 v -4 c 3.3,0 6,2.7 6,6 0,3.3 -2.7,6 -6,6 -3.3,0 -6,-2.7 -6,-6 h -2 c 0,4.4 3.6,8 8,8 4.4,0 8,-3.6 8,-8 0,-4.4 -3.6,-8 -8,-8 z m -1.3,8.9 .2,-2.2 h 2.4 v .7 h -1.7 l -0.1,.9 c 0,0 .1,0 .1,-0.1 0,-0.1 .1,0 .1,-0.1 0,-0.1 .1,0 .2,0 h .2 c .2,0 .4,0 .5,.1 .1,.1 .3,.2 .4,.3 .1,.1 .2,.3 .3,.5 .1,.2 .1,.4 .1,.6 0,.2 0,.4 -0.1,.5 -0.1,.1 -0.1,.3 -0.3,.5 -0.2,.2 -0.3,.2 -0.4,.3 C 18.5,22 18.2,22 18,22 17.8,22 17.6,22 17.5,21.9 17.4,21.8 17.2,21.8 17,21.7 16.8,21.6 16.8,21.5 16.7,21.3 16.6,21.1 16.6,21 16.6,20.8 h .8 c 0,.2 .1,.3 .2,.4 .1,.1 .2,.1 .4,.1 .1,0 .2,0 .3,-0.1 L 18.5,21 c 0,0 .1,-0.2 .1,-0.3 v -0.6 l -0.1,-0.2 -0.2,-0.2 c 0,0 -0.2,-0.1 -0.3,-0.1 h -0.2 c 0,0 -0.1,0 -0.2,.1 -0.1,.1 -0.1,0 -0.1,.1 0,.1 -0.1,.1 -0.1,.1 h -0.7 z";
-const ICON_SEEK_FORWARD = "m 10,19 c 0,4.4 3.6,8 8,8 4.4,0 8,-3.6 8,-8 h -2 c 0,3.3 -2.7,6 -6,6 -3.3,0 -6,-2.7 -6,-6 0,-3.3 2.7,-6 6,-6 v 4 l 5,-5 -5,-5 v 4 c -4.4,0 -8,3.6 -8,8 z m 6.7,.9 .2,-2.2 h 2.4 v .7 h -1.7 l -0.1,.9 c 0,0 .1,0 .1,-0.1 0,-0.1 .1,0 .1,-0.1 0,-0.1 .1,0 .2,0 h .2 c .2,0 .4,0 .5,.1 .1,.1 .3,.2 .4,.3 .1,.1 .2,.3 .3,.5 .1,.2 .1,.4 .1,.6 0,.2 0,.4 -0.1,.5 -0.1,.1 -0.1,.3 -0.3,.5 -0.2,.2 -0.3,.2 -0.5,.3 C 18.3,22 18.1,22 17.9,22 17.7,22 17.5,22 17.4,21.9 17.3,21.8 17.1,21.8 16.9,21.7 16.7,21.6 16.7,21.5 16.6,21.3 16.5,21.1 16.5,21 16.5,20.8 h .8 c 0,.2 .1,.3 .2,.4 .1,.1 .2,.1 .4,.1 .1,0 .2,0 .3,-0.1 L 18.4,21 c 0,0 .1,-0.2 .1,-0.3 v -0.6 l -0.1,-0.2 -0.2,-0.2 c 0,0 -0.2,-0.1 -0.3,-0.1 h -0.2 c 0,0 -0.1,0 -0.2,.1 -0.1,.1 -0.1,0 -0.1,.1 0,.1 -0.1,.1 -0.1,.1 h -0.6 z";
 
 const SVG_NEXT_VIDEO = '<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><path fill="#ffffff" d="M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z"></path></svg>';
 const SVG_ENTER_FULLSCREEN = '<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><g class="html5-player__fullscreen-btn-corner-0"><path fill="#ffffff" d="m 10,16 2,0 0,-4 4,0 0,-2 L 10,10 l 0,6 0,0 z"></path></g><g class="html5-player__fullscreen-btn-corner-1"><path fill="#ffffff" d="m 20,10 0,2 4,0 0,4 2,0 L 26,10 l -6,0 0,0 z"></path></g><g class="html5-player__fullscreen-btn-corner-2"><path fill="#ffffff" d="m 24,24 -4,0 0,2 L 26,26 l 0,-6 -2,0 0,4 0,0 z"></path></g><g class="html5-player__fullscreen-btn-corner-3"><path fill="#ffffff" d="M 12,20 10,20 10,26 l 6,0 0,-2 -4,0 0,-4 0,0 z"></path></g></svg>';
@@ -51,6 +44,11 @@ export class Player extends EventTarget {
 
   private controlsElement: HTMLElement;
   private playButton: AnimationButton;
+  private volumeButton: HTMLElement;
+  private volumeButtonTitleText: Text = document.createTextNode("");
+  private volumeSvg: VolumeSvg;
+  private volumeSlider: VolumeSlider;
+  private _volumeSliderPreferActive: boolean = false;
 
   private fullscreenButton: HTMLElement;
 
@@ -86,6 +84,8 @@ export class Player extends EventTarget {
 
   private _progressPlaying: boolean = false;
   private _progressDragging: boolean = false;
+
+  private _dragging: boolean = false;
   private _preferAutoHide: boolean = true;
 
   private nextVideo: NextVideo;
@@ -96,7 +96,7 @@ export class Player extends EventTarget {
 
     this.playerElement = document.createElement("div");
     this.playerElement.setAttribute("tabindex", "-1");
-    this.playerElement.className = "html5-player html5-player--auto-hide";
+    this.playerElement.className = "html5-player";
 
     this.videoWrapper = document.createElement("div");
     this.videoWrapper.className = "html5-player__video";
@@ -143,11 +143,24 @@ export class Player extends EventTarget {
     controlsLeft.appendChild(this.playButton.getElement());
 
     this.nextVideoButton = document.createElement("a");
-    this.nextVideoButton.className = "html5-player__button ";
+    this.nextVideoButton.className = "html5-player__button";
     this.nextVideoButton.innerHTML = SVG_NEXT_VIDEO;
     this.nextVideoButton.style.display = "none";
 
     controlsLeft.appendChild(this.nextVideoButton);
+
+    var volumeWrapper = document.createElement("span");
+    this.volumeButton = document.createElement("button");
+    this.volumeButton.className = "html5-player__button";
+    this.volumeSvg = new VolumeSvg();
+    this.volumeButton.appendChild(this.volumeSvg.getElement());
+
+    volumeWrapper.appendChild(this.volumeButton);
+
+    this.volumeSlider = new VolumeSlider(this.getVolume(), 0, 1);
+    volumeWrapper.appendChild(this.volumeSlider.getElement());
+
+    controlsLeft.appendChild(volumeWrapper);
 
     this.controlsTimeElement = document.createElement("div");
     this.controlsTimeElement.className = "html5-player__time";
@@ -204,15 +217,25 @@ export class Player extends EventTarget {
       .listen(this.videoElement, "progress", this.handleProgress)
       .listen(this.videoElement, "timeupdate", this.handleTimeUpdate)
       .listen(this.playerElement, "keydown", this.handleKeyDown)
+      .listen(this.playerElement, "mousedown", this.handleMouseDown)
+      .listen(document, "mouseup", this.handleMouseUp)
+
+      .listen(controlsLeft, 'mouseleave', this.handleLeftControlsMouseLeave)
+      .listen(this.volumeSlider.getElement(), 'blur', this.handleVolumeSliderBlur)
+      .listen(this.volumeSlider, 'change', this.handleVolumeSliderChange)
 
       .listen(this.playButton, 'click', this.togglePlay)
       .listen(this.fullscreenButton, 'click', this.toggleFullscreen)
 
-      .listen(this.nextVideoButton, 'mouseover', this.handleNextVideoMouseOver)
-      .listen(this.fullscreenButton, 'mouseover', this.handleFullscreenMouseOver)
+      .listen(this.volumeButton, 'click', this.handleVolumeButtonClick)
 
-      .listen(this.nextVideoButton, 'mouseout', this.handleElementTooltipMouseOut)
-      .listen(this.fullscreenButton, 'mouseout', this.handleElementTooltipMouseOut)
+      .listen(this.volumeButton, 'mouseenter', this.handleVolumeButtonMouseEnter)
+      .listen(this.nextVideoButton, 'mouseenter', this.handleNextVideoMouseEnter)
+      .listen(this.fullscreenButton, 'mouseenter', this.handleFullscreenMouseEnter)
+
+      .listen(this.volumeButton, 'mouseleave', this.handleElementTooltipMouseLeave)
+      .listen(this.nextVideoButton, 'mouseleave', this.handleElementTooltipMouseLeave)
+      .listen(this.fullscreenButton, 'mouseleave', this.handleElementTooltipMouseLeave)
 
       .listen(this.progressBar, "dragStart", this.handleProgressDragStart)
       .listen(this.progressBar, "drag", this.handleProgressDrag)
@@ -222,31 +245,48 @@ export class Player extends EventTarget {
       .listen(this.videoElement, "loadedmetadata", this.handleLoadedMetadata)
       .listen(this.videoWrapper, "click", this.handleClickEvent)
       .listen(this.videoWrapper, "dblclick", this.handleDoubleClickEvent)
-      .listen(this.playerElement, "mouseover", this.handleMouseOver)
-      .listen(this.playerElement, "mouseout", this.handleMouseOut)
+      .listen(this.playerElement, "mouseenter", this.handleMouseEnter)
+      .listen(this.playerElement, "mouseleave", this.handleMouseLeave)
       .listen(this.playerElement, "mousemove", this.handleMouseMove)
       .listen(this.subtitleEngine, "resize", this.handleSubtitleResize)
       .listen(document, "fullscreenchange", this.handleFullscreenChange)
       .listen(document, "webkitfullscreenchange", this.handleFullscreenChange);
+    
+    this.updateAutoHideInternal();
   }
 
-  private setAutoHide(autoHide: boolean) {
-    this._preferAutoHide = autoHide;
-    if (!this._progressDragging) {
-      if (autoHide) {
-        this.playerElement.classList.add('html5-player--auto-hide');
-      } else {
-        this.playerElement.classList.remove('html5-player--auto-hide');
-      }
+  private updateAutoHideInternal() {
+    const canAutoHide: boolean =  !this._dragging
+      && this.getPlaybackState() === PlaybackState.PLAYING
+      && this._preferAutoHide;
+    if (canAutoHide) {
+      this.playerElement.classList.add('html5-player--auto-hide');
+    } else {
+      this.playerElement.classList.remove('html5-player--auto-hide');
     }
+    this.progressBar.setUpdateDom(!canAutoHide);
+  }
 
-    this.progressBar.setUpdateDom(!autoHide);
+  setAutoHide(autoHide: boolean) {
+    this._preferAutoHide = autoHide;
+    
+    this.updateAutoHideInternal();
+  }
+
+  private handleMouseDown() {
+    this._dragging = true;
+  }
+
+  private handleMouseUp() {
+    this._dragging = false;
+
+    this.updateAutoHideInternal();
   }
 
   private handleProgressHover(detail: IHover) {
     if (detail) {
       this.tooltip.setFlags(0);
-      this.tooltip.setText(parseAndFormatTime(detail.time));
+      this.tooltip.setTextContent(parseAndFormatTime(detail.time));
 
       this.tooltip.setVisible(true);
 
@@ -275,17 +315,13 @@ export class Player extends EventTarget {
     if (this._progressPlaying) {
       this.play();
     }
-
-    if (this._preferAutoHide) {
-      this.playerElement.classList.add('html5-player--auto-hide');
-    } else {
-      this.playerElement.classList.remove('html5-player--auto-hide');
-    }
   }
 
   private onStateChange(state: PlaybackState): void {
     var icon = (state === PlaybackState.PLAYING ? ICON_PAUSE : ICON_PLAY);
     this.playButton.animate(icon);
+
+    this.updateAutoHideInternal();
   }
 
   private handlePlay(): void {
@@ -335,7 +371,20 @@ export class Player extends EventTarget {
   }
 
   private handleVolumeChange(): void {
-    
+    var volume = this.getVolume();
+    var muted = this.isMuted() || volume === 0;
+    if (muted) {
+      this.volumeSvg.setState(VolumeSvgState.MUTED);
+    } else {
+      if (volume < 0.5) {
+        this.volumeSvg.setState(VolumeSvgState.LOW);
+      } else {
+        this.volumeSvg.setState(VolumeSvgState.HIGH);
+      }
+    }
+
+    this.volumeButtonTitleText.textContent = muted ? "Unmute" : "Mute";
+    this.volumeSlider.setValue(volume);
   }
 
   private handleTimeUpdate(): void {
@@ -360,30 +409,40 @@ export class Player extends EventTarget {
     this.play();
   }
 
+  private setBigMode(enabled: boolean) {
+    if (enabled) {
+      this.playerElement.classList.add("html5-player--big-mode");
+    } else {
+      this.playerElement.classList.remove("html5-player--big-mode");
+    }
+    this.volumeSlider.setBigMode(enabled);
+    this.progressBar.updateDom();
+  }
+
   private handleFullscreenChange(): void {
     this.bezel.stop();
     this.tooltip.setVisible(false, true);
 
-    if (this.isFullscreen()) {
-      this.playerElement.classList.add("html5-player--big-mode");
+    const fullscreen = this.isFullscreen();
+    if (fullscreen) {
       this.playerElement.classList.add("html5-player--fullscreen");
 
       this.fullscreenButton.innerHTML = SVG_EXIT_FULLSCREEN;
     } else {
-      this.playerElement.classList.remove("html5-player--big-mode");
       this.playerElement.classList.remove("html5-player--fullscreen");
 
       this.fullscreenButton.innerHTML = SVG_ENTER_FULLSCREEN;
     }
 
     this.resize();
+    this.setBigMode(fullscreen);
   }
 
-  private handleMouseOver(e: MouseEvent): void {
+  private handleMouseEnter(e: MouseEvent): void {
     this.handleMouseMove(e);
   }
 
-  private handleMouseOut(): void {
+  private handleMouseLeave(): void {
     this.setAutoHide(true);
   }
 
@@ -513,10 +572,55 @@ export class Player extends EventTarget {
     this.tooltip.setPosition(left, top);
   }
 
-  private handleNextVideoMouseOver() {
+  private handleLeftControlsMouseLeave() {
+    if (document.activeElement === this.volumeSlider.getElement()) {
+      this._volumeSliderPreferActive = false;
+    } else {
+      this.volumeSlider.getElement().classList
+        .remove('html5-player-volume-panel--active');
+    }
+  }
+
+  private handleVolumeSliderChange(value) {
+    this.setVolume(value);
+  }
+
+  private handleVolumeSliderBlur() {
+    if (!this._volumeSliderPreferActive) {
+      this.volumeSlider.getElement().classList
+        .remove('html5-player-volume-panel--active');
+    }
+  }
+
+  private handleVolumeButtonClick() {
+    if (this.isMuted()) {
+      this.unmute();
+    } else if (this.getVolume() === 0) {
+      this.setVolume(1);
+    } else {
+      this.mute();
+    }
+  }
+
+  private handleVolumeButtonMouseEnter() {
+    this.tooltip.setFlags(0);
+    this.volumeButtonTitleText.textContent = 
+      this.isMuted() || this.getVolume() === 0 ? "Unmute" : "Mute";
+    this.tooltip.setText(this.volumeButtonTitleText);
+
+    this.tooltip.setVisible(true);
+
+    this.repositionTooltip(this.volumeButton);
+
+    this.volumeSlider.getElement().classList
+      .add('html5-player-volume-panel--active');
+    this._volumeSliderPreferActive = true;
+  }
+
+  private handleNextVideoMouseEnter() {
     this.tooltip.setFlags(TooltipFlags.PREVIEW | TooltipFlags.TEXT_DETAIL);
     this.tooltip.setTitle("Next");
-    this.tooltip.setText(this.nextVideo.episodeNumber
+    this.tooltip.setTextContent(this.nextVideo.episodeNumber
       + ": "
       + this.nextVideo.episodeTitle
     );
@@ -534,16 +638,16 @@ export class Player extends EventTarget {
     this.repositionTooltip(this.nextVideoButton);
   }
 
-  private handleFullscreenMouseOver() {
+  private handleFullscreenMouseEnter() {
     this.tooltip.setFlags(0);
-    this.tooltip.setText(this.isFullscreen() ? "Exit full screen" : "Full screen");
+    this.tooltip.setTextContent(this.isFullscreen() ? "Exit full screen" : "Full screen");
 
     this.tooltip.setVisible(true);
 
     this.repositionTooltip(this.fullscreenButton);
   }
 
-  private handleElementTooltipMouseOut() {
+  private handleElementTooltipMouseLeave() {
     this.tooltip.setVisible(false);
   }
 
@@ -585,9 +689,11 @@ export class Player extends EventTarget {
   }
 
   resize() {
-
     // Update subtitle dimensions
     this.subtitleEngine.resize();
+
+    this.volumeSlider.updateDom();
+    this.progressBar.updateDom();
   }
 
   attach(el: Element) {
@@ -690,6 +796,10 @@ export class Player extends EventTarget {
     return this.videoElement.volume;
   }
 
+  /**
+   * Set the volume.
+   * @param volume Volume ranges between 0 and 1.
+   */
   setVolume(volume: number) {
     this.videoElement.volume = volume;
   }

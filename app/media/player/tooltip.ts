@@ -156,7 +156,12 @@ export class Tooltip extends Disposable {
     this.titleElement.textContent = title;
   }
 
-  setText(text: string) {
+  setText(text: Text) {
+    this.textElement.innerHTML = "";
+    this.textElement.appendChild(text);
+  }
+
+  setTextContent(text: string) {
     this.textElement.textContent = text;
   }
 

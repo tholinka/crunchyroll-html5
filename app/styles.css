@@ -496,6 +496,14 @@
   pointer-events: none;
 }
 
+.html5-player-tooltip.html5-player-tooltip--text-detail.html5-player-tooltip--preview {
+  width: 312px;
+}
+
+.html5-player--big-mode .html5-player-tooltip.html5-player-tooltip--text-detail.html5-player-tooltip--preview {
+  width: 457px;
+}
+
 .html5-player--big-mode .html5-player-tooltip {
   line-height: 22px;
 }
@@ -605,4 +613,84 @@
 .html5-player-tooltip.html5-player-tooltip--text-detail.html5-player-tooltip--preview .html5-player-tooltip__text {
   background-color: transparent;
   padding: 0;
+}
+
+.html5-player-volume-panel {
+  display: inline-block;
+  width: 0;
+  height: 100%;
+  transition: margin .2s cubic-bezier(0.4,0.0,1,1),width .2s cubic-bezier(0.4,0.0,1,1);
+  cursor: pointer;
+  outline: 0;
+}
+
+.html5-player-volume-panel.html5-player-volume-panel--active {
+  width: 52px;
+  margin-right: 3px;
+  transition: margin .2s cubic-bezier(0.0,0.0,0.2,1),width .2s cubic-bezier(0.0,0.0,0.2,1);
+}
+
+.html5-player--big-mode .html5-player-volume-panel.html5-player-volume-panel--active {
+  width: 78px;
+  margin-right: 5px;
+}
+
+.html5-player-volume-slider {
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.html5-player-volume-slider__handle {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  margin-top: -6px;
+  background: #fff;
+}
+
+.html5-player--big-mode .html5-player-volume-slider__handle {
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  margin-top: -9px;
+}
+
+.html5-player-volume-slider__handle:before,
+.html5-player-volume-slider__handle:after {
+  content: '';
+  position: absolute;
+  display: block;
+  top: 50%;
+  height: 3px;
+  margin-top: -2px;
+  width: 64px;
+}
+
+.html5-player--big-mode .html5-player-volume-slider__handle:before,
+.html5-player--big-mode .html5-player-volume-slider__handle:after {
+  height: 4px;
+  margin-top: -2px;
+  width: 96px;
+}
+
+.html5-player-volume-slider__handle:before {
+  left: -58px;
+  background: #fff;
+}
+
+.html5-player--big-mode .html5-player-volume-slider__handle:before {
+  left: -87px;
+}
+
+.html5-player-volume-slider__handle:after {
+  left: 6px;
+  background: rgba(255,255,255,.2);
+}
+
+.html5-player--big-mode .html5-player-volume-slider__handle:after {
+  left: 9px;
+  background: rgba(255,255,255,.2);
 }

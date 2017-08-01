@@ -45,9 +45,9 @@ export class ProgressBarElement extends EventTarget {
       .listen(document, "mouseup", this.handleGlobalMouseUp)
       .listen(document, "mousemove", this.handleGlobalMouseMove)
       .listen(this.element, "mousedown", this.handleMouseDown)
-      .listen(this.element, "mouseover", this.handleMouseOver)
+      .listen(this.element, "mouseenter", this.handleMouseEnter)
       .listen(this.element, "mousemove", this.handleMouseMove)
-      .listen(this.element, "mouseout", this.handleMouseOut)
+      .listen(this.element, "mouseleave", this.handleMouseLeave)
   }
 
   private handleMouseDown(e: MouseEvent) {
@@ -94,8 +94,8 @@ export class ProgressBarElement extends EventTarget {
     this.dispatchEvent('dragEnd', this.value);
   }
 
-  private handleMouseOver(e: MouseEvent) {
-    this._outside = true;
+  private handleMouseEnter(e: MouseEvent) {
+    this._outside = false;
     this.setHoverEnabled(true);
 
     this.handleMouseMove(e);
@@ -165,8 +165,8 @@ export class ProgressBarElement extends EventTarget {
     return (this.bufferingValue - this.minValue)/(this.maxValue - this.minValue);
   }
 
-  private handleMouseOut() {
-    this._outside = false;
+  private handleMouseLeave() {
+    this._outside = true;
 
     if (this._dragging) return;
 
@@ -236,8 +236,14 @@ export class ProgressBarElement extends EventTarget {
     this.element.appendChild(this.scrubberElement);
   }
 
-  private update() {
+  updateDom() {
     if (!this._updateDom) return;
+
+    this.element.setAttribute("aria-valuenow", this.value.toString());
+    this.element.setAttribute("aria-valuetext", parseAndFormatTime(this.value) + " of " + parseAndFormatTime(this.maxValue));
+
+    this.element.setAttribute("aria-valuemin", this.minValue.toString());
+    this.element.setAttribute("aria-valuemax", this.minValue.toString());
 
     var progress = this.getProgressPercentage();
     var buffering = this.getBufferingPercentage();
@@ -256,7 +262,7 @@ export class ProgressBarElement extends EventTarget {
   setUpdateDom(updateDom: boolean) {
     this._updateDom = updateDom;
 
-    this.update();
+    this.updateDom();
   }
 
   getElement(): Element {
@@ -266,31 +272,24 @@ export class ProgressBarElement extends EventTarget {
   setValue(value: number): void {
     this.value = value;
 
-    this.element.setAttribute("aria-valuenow", this.value.toString());
-    this.element.setAttribute("aria-valuetext", parseAndFormatTime(this.value) + " of " + parseAndFormatTime(this.maxValue));
-
-    this.update();
+    this.updateDom();
   }
 
   setBufferingValue(value: number): void {
     this.bufferingValue = value;
 
-    this.update();
+    this.updateDom();
   }
 
   setMinValue(minValue: number): void {
     this.minValue = minValue;
 
-    this.element.setAttribute("aria-valuemin", this.minValue.toString());
-
-    this.update();
+    this.updateDom();
   }
 
   setMaxValue(maxValue: number): void {
     this.maxValue = maxValue;
 
-    this.element.setAttribute("aria-valuemax", this.minValue.toString());
-
-    this.update();
+    this.updateDom();
   }
 }
