@@ -137,6 +137,7 @@ export class Stream {
     var subtitleElements = doc.querySelectorAll("subtitles subtitle");
     for (let i = 0; i < subtitleElements.length; i++) {
       let default2: boolean = subtitleElements[i].getAttribute("default") === "1";
+      if (!default2) continue;
 
       let uri = subtitleElements[i].getAttribute("link");
       let subResponse = await request.get(uri);
