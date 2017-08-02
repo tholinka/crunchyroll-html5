@@ -499,8 +499,8 @@ export class Player extends EventTarget {
     var offsetLeft = wrapperRect.left - videoRect.left;
     var offsetTop = wrapperRect.top - videoRect.top;
 
-    el.style.left = (rect.x - offsetLeft) + "px";
-    el.style.top = (rect.y - offsetTop) + "px";
+    el.style.left = Math.floor(rect.x - offsetLeft) + "px";
+    el.style.top = Math.floor(rect.y - offsetTop) + "px";
   }
 
   private handleKeyDown(e: KeyboardEvent) {
@@ -761,15 +761,15 @@ export class Player extends EventTarget {
     var realHeight = maxHeight;
 
     if (elementRatio > videoRatio) {
-      realWidth = Math.floor(maxHeight * videoRatio);
+      realWidth = Math.ceil(maxHeight * videoRatio);
     } else {
-      realHeight = Math.floor(maxWidth / videoRatio);
+      realHeight = Math.ceil(maxWidth / videoRatio);
     }
 
     this.videoElement.style.width = realWidth + "px";
     this.videoElement.style.height = realHeight + "px";
-    this.videoElement.style.left = ((maxWidth - realWidth) / 2) + "px";
-    this.videoElement.style.top = ((maxHeight - realHeight) / 2) + "px";
+    this.videoElement.style.left = Math.floor((maxWidth - realWidth) / 2) + "px";
+    this.videoElement.style.top = Math.floor((maxHeight - realHeight) / 2) + "px";
   }
 
   attach(el: Element) {

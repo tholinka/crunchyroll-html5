@@ -160,9 +160,9 @@ export class LibAss extends EventTarget {
     var realHeight = height;
 
     if (elementRatio > videoRatio) {
-      realWidth = Math.floor(height * videoRatio);
+      realWidth = Math.ceil(height * videoRatio);
     } else {
-      realHeight = Math.floor(width / videoRatio);
+      realHeight = Math.ceil(width / videoRatio);
     }
 
     var x = (width - realWidth) / 2;

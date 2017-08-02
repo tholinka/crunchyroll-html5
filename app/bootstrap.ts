@@ -1,6 +1,6 @@
 import { Video, Stream, Subtitle } from './media/video';
 import { NextVideo } from './media/nextvideo';
-import { Player } from './media/player';
+import { Player, PlaybackState } from './media/player';
 import * as request from 'request-promise-native';
 import { importCSS, importCSSByUrl } from './utils/css';
 
@@ -25,6 +25,7 @@ class Bootstrap {
     const showmediaVideo = document.querySelector("#showmedia_video");
     const mainMedia = document.querySelector("#main_content");
     this.player.listen('widechange', (wide: boolean) => {
+      var playing = this.player.getPlaybackState() === PlaybackState.PLAYING;
       if (wide) {
         this.wrapper.setAttribute("id", "showmedia_video_box_wide");
         this.wrapper.classList.remove("xsmall-margin-bottom");
@@ -43,6 +44,9 @@ class Bootstrap {
         } else {
           mainMedia.insertBefore(showmediaVideo, mainMedia.childNodes[0]);
         }
+      }
+      if (playing) {
+        this.player.play();
       }
     });
   }
