@@ -65,6 +65,7 @@ yarn run start
   more.
 - Add a way for the player to remember user choices as how high or low the
   volume is.
+- Look into reducing the size of the code in the userscript.
 
 ## Main Libraries
 - [hls.js](https://github.com/video-dev/hls.js)
