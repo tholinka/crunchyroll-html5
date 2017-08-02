@@ -20,7 +20,10 @@ import { getOffsetRect, getClientRect, IRect } from '../../utils/offset';
 import { SubtitleEngine } from './subtitles/isubtitle';
 import { LibAssSubtitle } from './subtitles/libass';
 
-import { ICON_PLAY, ICON_PAUSE, ICON_SEEK_BACK, ICON_SEEK_FORWARD, ICON_VOLUME, ICON_VOLUME_HIGH } from '../../assets/svg-paths';
+import {
+  ICON_PLAY, ICON_PAUSE, ICON_SEEK_BACK, ICON_SEEK_FORWARD, ICON_VOLUME,
+  ICON_VOLUME_HIGH, ICON_SIZE_SMALL, ICON_SIZE_LARGE
+} from '../../assets/svg-paths';
 
 export enum PlaybackState {
   UNSTARTED, PLAYING, PAUSED, BUFFERING, ENDED
@@ -51,6 +54,9 @@ export class Player extends EventTarget {
   private _volumeSliderPreferActive: boolean = false;
 
   private fullscreenButton: HTMLElement;
+  private sizeButton: HTMLElement;
+  private sizeButtonPath: SVGElement;
+  private sizeButtonTitleText: Text = document.createTextNode("");
 
   private controlsTimeElement: HTMLElement;
 
@@ -189,6 +195,25 @@ export class Player extends EventTarget {
     var controlsRight = document.createElement("div");
     controlsRight.className = "html5-player__controls-right";
 
+    this.sizeButton = document.createElement("button");
+    this.sizeButton.className = "html5-player__button html5-player__size-btn";
+
+    var sizeButtonSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    sizeButtonSvg.setAttribute("width", "100%");
+    sizeButtonSvg.setAttribute("height", "100%");
+    sizeButtonSvg.setAttribute("version", "1.1");
+    sizeButtonSvg.setAttribute("viewBox", "0 0 36 36");
+
+    this.sizeButtonPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    this.sizeButtonPath.setAttribute("d", this.wide ? ICON_SIZE_SMALL : ICON_SIZE_LARGE);
+    this.sizeButtonPath.setAttribute("fill", "#ffffff");
+    this.sizeButtonPath.setAttribute("fill-rule", "evenodd");
+
+    sizeButtonSvg.appendChild(this.sizeButtonPath);
+
+    this.sizeButton.appendChild(sizeButtonSvg);
+    controlsRight.appendChild(this.sizeButton);
+
     this.fullscreenButton = document.createElement("button");
     this.fullscreenButton.className = "html5-player__button html5-player__fullscreen-btn";
     this.fullscreenButton.innerHTML = SVG_ENTER_FULLSCREEN;
@@ -229,16 +254,19 @@ export class Player extends EventTarget {
 
       .listen(this.playButton, 'click', this.togglePlay)
       .listen(this.fullscreenButton, 'click', this.toggleFullscreen)
+      .listen(this.sizeButton, 'click', this.toggleWide)
 
       .listen(this.volumeButton, 'click', this.handleVolumeButtonClick)
 
       .listen(this.volumeButton, 'mouseenter', this.handleVolumeButtonMouseEnter)
       .listen(this.nextVideoButton, 'mouseenter', this.handleNextVideoMouseEnter)
       .listen(this.fullscreenButton, 'mouseenter', this.handleFullscreenMouseEnter)
+      .listen(this.sizeButton, 'mouseenter', this.handleSizeMouseEnter)
 
       .listen(this.volumeButton, 'mouseleave', this.handleElementTooltipMouseLeave)
       .listen(this.nextVideoButton, 'mouseleave', this.handleElementTooltipMouseLeave)
       .listen(this.fullscreenButton, 'mouseleave', this.handleElementTooltipMouseLeave)
+      .listen(this.sizeButton, 'mouseleave', this.handleElementTooltipMouseLeave)
 
       .listen(this.progressBar, "dragStart", this.handleProgressDragStart)
       .listen(this.progressBar, "drag", this.handleProgressDrag)
@@ -653,6 +681,17 @@ export class Player extends EventTarget {
     this.repositionTooltip(this.fullscreenButton);
   }
 
+  private handleSizeMouseEnter() {
+    this.tooltip.setFlags(0);
+    this.sizeButtonTitleText.textContent =  this.wide ? "Default" : "Wide";
+    this.tooltip.setTextContent(this.isFullscreen() ? "Exit full screen" : "Full screen");
+    this.tooltip.setText(this.sizeButtonTitleText);
+
+    this.tooltip.setVisible(true);
+
+    this.repositionTooltip(this.sizeButton);
+  }
+
   private handleElementTooltipMouseLeave() {
     this.tooltip.setVisible(false);
   }
@@ -695,11 +734,42 @@ export class Player extends EventTarget {
   }
 
   resize() {
+    this.resizeVideo();
+
     // Update subtitle dimensions
     this.subtitleEngine.resize();
 
     this.volumeSlider.updateDom();
     this.progressBar.updateDom();
+  }
+
+  private resizeVideo() {
+    const videoWidth: number = this.videoElement.videoWidth;
+    const videoHeight: number = this.videoElement.videoHeight;
+
+    var maxWidth: number = this.videoWrapper.offsetWidth;
+    var maxHeight: number = this.videoWrapper.offsetHeight;
+    if (this.isFullscreen()) {
+      maxWidth = screen.width;
+      maxHeight = screen.height;
+    }
+
+    const videoRatio = videoWidth / videoHeight;
+    const elementRatio = maxWidth / maxHeight;
+
+    var realWidth = maxWidth;
+    var realHeight = maxHeight;
+
+    if (elementRatio > videoRatio) {
+      realWidth = Math.floor(maxHeight * videoRatio);
+    } else {
+      realHeight = Math.floor(maxWidth / videoRatio);
+    }
+
+    this.videoElement.style.width = realWidth + "px";
+    this.videoElement.style.height = realHeight + "px";
+    this.videoElement.style.left = ((maxWidth - realWidth) / 2) + "px";
+    this.videoElement.style.top = ((maxHeight - realHeight) / 2) + "px";
   }
 
   attach(el: Element) {
@@ -798,13 +868,28 @@ export class Player extends EventTarget {
     this.videoElement.muted = false;
   }
 
-  setWide(wide: boolean) {
+  toggleWide(): void {
+    this.setWide(!this.wide);
+
+    this.dispatchEvent('widechange', this.wide);
+  }
+
+  setWide(wide: boolean): void {
     this.wide = wide;
-    if (wide) {
-      this.playerElement.classList.add("html5-player--wide")
-    } else {
-      this.playerElement.classList.remove("html5-player--wide")
+    
+    if (this.sizeButtonPath) {
+      this.sizeButtonPath.setAttribute("d", this.wide ? ICON_SIZE_SMALL : ICON_SIZE_LARGE);
     }
+
+    if (this.playerElement) {
+      if (wide) {
+        this.playerElement.classList.add("html5-player--wide")
+      } else {
+        this.playerElement.classList.remove("html5-player--wide")
+      }
+    }
+
+    this.resize();
   }
 
   getVolume(): number {

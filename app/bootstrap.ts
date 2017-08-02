@@ -20,6 +20,31 @@ class Bootstrap {
 
     importCSSByUrl("https://fonts.googleapis.com/css?family=Noto+Sans");
     importCSS(css);
+
+    const showmedia = document.querySelector("#showmedia");
+    const showmediaVideo = document.querySelector("#showmedia_video");
+    const mainMedia = document.querySelector("#main_content");
+    this.player.listen('widechange', (wide: boolean) => {
+      if (wide) {
+        this.wrapper.setAttribute("id", "showmedia_video_box_wide");
+        this.wrapper.classList.remove("xsmall-margin-bottom");
+        mainMedia.classList.remove("new_layout");
+        showmedia.parentElement.classList.add("new_layout");
+        showmedia.parentElement.classList.add("new_layout_wide")
+        showmedia.parentNode.insertBefore(showmediaVideo, showmedia);
+      } else {
+        this.wrapper.setAttribute("id", "showmedia_video_box");
+        this.wrapper.classList.add("xsmall-margin-bottom");
+        showmedia.parentElement.classList.remove("new_layout");
+        showmedia.parentElement.classList.remove("new_layout_wide")
+        mainMedia.classList.add("new_layout");
+        if (mainMedia.childNodes.length === 0) {
+          mainMedia.appendChild(showmediaVideo);
+        } else {
+          mainMedia.insertBefore(showmediaVideo, mainMedia.childNodes[0]);
+        }
+      }
+    });
   }
 
   async run() {

@@ -1,6 +1,6 @@
 .html5-player {
   position: relative;
-  width: 100%;
+  width: 640px;
   height: 360px;
   background-color: #000;
   overflow: hidden;
@@ -16,6 +16,7 @@
   touch-action: manipulation;
 }
 .html5-player.html5-player--wide {
+  width: 960px;
   height: 540px;
 }
 
@@ -64,6 +65,7 @@
 }
 
 .html5-player__video video {
+  position: relative;
   max-width: 100%;
   max-height: 100%;
 }
@@ -698,4 +700,8 @@
 .html5-player--big-mode .html5-player-volume-slider__handle:after {
   left: 9px;
   background: rgba(255,255,255,.2);
+}
+
+.html5-player--fullscreen .html5-player__size-btn {
+  display: none;
 }
