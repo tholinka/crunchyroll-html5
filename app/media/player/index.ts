@@ -1,5 +1,4 @@
 import * as Hls from 'hls.js';
-import * as libjass from 'libjass';
 import { Video, Stream, Subtitle } from '../video';
 import { NextVideo } from '../nextvideo';
 import { EventTarget } from '../../events/eventtarget';
@@ -906,12 +905,15 @@ export class Player extends EventTarget {
 
   isFullscreen() {
     return document.webkitFullscreenElement === this.playerElement
+      || document['mozFullScreenElement'] === this.playerElement
       || document.fullscreenElement === this.playerElement;
   }
 
   enterFullscreen() {
     if (typeof this.playerElement.requestFullscreen === "function") {
       this.playerElement.requestFullscreen();
+    } else if (typeof this.playerElement["mozRequestFullScreen"] === "function") {
+      this.playerElement["mozRequestFullScreen"]();
     } else if (typeof this.playerElement.webkitRequestFullScreen === "function") {
       this.playerElement.webkitRequestFullScreen();
     }
@@ -924,6 +926,8 @@ export class Player extends EventTarget {
       document.exitFullscreen();
     } else if (typeof document.webkitExitFullscreen === "function") {
       document.webkitExitFullscreen();
+    } else if (typeof document["mozCancelFullScreen"] === "function") {
+      document["mozCancelFullScreen"]();
     }
   }
 }
