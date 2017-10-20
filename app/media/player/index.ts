@@ -280,7 +280,9 @@ export class Player extends EventTarget {
       .listen(this.playerElement, "mousemove", this.handleMouseMove)
       .listen(this.subtitleEngine, "resize", this.handleSubtitleResize)
       .listen(document, "fullscreenchange", this.handleFullscreenChange)
-      .listen(document, "webkitfullscreenchange", this.handleFullscreenChange);
+      .listen(document, "webkitfullscreenchange", this.handleFullscreenChange)
+      .listen(document, "mozfullscreenchange", this.handleFullscreenChange)
+      .listen(document, "msfullscreenchange", this.handleFullscreenChange);
     
     this.updateAutoHideInternal();
   }
@@ -709,6 +711,7 @@ export class Player extends EventTarget {
 
   private updateStream() {
     this.hls.loadSource(this.stream.url);
+    console.log(this.stream.subtitles[0].toAss());
     this.subtitles = this.stream.subtitles;
 
     // Select default subtitle
@@ -916,6 +919,8 @@ export class Player extends EventTarget {
       this.playerElement["mozRequestFullScreen"]();
     } else if (typeof this.playerElement.webkitRequestFullScreen === "function") {
       this.playerElement.webkitRequestFullScreen();
+    } else if (typeof this.playerElement['msRequestFullscreen'] === "function") {
+      this.playerElement['msRequestFullscreen']();
     }
   }
 
@@ -928,6 +933,8 @@ export class Player extends EventTarget {
       document.webkitExitFullscreen();
     } else if (typeof document["mozCancelFullScreen"] === "function") {
       document["mozCancelFullScreen"]();
+    } else if (typeof document["msExitFullscreen"] === "function") {
+      document["msExitFullscreen"]();
     }
   }
 }

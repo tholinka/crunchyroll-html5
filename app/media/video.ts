@@ -1,8 +1,10 @@
 import * as request from 'request-promise-native';
-import * as crypto from 'crypto';
 import * as pako from 'pako';
 import * as bigInt from 'big-integer';
 import { padLeft, padRight } from '../utils/string';
+import { TextDecoder, TextEncoder } from 'text-encoding';
+import * as aes from 'aes-js';
+import * as sha1 from 'js-sha1';
 
 function assToVtt(text: string): string {
   const defaultReplacements = {
@@ -146,10 +148,9 @@ export class Stream {
       let iv = subDoc.querySelector("iv").textContent;
       let data = subDoc.querySelector("data").textContent;
 
-      let xml = (new DOMParser()).parseFromString(
-        Subtitle.decrypt(iv, data, parseInt(id)).toString("utf-8"),
-        "text/xml"
-      );
+      let contentBytes = await Subtitle.decrypt(iv, data, parseInt(id));
+      let content = new TextDecoder("utf-8").decode(contentBytes);
+      let xml = (new DOMParser()).parseFromString(content, "text/xml");
       let subtitle = new Subtitle(xml, default2);
       subtitles.push(subtitle);
     }
@@ -284,15 +285,19 @@ export class Subtitle {
     return output;
   }
 
-  static decrypt(iv: string, data: string, id: number): Buffer {
-    var ivBuffer: Buffer = new Buffer(iv, "base64");
-    var dataBuffer: Buffer = new Buffer(data, "base64");
+  static async decrypt(iv: string, data: string, id: number): Promise<Uint8Array> {
+    const ivBuffer: Uint8Array = new Uint8Array(atob(iv).split("").map(function(c) {
+      return c.charCodeAt(0);
+    }));
+    const dataBuffer: Uint8Array = new Uint8Array(atob(data).split("").map(function(c) {
+      return c.charCodeAt(0);
+    }));
 
-    var key: Buffer = Subtitle.obfuscateKey(id);
-    var decipher: crypto.Decipher = crypto.createDecipheriv('aes-256-cbc', key, ivBuffer);
-    var decryptedData: Buffer = decipher.update(dataBuffer);
+    const key: Uint8Array = await Subtitle.obfuscateKey(id);
+    const aesCbc = new aes.ModeOfOperation.cbc(key, ivBuffer);
+    const decryptedData = new Uint8Array(aesCbc.decrypt(dataBuffer));
 
-    return new Buffer(pako.inflate(decryptedData));
+    return pako.inflate(decryptedData);
   }
 
   static obfuscateKeyAux(count: number, modulo: number, start: number[]) {
@@ -304,19 +309,27 @@ export class Subtitle {
     return output.map(x => x % modulo + 33);
   }
 
-  static obfuscateKey(n: number): Buffer {
-    var key = bigInt(n);
-    var num1 = bigInt(Math.floor(Math.pow(2, 25) * Math.sqrt(6.9)));
-    var num2 = num1.xor(key).shiftLeft(5);
-    var num3 = key.xor(num1);
-    var num4 = num3.xor(num3.shiftRight(3)).xor(num2);
+  static obfuscateKey(n: number): Uint8Array {
+    const key = bigInt(n);
+    const num1 = bigInt(Math.floor(Math.pow(2, 25) * Math.sqrt(6.9)));
+    const num2 = num1.xor(key).shiftLeft(5);
+    const num3 = key.xor(num1);
+    const num4 = num3.xor(num3.shiftRight(3)).xor(num2);
 
-    var keyAux = new Buffer(Subtitle.obfuscateKeyAux(20, 97, [1, 2]));
-    var shaSum = crypto.createHash('sha1');
-    var shaData = Buffer.concat([keyAux, new Buffer(num4.toString(), "ascii")]);
-    shaSum.update(shaData);
-    var shaHash = shaSum.digest();
-    return Buffer.concat([shaHash, new Buffer([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])]);
+    const keyAux = new Uint8Array(Subtitle.obfuscateKeyAux(20, 97, [1, 2]));
+    const num4Arr = new TextEncoder("ascii").encode(num4.toString());
+    const shaData = new Uint8Array(keyAux.length + num4Arr.length);
+    shaData.set(keyAux);
+    shaData.set(num4Arr, keyAux.length);
+
+    const shaHash = new Uint8Array(sha1.digest(shaData));
+
+    const emptyArray = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    const result = new Uint8Array(shaHash.length + emptyArray.length);
+    result.set(shaHash);
+    result.set(emptyArray, shaHash.length);
+
+    return result;
   }
 }
 
