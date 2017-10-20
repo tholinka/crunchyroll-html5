@@ -1,5 +1,5 @@
 export function importCSSByUrl(url: string) {
-  var el = document.createElement("link");
+  const el = document.createElement("link");
   el.setAttribute("rel", "stylesheet");
   el.setAttribute("href", url);
 
@@ -7,7 +7,7 @@ export function importCSSByUrl(url: string) {
 }
 
 export function importCSS(content: string) {
-  var style = document.createElement("style");
+  const style = document.createElement("style");
   style.appendChild(document.createTextNode(content));
 
   document.head.appendChild(style);

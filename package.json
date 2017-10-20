@@ -38,6 +38,7 @@
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "pako": "^1.0.5",
+    "preact": "^8.2.5",
     "raw-loader": "^0.5.1",
     "request": "^2.81.0",
     "request-promise-native": "^1.0.4",

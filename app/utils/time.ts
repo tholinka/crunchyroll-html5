@@ -1,8 +1,8 @@
 import { padLeft, padRight } from './string';
 
 export function parseSeconds(seconds: number): { hours: number, minutes: number, seconds: number } {
-  var hours: number = Math.floor(seconds / 3600);
-  var minutes: number = Math.floor((seconds - (hours * 3600)) / 60);
+  const hours: number = Math.floor(seconds / 3600);
+  const minutes: number = Math.floor((seconds - (hours * 3600)) / 60);
   seconds = Math.floor(seconds - hours * 3600 - minutes * 60);
 
   return {
@@ -19,7 +19,7 @@ export function parseAndFormatTime(s: number): string {
 }
 
 export function formatTime(hours: number, minutes: number, seconds: number): string {
-  var format: string = "";
+  let format: string = "";
   if (hours > 0) {
     format = padLeft(hours, 2) + ":";
   }

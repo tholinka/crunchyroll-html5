@@ -6,10 +6,10 @@ export interface IRect {
 }
 
 export function getOffsetRect(el: HTMLElement, relativeTo?: HTMLElement): IRect {
-  var top = 0, left = 0;
+  let top = 0, left = 0;
 
-  var width = el.offsetWidth;
-  var height = el.offsetHeight;
+  const width = el.offsetWidth;
+  const height = el.offsetHeight;
     
   while (el && el.offsetParent && el !== relativeTo) {
     top += el.offsetTop;
@@ -26,7 +26,7 @@ export function getOffsetRect(el: HTMLElement, relativeTo?: HTMLElement): IRect 
 }
 
 export function getClientRect(el: HTMLElement, relativeTo?: HTMLElement): IRect {
-  var { width, height, left, top } = el.getBoundingClientRect();
+  let { width, height, left, top } = el.getBoundingClientRect();
   if (relativeTo) {
     let rect2 = relativeTo.getBoundingClientRect();
     left -= rect2.left;

@@ -1,6 +1,6 @@
 export function binaryToBlob(utf8String: string, contentType: string = '', sliceSize: number = 512): Blob {
-  var byteCharacters = utf8String;
-  var byteArrays = [];
+  const byteCharacters = utf8String;
+  const byteArrays = [];
 
   for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
     var slice = byteCharacters.slice(offset, offset + sliceSize);

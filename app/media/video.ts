@@ -7,7 +7,7 @@ import * as aes from 'aes-js';
 import * as sha1 from 'js-sha1';
 
 function assToVtt(text: string): string {
-  const defaultReplacements = {
+  const defaultReplacements: any = {
     'i': {
       '0': '</i>',
       '1': '<i>'
@@ -24,11 +24,11 @@ function assToVtt(text: string): string {
 
   return text
     .replace(/{\\([a-zA-Z]+)(\-?[0-9]+)}/g, (m) => {
-      var tag = m[1];
-      var value = m[2];
+      const tag = m[1];
+      const value = m[2];
 
       if (defaultReplacements.hasOwnProperty(tag)) {
-        return defaultReplacements[tag][value];
+        return defaultReplacements[tag][value] || "";
       } else if (tag === 'b') {
         if (value === "0") {
           return "</b>"
@@ -42,10 +42,10 @@ function assToVtt(text: string): string {
 }
 
 function toVttTimeFormat(format: string): string {
-  var parts: number[] = format.split(/[:\.]/g)
+  const parts: number[] = format.split(/[:\.]/g)
     .map(n => parseInt(n, 10));
 
-  var output = '';
+  let output = '';
   for (let i = 0; i < parts.length; i++) {
     if (parts.length - 1 === i) {
       if (i > 0) {
@@ -64,24 +64,24 @@ function toVttTimeFormat(format: string): string {
 }
 
 function searchFor(str: string, start: string, end: string): string {
-  var startIndex = str.indexOf(start);
+  const startIndex = str.indexOf(start);
   if (startIndex === -1) throw new Error("Start str not inside str.");
   str = str.substring(startIndex + start.length);
-  var endIndex = str.indexOf(end);
+  const endIndex = str.indexOf(end);
   if (endIndex === -1) throw new Error("End str not inside str.");
 
   return str.substring(0, endIndex);
 }
 
 function toArray<T>(arrLike: ArrayLike<T>): T[] {
-  var arr = [];
+  const arr = [];
   for (let i = 0; i < arrLike.length; i++) {
     arr.push(arrLike[i]);
   }
   return arr;
 }
 
-const FORMAT_IDS = {
+const FORMAT_IDS: any = {
   '360p': [ '60', '106' ],
   '480p': [ '61', '106' ],
   '720p': [ '62', '106' ],
@@ -107,46 +107,47 @@ export class Stream {
   ) {}
 
   static async fromUrl(url: string, videoId: string, fmt: string, streamFormat: string, streamQuality: string): Promise<Stream> {
-    var streamUrl = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig"
+    const streamUrl = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig"
         + "&media_id=" + encodeURIComponent(videoId)
         + "&video_format=" + encodeURIComponent(streamFormat)
         + "&video_quality=" + encodeURIComponent(streamQuality)
         + "&current_page=" + encodeURIComponent(url);
-    var response = await request.get(streamUrl, {
+        const response = await request.get(streamUrl, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
-    var doc = (new DOMParser()).parseFromString(response, "text/xml");
-    var streamInfo = doc.querySelector("stream_info");
-    var mediaId: string = streamInfo.querySelector("media_id").textContent;
-    var mediaType: string = streamInfo.querySelector("media_type").textContent;
-    var encodeId: string = streamInfo.querySelector("video_encode_id").textContent;
-    var file: string = streamInfo.querySelector("file").textContent;
+    const doc = (new DOMParser()).parseFromString(response, "text/xml");
+    const streamInfo = doc.querySelector("stream_info");
+    if (!streamInfo) throw new Error("Tag stream_info not found.");
+    const mediaId: string = streamInfo.querySelector("media_id")!.textContent!;
+    const mediaType: string = streamInfo.querySelector("media_type")!.textContent!;
+    const encodeId: string = streamInfo.querySelector("video_encode_id")!.textContent!;
+    const file: string = streamInfo.querySelector("file")!.textContent!;
 
-    var width: number = parseInt(streamInfo.querySelector("metadata width").textContent, 10);
-    var height: number = parseInt(streamInfo.querySelector("metadata height").textContent, 10);
-    var duration: number = parseFloat(streamInfo.querySelector("metadata duration").textContent);
+    const width: number = parseInt(streamInfo.querySelector("metadata width")!.textContent!, 10);
+    const height: number = parseInt(streamInfo.querySelector("metadata height")!.textContent!, 10);
+    const duration: number = parseFloat(streamInfo.querySelector("metadata duration")!.textContent!);
 
-    var thumbnailUrl: string = doc.querySelector("media_metadata episode_image_url").textContent;
-    var nextUrl: string = doc.getElementsByTagName("default:nextUrl")[0].textContent;
+    const thumbnailUrl: string = doc.querySelector("media_metadata episode_image_url")!.textContent!;
+    const nextUrl: string = doc.getElementsByTagName("default:nextUrl")[0].textContent!;
 
-    var episodeTitle: string = doc.querySelector("episode_title").textContent;
-    var episodeNumber: string = doc.querySelector("episode_number").textContent;
-    var seriesTitle: string = doc.querySelector("series_title").textContent;
+    const episodeTitle: string = doc.querySelector("episode_title")!.textContent!;
+    const episodeNumber: string = doc.querySelector("episode_number")!.textContent!;
+    const seriesTitle: string = doc.querySelector("series_title")!.textContent!;
 
-    var subtitles: Subtitle[] = [];
-    var subtitleElements = doc.querySelectorAll("subtitles subtitle");
+    const subtitles: Subtitle[] = [];
+    const subtitleElements = doc.querySelectorAll("subtitles subtitle");
     for (let i = 0; i < subtitleElements.length; i++) {
       let default2: boolean = subtitleElements[i].getAttribute("default") === "1";
       if (!default2) continue;
 
-      let uri = subtitleElements[i].getAttribute("link");
+      let uri = subtitleElements[i].getAttribute("link")!;
       let subResponse = await request.get(uri);
       let subDoc = (new DOMParser()).parseFromString(subResponse, "text/xml");
-      let id = subDoc.querySelector("subtitle").getAttribute("id");
-      let iv = subDoc.querySelector("iv").textContent;
-      let data = subDoc.querySelector("data").textContent;
+      let id = subDoc.querySelector("subtitle")!.getAttribute("id")!;
+      let iv = subDoc.querySelector("iv")!.textContent!;
+      let data = subDoc.querySelector("data")!.textContent!;
 
       let contentBytes = await Subtitle.decrypt(iv, data, parseInt(id));
       let content = new TextDecoder("utf-8").decode(contentBytes);
@@ -172,12 +173,12 @@ export class Subtitle {
   }
 
   get title(): string {
-    return this.xml.querySelector("subtitle_script").getAttribute("title");
+    return this.xml.querySelector("subtitle_script")!.getAttribute("title")!;
   }
 
   get langCode(): string {
-    var code = this.xml.querySelector("subtitle_script").getAttribute("lang_code");
-    var m = code.match(/^([a-z]+)([A-Z]+)$/);
+    let code = this.xml.querySelector("subtitle_script")!.getAttribute("lang_code")!;
+    const m = code.match(/^([a-z]+)([A-Z]+)$/);
     if (m) {
       code = m[1] + "-" + m[2];
     }
@@ -186,14 +187,14 @@ export class Subtitle {
   }
 
   get langString(): string {
-    return this.xml.querySelector("subtitle_script").getAttribute("lang_string");
+    return this.xml.querySelector("subtitle_script")!.getAttribute("lang_string")!;
   }
 
   toAss(): string {
-    const getAttr = (name: string): string => this.xml.querySelector("subtitle_script").getAttribute(name);
+    const getAttr = (name: string): string => this.xml.querySelector("subtitle_script")!.getAttribute(name)!;
     const assBool = (bool: string): string => bool === '1' ? '-1' : '0';
 
-    var output = '[Script Info]\n';
+    let output = '[Script Info]\n';
     output += "Title: " + getAttr("title") + "\n";
     output += "ScriptType: v4.00+\n";
     output += "WrapStyle: " + getAttr("wrap_style") + "\n";
@@ -202,7 +203,7 @@ export class Subtitle {
     output += "\n";
     output += "[V4+ Styles]\n";
     output += "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n";
-    var styles = this.xml.querySelectorAll("styles style");
+    let styles = this.xml.querySelectorAll("styles style");
     for (let i = 0; i < styles.length; i++) {
       output += "Style: " + styles[i].getAttribute("name");
       output += ", " + styles[i].getAttribute("font_name");
@@ -211,10 +212,10 @@ export class Subtitle {
       output += ", " + styles[i].getAttribute("secondary_colour");
       output += ", " + styles[i].getAttribute("outline_colour");
       output += ", " + styles[i].getAttribute("back_colour");
-      output += ", " + assBool(styles[i].getAttribute("bold"));
-      output += ", " + assBool(styles[i].getAttribute("italic"));
-      output += ", " + assBool(styles[i].getAttribute("underline"));
-      output += ", " + assBool(styles[i].getAttribute("strikeout"));
+      output += ", " + assBool(styles[i].getAttribute("bold")!);
+      output += ", " + assBool(styles[i].getAttribute("italic")!);
+      output += ", " + assBool(styles[i].getAttribute("underline")!);
+      output += ", " + assBool(styles[i].getAttribute("strikeout")!);
       output += ", " + styles[i].getAttribute("scale_x");
       output += ", " + styles[i].getAttribute("scale_y");
       output += ", " + styles[i].getAttribute("spacing");
@@ -256,13 +257,13 @@ export class Subtitle {
     var output = 'WEBVTT FILE\n\n';
     var events = this.xml.querySelectorAll("events event");
     for (let i = 0; i < events.length; i++) {
-      let start = events[i].getAttribute("start");
-      let end = events[i].getAttribute("end");
+      let start = events[i].getAttribute("start")!;
+      let end = events[i].getAttribute("end")!;
 
       start = toVttTimeFormat(start);
       end = toVttTimeFormat(end);
 
-      let text = events[i].getAttribute("text").replace(/(\\N)+/g, '\n').trim();
+      let text = events[i].getAttribute("text")!.replace(/(\\N)+/g, '\n').trim();
       if (i > 0) output += "\n\n";
       output += (i + 1) + "\n"
         + start + " --> " + end + "\n"
@@ -273,12 +274,12 @@ export class Subtitle {
   }
 
   toSrt(): string {
-    var output = '';
-    var events = this.xml.querySelectorAll("events event");
+    let output = '';
+    const events = this.xml.querySelectorAll("events event");
     for (let i = 0; i < events.length; i++) {
-      let start = events[i].getAttribute("start").replace(/\./g, ",");
-      let end = events[i].getAttribute("end").replace(/\./g, ",");
-      let text = events[i].getAttribute("text").replace(/\\N/g, '\n');
+      let start = events[i].getAttribute("start")!.replace(/\./g, ",");
+      let end = events[i].getAttribute("end")!.replace(/\./g, ",");
+      let text = events[i].getAttribute("text")!.replace(/\\N/g, '\n');
       output += (i + 1) + "\n" + start + " --> " + end + "\n" + text + "\n\n";
     }
 
@@ -301,7 +302,7 @@ export class Subtitle {
   }
 
   static obfuscateKeyAux(count: number, modulo: number, start: number[]) {
-    var output: number[] = start.slice(0);
+    let output: number[] = start.slice(0);
     for (let i = 0; i < count; i++) {
       output.push(output[output.length - 1] + output[output.length - 2]);
     }
@@ -349,11 +350,12 @@ export class Video {
 
   static async fromDocument(url: string, doc: Document, onlyDefault: boolean = false): Promise<Video> {
     const re = /https?:\/\/(?:(www|m)\.)?(crunchyroll\.(?:com|fr)\/(?:media(?:-|\/\?id=)|[^/]*\/[^/?&]*?)([0-9]+))(?:[/?&]|$)/g;
-    var m = re.exec(url);
+    const m = re.exec(url);
+    if (!m) throw new Error("Unable to match url");
 
-    var prefix: string = m[1];
-    var webpageUrl: string = m[2];
-    var videoId: string = m[3];
+    const prefix: string = m[1];
+    const webpageUrl: string = m[2];
+    const videoId: string = m[3];
 
     /*var note = doc.querySelector(".showmedia-trailer-notice");
     if (note && note.textContent.trim() !== "")
@@ -362,11 +364,11 @@ export class Video {
     if (doc.documentElement.innerText.indexOf("To view this, please log in to verify you are 18 or older.") !== -1)
       throw new Error("User is required to log in.");
 
-    var title = doc.querySelector("h1[itemscope] a span[itemprop=title]")
-      .parentNode.parentNode.textContent
+    const title = doc.querySelector("h1[itemscope] a span[itemprop=title]")!
+      .parentNode!.parentNode!.textContent!
       .replace(/[\s]+/g, " ")
       .trim();
-    var description = toArray(doc.querySelector(".description").childNodes)
+    const description = toArray(doc.querySelector(".description")!.childNodes)
       .filter(node => {
         return node.nodeType === Node.TEXT_NODE;
       })
@@ -376,17 +378,17 @@ export class Video {
       .join('')
       .trim();
 
-    var fmts = [];
-    var fmtElements = doc.querySelectorAll("a[token^=showmedia\\.]");
+    const fmts: string[] = [];
+    const fmtElements = doc.querySelectorAll("a[token^=showmedia\\.]");
     for (let i = 0; i < fmtElements.length; i++) {
-      if (fmtElements[i].getAttribute("href").indexOf("/freetrial") === 0)
+      if (fmtElements[i].getAttribute("href")!.indexOf("/freetrial") === 0)
         continue;
       if (onlyDefault && !fmtElements[i].classList.contains('dark-button'))
         continue;
-      fmts.push(fmtElements[i].getAttribute("token").substring(10));
+      fmts.push(fmtElements[i].getAttribute("token")!.substring(10));
     }
 
-    var streams: Stream[] = [];
+    const streams: Stream[] = [];
 
     for (let i = 0; i < fmts.length; i++) {
       let [ streamQuality, streamFormat ] = FORMAT_IDS[fmts[i]];
@@ -399,21 +401,22 @@ export class Video {
 
   static async fromUrl(url: string, onlyDefault: boolean = false): Promise<Video> {
     const re = /https?:\/\/(?:(www|m)\.)?(crunchyroll\.(?:com|fr)\/(?:media(?:-|\/\?id=)|[^/]*\/[^/?&]*?)([0-9]+))(?:[/?&]|$)/g;
-    var m = re.exec(url);
+    const m = re.exec(url);
+    if (!m) throw new Error("Unable to match url.");
 
-    var prefix: string = m[1];
-    var webpageUrl: string = m[2];
-    var videoId: string = m[3];
+    const prefix: string = m[1];
+    let webpageUrl: string = m[2];
+    const videoId: string = m[3];
 
     if (prefix === 'm') {
-      var mobileResponse: string = await request.get(url);
+      const mobileResponse: string = await request.get(url);
       webpageUrl = searchFor(mobileResponse, "<link rel=\"canonical\" href=\"", "\" />");
     } else {
       webpageUrl = 'http://www.' + webpageUrl;
     }
 
-    var response = await request.get(webpageUrl);
-    var doc = (new DOMParser()).parseFromString(response, "text/html");
+    const response = await request.get(webpageUrl);
+    const doc = (new DOMParser()).parseFromString(response, "text/html");
 
     return Video.fromDocument(url, doc, onlyDefault);
   }

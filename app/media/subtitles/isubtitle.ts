@@ -1,5 +1,5 @@
-import { Subtitle } from '../../video';
-import { EventTarget } from '../../../events/eventtarget';
+import { Subtitle } from '../video';
+import { EventTarget } from '../../libs/events/EventTarget';
 
 export interface ISubtitleRect {
   width: number;
@@ -9,11 +9,11 @@ export interface ISubtitleRect {
 }
 
 export abstract class SubtitleEngine extends EventTarget {
-  abstract attach(element: HTMLVideoElement);
-  abstract detach();
+  abstract attach(element: HTMLVideoElement): void;
+  abstract detach(): void;
   abstract getElement(): Element;
-  abstract setTrack(subtitle: Subtitle);
+  abstract setTrack(subtitle: Subtitle): void;
   abstract getTrack(): Subtitle;
   abstract getRect(): ISubtitleRect;
-  abstract resize();
+  abstract resize(): void;
 }

@@ -1,12 +1,12 @@
-import { LibAss } from '../../libass';
+import { LibAss } from '../libass';
 import { SubtitleEngine, ISubtitleRect } from './isubtitle';
-import { Subtitle } from '../../video';
-import { EventHandler } from '../../../events/eventhandler';
+import { Subtitle } from '../video';
+import { EventHandler } from '../../libs/events/EventHandler';
 
 export class LibAssSubtitle extends SubtitleEngine {
   private libass = new LibAss();
   private subtitle: Subtitle;
-  private handler: EventHandler = new EventHandler();
+  private handler: EventHandler = new EventHandler(this);
 
   private initialized: boolean = false;
 
@@ -14,23 +14,22 @@ export class LibAssSubtitle extends SubtitleEngine {
     super();
 
     this.handler
-      .listen(this.libass, 'ready', () => this.onReady())
-      .listen(this.libass, 'resize', () => this.onResize());
+      .listen(this.libass, 'ready', this.onReady)
+      .listen(this.libass, 'resize', this.onResize);
   }
 
   private onReady() {
-    this.dispatchEvent('ready', null);
+    this.dispatchEvent('ready');
   }
 
   private onResize() {
-    this.dispatchEvent('resize', null);
+    this.dispatchEvent('resize');
   }
 
   protected disposeInternal() {
     super.disposeInternal();
 
     this.handler.dispose();
-    this.handler = null;
   }
 
   attach(element: HTMLVideoElement) {

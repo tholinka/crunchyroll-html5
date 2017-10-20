@@ -1,5 +1,5 @@
 export function padLeft(n: any, amount: number, pad: string = '0'): string {
-  var str = n + '';
+  let str = n + '';
   for (let i = str.length; i < amount; i++) {
     str = pad + str;
   }
@@ -7,7 +7,7 @@ export function padLeft(n: any, amount: number, pad: string = '0'): string {
 }
 
 export function padRight(n: any, amount: number, pad: string = '0'): string {
-  var str = n + '';
+  let str = n + '';
   for (let i = str.length; i < amount; i++) {
     str += pad;
   }
