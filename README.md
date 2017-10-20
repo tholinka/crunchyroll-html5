@@ -29,18 +29,19 @@ to restart the WebWorker that's running the engine.
 _All modifcations can be found [here](https://github.com/YePpHa/JavascriptSubtitlesOctopus)._
 
 ## Build
-Building this project will result in a `bundle.js` file in the `/dist`
-directory. To make it run on Crunchyroll you need to prepend a userscript
-header that allows for script execution on `http://www.crunchyroll.com/*`. I've
-currently not made it able to build for each browser or userscript.
+Building this project will result in a `crunchyroll-html5.user.js` file in the
+`/dist` directory. To make it run on Crunchyroll you need to prepend a
+userscript header that allows for script execution on
+`http://www.crunchyroll.com/*`. I've currently not made it able to build for
+each browser or userscript.
 
 Before building make sure that you have installed [Node.js](https://nodejs.org/)
 and [Yarn](https://yarnpkg.com/) (optional). After that you're required to
 install the project dependencies through either Yarn or NPM.
 
-Building is done by running the script `start`:
+Building is done by running the script `build`:
 ```
-yarn run start
+npm run build
 ```
 
 ## TODO
