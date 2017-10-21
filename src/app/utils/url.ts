@@ -1,0 +1,36 @@
+export function parseQuery(query: string): {[key: string]: string|(string[])} {
+  if (query[0] === '?') query = query.substring(1);
+
+  const tokens = query.split("&");
+  const queries: {[key: string]: string|(string[])} = {};
+  for (let i = 0; i < tokens.length; i++) {
+    let [ key, value ] = tokens[i].split("=")
+      .map((value) => decodeURIComponent(value));
+    if (queries.hasOwnProperty(key)) {
+      if (typeof queries[key] === 'string') {
+        queries[key] = [(queries[key] as string), value];
+      } else {
+        (queries[key] as string[]).push(value);
+      }
+    } else {
+      queries[key] = value;
+    }
+  }
+  return queries;
+}
+
+export function parseSimpleQuery(query: string): {[key: string]: string} {
+  const queries = parseQuery(query);
+  for (let key in queries) {
+    if (queries.hasOwnProperty(key)) {
+      if (Array.isArray(queries[key])) {
+        if (queries[key].length > 0) {
+          queries[key] = queries[key][0];
+        } else {
+          delete queries[key];
+        }
+      }
+    }
+  }
+  return queries as {[key: string]: string};
+}

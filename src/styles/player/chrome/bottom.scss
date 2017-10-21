@@ -1,0 +1,23 @@
+@import "./controls";
+
+.html5-video-chrome-bottom {
+  bottom: 0;
+  height: 36px;
+  width: 100%;
+  z-index: 60;
+  padding-top: 3px;
+  text-align: left;
+  direction: ltr;
+}
+
+.html5-video-chrome-bottom {
+  position: absolute;
+  text-shadow: 0 0 2px rgba(0,0,0,.5);
+  width: auto;
+  left: 12px;
+  right: 12px;
+}
+
+.html5-video-chrome-bottom {
+  transition: opacity .25s cubic-bezier(0.0,0.0,0.2,1);
+}

@@ -1,0 +1,43 @@
+@import './play';
+
+.chrome-controls-button {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+  text-align: inherit;
+  font-size: 100%;
+  font-family: inherit;
+  cursor: default;
+  line-height: inherit;
+}
+
+.chrome-controls .chrome-controls-button {
+  height: 100%;
+}
+
+.chrome-controls-button,
+.chrome-controls-button:focus {
+  outline: 0;
+}
+
+.chrome-controls .chrome-controls-button {
+  opacity: .9;
+  display: inline-block;
+  width: 36px;
+  -moz-transition: opacity .1s cubic-bezier(0.4,0.0,1,1);
+  -webkit-transition: opacity .1s cubic-bezier(0.4,0.0,1,1);
+  transition: opacity .1s cubic-bezier(0.4,0.0,1,1);
+  overflow: hidden;
+}
+
+.chrome-controls-button:not([aria-disabled=true]):not([disabled]):not([aria-hidden=true]) {
+  cursor: pointer;
+}
+
+.chrome-controls .chrome-controls-button:not([aria-disabled=true]):not([disabled]):hover {
+  opacity: 1;
+  -moz-transition: opacity .1s cubic-bezier(0.0,0.0,0.2,1);
+  -webkit-transition: opacity .1s cubic-bezier(0.0,0.0,0.2,1);
+  transition: opacity .1s cubic-bezier(0.0,0.0,0.2,1);
+}

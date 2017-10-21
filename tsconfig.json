@@ -20,7 +20,7 @@
     "strictNullChecks": true
   },
   "include": [
-    "app/**/*"
+    "src/app/**/*"
   ],
   "exclude": [
     "node_modules",

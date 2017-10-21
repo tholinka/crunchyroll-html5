@@ -1,0 +1,17 @@
+.chrome-controls {
+  height: 36px;
+  line-height: 36px;
+  font-size: 109%;
+  text-align: left;
+  direction: ltr;
+}
+
+.chrome-controls__left {
+  float: left;
+  height: 100%;
+}
+
+.chrome-controls__right {
+  float: right;
+  height: 100%;
+}

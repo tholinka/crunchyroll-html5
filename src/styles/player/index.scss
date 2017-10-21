@@ -1,0 +1,15 @@
+@import "./chromeless-player";
+@import "./chrome/index";
+
+.html5-video-player {
+  position: relative;
+  width: 640px;
+  height: 360px;
+  background: #000000;
+
+  &--large {
+    width: 960px;
+    height: 540px;
+  }
+}
+
