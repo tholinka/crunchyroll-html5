@@ -1,8 +1,9 @@
 import { Video, Stream, Subtitle } from './media/video';
 import { NextVideo } from './media/nextvideo';
-import { Player, PlaybackState } from './media/player';
+import { Player, IPlayerConfig } from './media/player';
 import * as request from 'request-promise-native';
 import { importCSS, importCSSByUrl } from './utils/css';
+import { h, render } from 'preact';
 
 const css = require('raw-loader!./styles.css');
 
@@ -11,17 +12,19 @@ class Bootstrap {
   private player: Player = new Player();
 
   constructor() {
-    this.wrapper = document.querySelector("#showmedia_video_box");
-    if (!this.wrapper) {
-      this.wrapper = document.querySelector("#showmedia_video_box_wide");
-      this.player.setWide(true);
+    let wrapper = document.querySelector("#showmedia_video_box");
+    if (!wrapper) {
+      wrapper = document.querySelector("#showmedia_video_box_wide");
+      //this.player.setWide(true);
     }
+    if (!wrapper) throw new Error("Not able to find video wrapper.");
+    this.wrapper = wrapper;
     this.wrapper.textContent = "Loading HTML5 player...";
 
     importCSSByUrl("https://fonts.googleapis.com/css?family=Noto+Sans");
     importCSS(css);
 
-    const showmedia = document.querySelector("#showmedia");
+    /*const showmedia = document.querySelector("#showmedia");
     const showmediaVideo = document.querySelector("#showmedia_video");
     const mainMedia = document.querySelector("#main_content");
     this.player.listen('widechange', (wide: boolean) => {
@@ -48,16 +51,45 @@ class Bootstrap {
       if (playing) {
         this.player.play();
       }
-    });
+    });*/
+  }
+
+  static getVideoThumbnailUrl(id: string): string|undefined {
+    const img = document.querySelector("a.link.block-link.block[href$=\"-" + id + "\"] img.mug");
+    if (!img) return undefined;
+
+    const url = img.getAttribute("src");
+    if (!url) return undefined;
+
+    return url.replace(/_[a-zA-Z]+(\.[a-zA-Z]+)$/, "_full$1");
   }
 
   async run() {
     this.wrapper.innerHTML = "";
-    this.player.attach(this.wrapper);
 
-    var video = await Video.fromDocument(location.href, document, true);
+    const config: IPlayerConfig = {};
 
-    if (video.streams.length > 0) {
+    const { videoId } = Video.parseUrlFragments(location.href);
+
+    const thumbnailUrl = Bootstrap.getVideoThumbnailUrl(videoId);
+    if (thumbnailUrl) {
+      config.thumbnailUrl = thumbnailUrl;
+    }
+
+    const loadVideo = async (player: Player) => {
+      var video = await Video.fromDocument(location.href, document, true);
+      if (video.streams.length === 0) throw new Error("Not working on trailers.");
+
+      player.loadVideoByConfig({
+        url: video.streams[0].url
+      });
+    };
+
+    render((
+      <Player config={ config } ref={ loadVideo }></Player>
+    ), this.wrapper);
+
+    /*if (video.streams.length > 0) {
       let stream = video.streams[0];
 
       if (stream.nextUrl) {
@@ -67,7 +99,7 @@ class Bootstrap {
       this.player.setStream(stream);
     } else {
       //let stream = await Stream.fromUrl(location.href, video.videoId, "trailer", '0', '');
-    }
+    }*/
   }
 }
 

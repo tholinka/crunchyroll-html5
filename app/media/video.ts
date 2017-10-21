@@ -81,6 +81,53 @@ function toArray<T>(arrLike: ArrayLike<T>): T[] {
   return arr;
 }
 
+async function decryptSubtitle(iv: string, data: string, id: number): Promise<Uint8Array> {
+  const ivBuffer: Uint8Array = new Uint8Array(atob(iv).split("").map(function(c) {
+    return c.charCodeAt(0);
+  }));
+  const dataBuffer: Uint8Array = new Uint8Array(atob(data).split("").map(function(c) {
+    return c.charCodeAt(0);
+  }));
+
+  const key: Uint8Array = await obfuscateKey(id);
+  const aesCbc = new aes.ModeOfOperation.cbc(key, ivBuffer);
+  const decryptedData = new Uint8Array(aesCbc.decrypt(dataBuffer));
+
+  return pako.inflate(decryptedData);
+}
+
+function obfuscateKeyAux(count: number, modulo: number, start: number[]) {
+  let output: number[] = start.slice(0);
+  for (let i = 0; i < count; i++) {
+    output.push(output[output.length - 1] + output[output.length - 2]);
+  }
+  output = output.slice(2);
+  return output.map(x => x % modulo + 33);
+}
+
+function obfuscateKey(n: number): Uint8Array {
+  const key = bigInt(n);
+  const num1 = bigInt(Math.floor(Math.pow(2, 25) * Math.sqrt(6.9)));
+  const num2 = num1.xor(key).shiftLeft(5);
+  const num3 = key.xor(num1);
+  const num4 = num3.xor(num3.shiftRight(3)).xor(num2);
+
+  const keyAux = new Uint8Array(obfuscateKeyAux(20, 97, [1, 2]));
+  const num4Arr = new TextEncoder("ascii").encode(num4.toString());
+  const shaData = new Uint8Array(keyAux.length + num4Arr.length);
+  shaData.set(keyAux);
+  shaData.set(num4Arr, keyAux.length);
+
+  const shaHash = new Uint8Array(sha1.digest(shaData));
+
+  const emptyArray = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  const result = new Uint8Array(shaHash.length + emptyArray.length);
+  result.set(shaHash);
+  result.set(emptyArray, shaHash.length);
+
+  return result;
+}
+
 const FORMAT_IDS: any = {
   '360p': [ '60', '106' ],
   '480p': [ '61', '106' ],
@@ -130,7 +177,7 @@ export class Stream {
     const duration: number = parseFloat(streamInfo.querySelector("metadata duration")!.textContent!);
 
     const thumbnailUrl: string = doc.querySelector("media_metadata episode_image_url")!.textContent!;
-    const nextUrl: string = doc.getElementsByTagName("default:nextUrl")[0].textContent!;
+    const nextUrl: string = doc.querySelector("default\\:nextUrl")!.textContent!;
 
     const episodeTitle: string = doc.querySelector("episode_title")!.textContent!;
     const episodeNumber: string = doc.querySelector("episode_number")!.textContent!;
@@ -139,20 +186,26 @@ export class Stream {
     const subtitles: Subtitle[] = [];
     const subtitleElements = doc.querySelectorAll("subtitles subtitle");
     for (let i = 0; i < subtitleElements.length; i++) {
-      let default2: boolean = subtitleElements[i].getAttribute("default") === "1";
-      if (!default2) continue;
+      let id = subtitleElements[i].getAttribute("id") || "";
+      let url = subtitleElements[i].getAttribute("link");
+      if (!url) continue;
+      let title = subtitleElements[i].getAttribute("title") || "";
+      let isDefault = subtitleElements[i].getAttribute("default") === "1";
+      let delay = parseFloat(subtitleElements[i].getAttribute("delay") || "0");
 
-      let uri = subtitleElements[i].getAttribute("link")!;
-      let subResponse = await request.get(uri);
-      let subDoc = (new DOMParser()).parseFromString(subResponse, "text/xml");
-      let id = subDoc.querySelector("subtitle")!.getAttribute("id")!;
-      let iv = subDoc.querySelector("iv")!.textContent!;
-      let data = subDoc.querySelector("data")!.textContent!;
+      let subtitle = new Subtitle(title, delay, isDefault, url);
 
-      let contentBytes = await Subtitle.decrypt(iv, data, parseInt(id));
-      let content = new TextDecoder("utf-8").decode(contentBytes);
-      let xml = (new DOMParser()).parseFromString(content, "text/xml");
-      let subtitle = new Subtitle(xml, default2);
+      const preloadSubtitle = doc.querySelector("default\\:preload > subtitle");
+      if (preloadSubtitle && preloadSubtitle.getAttribute("id") === id) {
+        const iv = preloadSubtitle.querySelector("iv")!.textContent!;
+        const data = preloadSubtitle.querySelector("data")!.textContent!;
+        let contentBytes = await decryptSubtitle(iv, data, parseInt(id));
+        let content = new TextDecoder("utf-8").decode(contentBytes);
+        let xml = (new DOMParser()).parseFromString(content, "text/xml");
+  
+        subtitle.setContent(new SubtitleContent(xml));
+      }
+
       subtitles.push(subtitle);
     }
 
@@ -163,14 +216,44 @@ export class Stream {
 }
 
 export class Subtitle {
+  private _content: SubtitleContent|undefined = undefined;
+
   constructor(
-    private xml: Document,
-    private _def: boolean = false
+    public title: string,
+    public delay: number,
+    public isDefault: boolean,
+    public url: string
   ) {}
 
-  isDefault(): boolean {
-    return this._def;
+  setContent(content: SubtitleContent): void {
+    this._content = content;
   }
+
+  async getContent(): Promise<SubtitleContent> {
+    if (this._content) {
+      return this._content;
+    } else {
+      let subResponse = await request.get(this.url);
+      let subDoc = (new DOMParser()).parseFromString(subResponse, "text/xml");
+      let id = subDoc.querySelector("subtitle")!.getAttribute("id")!;
+      let iv = subDoc.querySelector("iv")!.textContent!;
+      let data = subDoc.querySelector("data")!.textContent!;
+
+      let contentBytes = await decryptSubtitle(iv, data, parseInt(id));
+      let content = new TextDecoder("utf-8").decode(contentBytes);
+      let xml = (new DOMParser()).parseFromString(content, "text/xml");
+
+      this._content = new SubtitleContent(xml);
+
+      return this._content;
+    }
+  }
+}
+
+export class SubtitleContent {
+  constructor(
+    private xml: Document
+  ) {}
 
   get title(): string {
     return this.xml.querySelector("subtitle_script")!.getAttribute("title")!;
@@ -285,53 +368,6 @@ export class Subtitle {
 
     return output;
   }
-
-  static async decrypt(iv: string, data: string, id: number): Promise<Uint8Array> {
-    const ivBuffer: Uint8Array = new Uint8Array(atob(iv).split("").map(function(c) {
-      return c.charCodeAt(0);
-    }));
-    const dataBuffer: Uint8Array = new Uint8Array(atob(data).split("").map(function(c) {
-      return c.charCodeAt(0);
-    }));
-
-    const key: Uint8Array = await Subtitle.obfuscateKey(id);
-    const aesCbc = new aes.ModeOfOperation.cbc(key, ivBuffer);
-    const decryptedData = new Uint8Array(aesCbc.decrypt(dataBuffer));
-
-    return pako.inflate(decryptedData);
-  }
-
-  static obfuscateKeyAux(count: number, modulo: number, start: number[]) {
-    let output: number[] = start.slice(0);
-    for (let i = 0; i < count; i++) {
-      output.push(output[output.length - 1] + output[output.length - 2]);
-    }
-    output = output.slice(2);
-    return output.map(x => x % modulo + 33);
-  }
-
-  static obfuscateKey(n: number): Uint8Array {
-    const key = bigInt(n);
-    const num1 = bigInt(Math.floor(Math.pow(2, 25) * Math.sqrt(6.9)));
-    const num2 = num1.xor(key).shiftLeft(5);
-    const num3 = key.xor(num1);
-    const num4 = num3.xor(num3.shiftRight(3)).xor(num2);
-
-    const keyAux = new Uint8Array(Subtitle.obfuscateKeyAux(20, 97, [1, 2]));
-    const num4Arr = new TextEncoder("ascii").encode(num4.toString());
-    const shaData = new Uint8Array(keyAux.length + num4Arr.length);
-    shaData.set(keyAux);
-    shaData.set(num4Arr, keyAux.length);
-
-    const shaHash = new Uint8Array(sha1.digest(shaData));
-
-    const emptyArray = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-    const result = new Uint8Array(shaHash.length + emptyArray.length);
-    result.set(shaHash);
-    result.set(emptyArray, shaHash.length);
-
-    return result;
-  }
 }
 
 export class Video {
@@ -349,13 +385,7 @@ export class Video {
   }
 
   static async fromDocument(url: string, doc: Document, onlyDefault: boolean = false): Promise<Video> {
-    const re = /https?:\/\/(?:(www|m)\.)?(crunchyroll\.(?:com|fr)\/(?:media(?:-|\/\?id=)|[^/]*\/[^/?&]*?)([0-9]+))(?:[/?&]|$)/g;
-    const m = re.exec(url);
-    if (!m) throw new Error("Unable to match url");
-
-    const prefix: string = m[1];
-    const webpageUrl: string = m[2];
-    const videoId: string = m[3];
+    const { videoId } = Video.parseUrlFragments(url);
 
     /*var note = doc.querySelector(".showmedia-trailer-notice");
     if (note && note.textContent.trim() !== "")
@@ -399,14 +429,28 @@ export class Video {
     return new Video(url, videoId, title, description, streams);
   }
 
-  static async fromUrl(url: string, onlyDefault: boolean = false): Promise<Video> {
+  static parseUrlFragments(url: string): {
+    prefix: string,
+    webpageUrl: string,
+    videoId: string
+  } {
     const re = /https?:\/\/(?:(www|m)\.)?(crunchyroll\.(?:com|fr)\/(?:media(?:-|\/\?id=)|[^/]*\/[^/?&]*?)([0-9]+))(?:[/?&]|$)/g;
     const m = re.exec(url);
     if (!m) throw new Error("Unable to match url.");
 
     const prefix: string = m[1];
-    let webpageUrl: string = m[2];
+    const webpageUrl: string = m[2];
     const videoId: string = m[3];
+
+    return {
+      prefix: prefix,
+      webpageUrl: webpageUrl,
+      videoId: videoId
+    }
+  }
+
+  static async fromUrl(url: string, onlyDefault: boolean = false): Promise<Video> {
+    let { prefix, webpageUrl, videoId } = Video.parseUrlFragments(url);
 
     if (prefix === 'm') {
       const mobileResponse: string = await request.get(url);
