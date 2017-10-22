@@ -1,0 +1,60 @@
+.chrome-fullscreen-btn-corner-0,
+.chrome-fullscreen-btn-corner-1,
+.chrome-fullscreen-btn-corner-2,
+.chrome-fullscreen-btn-corner-3 {
+  transform: none;
+}
+
+.chrome-fullscreen-button:hover .chrome-fullscreen-btn-corner-0 {
+  animation: chrome-fullscreen-button-corner-0-animation .4s cubic-bezier(0.4,0.0,0.2,1);
+}
+
+.chrome-fullscreen-button:hover .chrome-fullscreen-btn-corner-1 {
+  animation: chrome-fullscreen-button-corner-1-animation .4s cubic-bezier(0.4,0.0,0.2,1);
+}
+
+.chrome-fullscreen-button:hover .chrome-fullscreen-btn-corner-2 {
+  animation: chrome-fullscreen-button-corner-2-animation .4s cubic-bezier(0.4,0.0,0.2,1);
+}
+
+.chrome-fullscreen-button:hover .chrome-fullscreen-btn-corner-3 {
+  animation: chrome-fullscreen-button-corner-3-animation .4s cubic-bezier(0.4,0.0,0.2,1);
+}
+
+.chrome-fullscreen-button::after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: 12px;
+  position: absolute;
+  top: 0;
+  left: 100%;
+}
+
+.chrome-big-mode .chrome-fullscreen-button::after {
+  width: 24px;
+}
+
+@keyframes chrome-fullscreen-button-corner-0-animation {
+  50% {
+    transform: translate(-1px, -1px);
+  }
+}
+
+@keyframes chrome-fullscreen-button-corner-1-animation {
+  50% {
+    transform: translate(1px, -1px);
+  }
+}
+
+@keyframes chrome-fullscreen-button-corner-2-animation {
+  50% {
+    transform: translate(1px, 1px);
+  }
+}
+
+@keyframes chrome-fullscreen-button-corner-3-animation {
+  50% {
+    transform: translate(-1px, 1px);
+  }
+}

@@ -6,6 +6,11 @@
   direction: ltr;
 }
 
+.chrome-big-mode .chrome-controls {
+  height: 54px;
+  line-height: 54px;
+}
+
 .chrome-controls__left {
   float: left;
   height: 100%;

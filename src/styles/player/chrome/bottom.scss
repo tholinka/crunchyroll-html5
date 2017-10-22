@@ -21,3 +21,8 @@
 .html5-video-chrome-bottom {
   transition: opacity .25s cubic-bezier(0.0,0.0,0.2,1);
 }
+
+.chrome-big-mode .html5-video-chrome-bottom {
+  height: 54px;
+  padding-top: 4px;
+}

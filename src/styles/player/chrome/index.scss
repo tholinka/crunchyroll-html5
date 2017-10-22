@@ -1,2 +1,12 @@
 @import "./bottom";
 @import "./buttons/index";
+@import "./controls";
+@import "./progressbar";
+@import "./tooltip";
+
+.html5-video-player--autohide .html5-video-chrome-bottom {
+  opacity: 0;
+  -moz-transition: opacity .1s cubic-bezier(0.4,0.0,1,1);
+  -webkit-transition: opacity .1s cubic-bezier(0.4,0.0,1,1);
+  transition: opacity .1s cubic-bezier(0.4,0.0,1,1);
+}

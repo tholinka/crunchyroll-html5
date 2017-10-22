@@ -17,6 +17,16 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   setChromelessPlayer(player: ChromelessPlayer) {
     this._player = player;
   }
+  
+  setForcePaused(force: boolean): void {
+    if (!this._player) throw new Error("Not initialized");
+    this._player.setForcePaused(force);
+  }
+
+  getPlaybackState(): PlaybackState {
+    if (!this._player) throw new Error("Not initialized");
+    return this._player.getPlaybackState();
+  }
 
   getPreferredPlaybackState(): PlaybackState {
     if (!this._player) throw new Error("Not initialized");
@@ -51,6 +61,11 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   getCurrentTime(): number {
     if (!this._player) throw new Error("Not initialized");
     return this._player.getCurrentTime();
+  }
+
+  getBufferedTime(): number {
+    if (!this._player) throw new Error("Not initialized");
+    return this._player.getBufferedTime();
   }
 
   setVolume(volume: number): void {

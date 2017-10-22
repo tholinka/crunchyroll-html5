@@ -1,0 +1,20 @@
+.html5-video-cued-thumbnail-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  transition: opacity .25s cubic-bezier(0.0,0.0,0.2,1);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.html5-video-cued-thumbnail-overlay-image {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}

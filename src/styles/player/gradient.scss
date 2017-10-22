@@ -1,0 +1,26 @@
+.html5-video-gradient-bottom {
+  height: 49px;
+  padding-top: 49px;
+  bottom: 0;
+  z-index: 22;
+  background-position: bottom;
+}
+
+.html5-video-gradient-bottom {
+  width: 100%;
+  position: absolute;
+  background-repeat: repeat-x;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAADGCAYAAAAT+OqFAAAAdklEQVQoz42QQQ7AIAgEF/T/D+kbq/RWAlnQyyazA4aoAB4FsBSA/bFjuF1EOL7VbrIrBuusmrt4ZZORfb6ehbWdnRHEIiITaEUKa5EJqUakRSaEYBJSCY2dEstQY7AuxahwXFrvZmWl2rh4JZ07z9dLtesfNj5q0FU3A5ObbwAAAABJRU5ErkJggg==);
+  transition: opacity .25s cubic-bezier(0.0,0.0,0.2,1);
+  pointer-events: none;
+}
+
+.chrome-big .html5-video-gradient-bottom {
+  height: 146px;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAEmCAYAAACjy/qzAAAAhklEQVQ4y52RUQ6AMAxCKd7/JJ7R6aeJAdr507TjQZqOAE4CWARwx7JE944rch/k6qOWS7bq5bh72zGF8+LTa6goJeRPgXDYNxWFfkS0QXCInLIN1GxTXA0dtS0otWJnuXJR1Y9WYP9GF1UCYRQYHRSlXMARbVO4th3sd7Y3OP5dY3Bn+SkPsGJ1+HGGVtcAAAAASUVORK5CYII=);
+}
+
+.html5-video-player--autohide .html5-video-gradient-bottom {
+  opacity: 0;
+  transition: opacity .1s cubic-bezier(0.4,0.0,1,1);
+}

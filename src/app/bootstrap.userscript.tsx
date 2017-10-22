@@ -74,6 +74,7 @@ class Bootstrap {
     }
 
     const loadVideo = async (player: Player) => {
+      player.loadVideoByConfig(config);
       var video = await Video.fromDocument(location.href, document, true);
       if (video.streams.length === 0) throw new Error("No stream found.");
 

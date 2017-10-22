@@ -443,9 +443,9 @@ export class Player extends EventTarget {
 
   private setBigMode(enabled: boolean) {
     if (enabled) {
-      this.playerElement.classList.add("html5-player--big-mode");
+      this.playerElement.classList.add("chrome-big-mode");
     } else {
-      this.playerElement.classList.remove("html5-player--big-mode");
+      this.playerElement.classList.remove("chrome-big-mode");
     }
     this.volumeSlider.setBigMode(enabled);
     this.progressBar.updateDom();

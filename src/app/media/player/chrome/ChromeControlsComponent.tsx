@@ -1,6 +1,7 @@
 import { h, Component } from "preact";
 import { PlayPauseButton } from "./PlayPauseButton";
 import { IPlayerApi } from "../IPlayerApi";
+import { FullscreenButton } from "./FullscreenButton";
 
 export interface IChromeControlsProps {
   api: IPlayerApi
@@ -14,7 +15,7 @@ export class ChromeControlsComponent extends Component<IChromeControlsProps, {}>
           <PlayPauseButton api={props.api}></PlayPauseButton>
         </div>
         <div class="chrome-controls__right">
-          
+          <FullscreenButton api={props.api}></FullscreenButton>
         </div>
       </div>
     );

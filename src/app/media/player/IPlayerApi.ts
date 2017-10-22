@@ -35,6 +35,8 @@ export enum PlaybackState {
 }
 
 export interface IPlayerApi extends EventTarget {
+  setForcePaused(force: boolean): void;
+  getPlaybackState(): PlaybackState;
   getPreferredPlaybackState(): PlaybackState;
 
   playVideo(): void;
@@ -45,6 +47,7 @@ export interface IPlayerApi extends EventTarget {
   
   getDuration(): number;
   getCurrentTime(): number;
+  getBufferedTime(): number;
 
   setVolume(volume: number): void;
   getVolume(): number;

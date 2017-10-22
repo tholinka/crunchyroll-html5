@@ -28,6 +28,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
   private _state: PlaybackState = PlaybackState.UNSTARTED;
   private _preferedState: PlaybackState|undefined = PlaybackState.PLAYING;
+  private _forcedPause: boolean = false;
 
   private _handler = new EventHandler(this);
 
@@ -36,6 +37,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   private _api: IPlayerApi;
 
   private _subtitleLoading: boolean = false;
+  private _lastFullscreenState: boolean = false;
 
   constructor(props: IChromelessPlayerProps) {
     super(props);
@@ -49,8 +51,16 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     }
   }
 
+  setForcePaused(force: boolean): void {
+    this._forcedPause = force;
+    if (this._forcedPause) {
+      this._videoElement.pause();
+    } else {
+      this._onCanplay();
+    }
+  }
+
   private _updateState(state: PlaybackState) {
-    console.log("state", PlaybackState[state]);
     this._state = state;
 
     this._api.dispatchEvent(new PlaybackStateChangeEvent(state));
@@ -65,10 +75,12 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     const state = this._preferedState;
     switch (state) {
       case PlaybackState.PAUSED:
-        this._preferedState = undefined;
         this._videoElement.pause();
         break;
       default:
+        if (this._forcedPause) {
+          this._videoElement.pause();
+        }
         this._updateState(PlaybackState.PLAYING);
         break;
     }
@@ -82,7 +94,9 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     const state = this._preferedState;
     switch (state) {
       case PlaybackState.PLAYING:
-        this._videoElement.play();
+        if (!this._forcedPause) {
+          this._videoElement.play();
+        }
         break;
       default:
         this._updateState(PlaybackState.PAUSED);
@@ -148,6 +162,22 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
   private _onDurationChange() {
     this._api.dispatchEvent(new DurationChangeEvent(this.getDuration()));
+  }
+
+  private _onSeeked() {
+    if (this._forcedPause) {
+      this._videoElement.pause();
+    } else {
+      this._onCanplay();
+    }
+  }
+
+  private _onFullscreenChange() {
+    const fullscreen = this.isFullscreen();
+    if (this._lastFullscreenState === fullscreen) return;
+    this._lastFullscreenState = fullscreen;
+
+    this._api.dispatchEvent('fullscreenchange');
   }
 
   private resizeVideo() {
@@ -234,10 +264,13 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   resize() {
     this.resizeVideo();
     this.resizeSubtitle();
+
+    this._api.dispatchEvent('resize');
   }
 
   playVideo() {
-    switch (this._state) {
+    this._preferedState = PlaybackState.PLAYING;
+    switch (this._forcedPause ? undefined : this._state) {
       case PlaybackState.ENDED:
         if (!this._subtitleLoading) {
           this._videoElement.currentTime = 0;
@@ -246,43 +279,38 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
         }
       case PlaybackState.PLAYING:
         if (this._subtitleLoading) {
-          this._preferedState = PlaybackState.PLAYING;
           this._api.dispatchEvent(new PlaybackStateChangeEvent(this._preferedState));
         }
         break;
       case PlaybackState.PAUSED:
         if (this._subtitleLoading) {
-          this._preferedState = PlaybackState.PLAYING;
           this._api.dispatchEvent(new PlaybackStateChangeEvent(this._preferedState));
         } else {
           this._videoElement.play();
         }
         break;
       default:
-        this._preferedState = PlaybackState.PLAYING;
         this._api.dispatchEvent(new PlaybackStateChangeEvent(this._preferedState));
         break;
     }
   }
 
   pauseVideo() {
+    this._preferedState = PlaybackState.PAUSED;
     switch (this._state) {
       case PlaybackState.PAUSED:
         if (this._subtitleLoading) {
-          this._preferedState = PlaybackState.PAUSED;
           this._api.dispatchEvent(new PlaybackStateChangeEvent(this._preferedState));
         }
         break;
       case PlaybackState.PLAYING:
         if (this._subtitleLoading) {
-          this._preferedState = PlaybackState.PAUSED;
           this._api.dispatchEvent(new PlaybackStateChangeEvent(this._preferedState));
         } else {
           this._videoElement.pause();
         }
         break;
       default:
-        this._preferedState = PlaybackState.PAUSED;
         this._api.dispatchEvent(new PlaybackStateChangeEvent(this._preferedState));
         break;
     }
@@ -304,12 +332,26 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     return this._videoElement.currentTime;
   }
 
+  getBufferedTime(): number {
+    let value: number = 0;
+
+    for (let i = 0; i < this._videoElement.buffered.length; i++) {
+      value = Math.max(value, this._videoElement.buffered.end(i));
+    }
+
+    return value;
+  }
+
   setVolume(volume: number): void {
     this._videoElement.volume = volume;
   }
 
   getVolume(): number {
     return this._videoElement.volume;
+  }
+
+  setFullscreenElement(element: HTMLElement): void {
+    this._fullscreenElement = element;
   }
   
   isFullscreen(): boolean {
@@ -349,6 +391,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     this._source = source;
 
     this._source.attach(this._videoElement);
+
+    this._videoElement.play();
   }
 
   async setSubtitleTrack(index: number): Promise<any> {
@@ -395,13 +439,6 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   componentDidMount() {
-    this._subtitleEngine.attach(this._videoElement);
-    if (this._source) {
-      this._source.attach(this._videoElement);
-    }
-
-    this.resize();
-    
     this._handler
       .listen(this._videoElement, 'playing', this._onPlaying, false)
       .listen(this._videoElement, 'pause', this._onPause, false)
@@ -410,13 +447,22 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
       .listen(this._videoElement, 'stalled', this._onStalled, false)
       .listen(this._videoElement, 'suspend', this._onSuspend, false)
       .listen(this._videoElement, 'waiting', this._onWaiting, false)
+      .listen(this._videoElement, 'seeked', this._onSeeked, false)
       .listen(this._videoElement, 'loadedmetadata', this._onLoadedMetadata, false)
       .listen(this._videoElement, 'timeupdate', this._onTimeUpdate, false)
       .listen(this._videoElement, 'durationchange', this._onDurationChange, false)
       .listen(this._videoElement, 'progress', this._onProgress, false)
       .listen(this._videoElement, 'volumechange', this._onVolumeChange, false)
-      .listen(this._subtitleEngine, 'resize', this.resizeSubtitle, false);
-    this._videoElement.play();
+      .listen(this._subtitleEngine, 'resize', this.resizeSubtitle, false)
+      .listen(document, "fullscreenchange", this._onFullscreenChange)
+      .listen(document, "webkitfullscreenchange", this._onFullscreenChange)
+      .listen(document, "mozfullscreenchange", this._onFullscreenChange)
+      .listen(document, "msfullscreenchange", this._onFullscreenChange);
+    this._subtitleEngine.attach(this._videoElement);
+    if (this._source) {
+      this.setVideoSource(this._source);
+    }
+    this.resize();
   }
 
   componentWillUnmount() {

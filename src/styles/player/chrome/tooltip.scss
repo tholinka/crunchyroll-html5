@@ -1,0 +1,150 @@
+.chrome-tooltip {
+  position: absolute;
+  z-index: 1002;
+  font-size: 118%;
+  font-weight: 500;
+  line-height: 15px;
+  opacity: 0;
+  transition: transform .1s cubic-bezier(0.0,0.0,0.2,1),opacity .1s cubic-bezier(0.0,0.0,0.2,1);
+  pointer-events: none;
+}
+
+.chrome-big-mode .chrome-tooltip {
+  line-height: 22px;
+}
+
+.chrome-tooltip:not([aria-hidden=true]) {
+  opacity: 1;
+  transform: none;
+  transition: transform .1s cubic-bezier(0.4,0.0,1,1),opacity .1s cubic-bezier(0.4,0.0,1,1);
+}
+
+.chrome-tooltip.chrome-preview {
+  padding: 2px;
+  background-color: rgba(28,28,28,0.9);
+  border-radius: 2px;
+}
+
+.chrome-tooltip.chrome-text-detail.chrome-preview {
+  width: 312px;
+}
+
+.chrome-big-mode .chrome-tooltip.chrome-text-detail.chrome-preview {
+  width: 457px;
+}
+
+.chrome-tooltip-text-wrapper {
+  border-radius: 3px;
+}
+
+.chrome-tooltip.chrome-preview:not(.chrome-text-detail) .chrome-tooltip-text-wrapper {
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.chrome-tooltip.chrome-text-detail.chrome-preview .chrome-tooltip-text-wrapper {
+  padding: 0 9px;
+  margin: 4px 0;
+  overflow: hidden;
+  max-height: 46px;
+}
+
+.chrome-big-mode .chrome-tooltip.chrome-text-detail.chrome-preview .chrome-tooltip-text-wrapper {
+  margin: 6px 0;
+  max-height: 69px;
+}
+
+.chrome-tooltip-text {
+  display: block;
+  background-color: rgba(28,28,28,0.9);
+  border-radius: 2px;
+  padding: 5px 9px;
+}
+
+.chrome-tooltip-opaque .chrome-tooltip-text {
+  background-color: rgba(28,28,28,1);
+}
+
+.chrome-tooltip.chrome-preview .chrome-tooltip-text {
+  display: inline;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.chrome-tooltip-image-enabled .chrome-tooltip-text {
+  padding-left: 34px;
+}
+
+.chrome-big-mode .chrome-tooltip-image-enabled .chrome-tooltip-text {
+  padding-left: 45px;
+}
+
+.chrome-tooltip.chrome-text-detail.chrome-preview .chrome-tooltip-text {
+  background-color: transparent;
+  padding: 0;
+}
+
+.chrome-tooltip-bg {
+  background-color: #000;
+  background-repeat: no-repeat;
+  position: relative;
+  display: none;
+}
+
+.chrome-tooltip.chrome-preview .chrome-tooltip-bg {
+  display: block;
+}
+
+.chrome-tooltip.chrome-text-detail.chrome-preview .chrome-tooltip-bg {
+  float: left;
+}
+
+.chrome-tooltip-duration {
+  display: none;
+}
+
+.chrome-tooltip.chrome-text-detail.chrome-preview.chrome-has-duration .chrome-tooltip-duration {
+  display: block;
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  background-color: rgba(28,28,28,0.9);
+  padding: 2px 4px;
+}
+
+.chrome-tooltip-title {
+  display: none;
+}
+
+.chrome-tooltip.chrome-text-detail .chrome-tooltip-title {
+  display: block;
+  color: #aaa;
+  text-transform: uppercase;
+}
+
+.chrome-tooltip-image {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 10px;
+  position: absolute;
+  display: none;
+  top: 2px;
+  left: 7px;
+  background-size: contain;
+}
+
+.chrome-big-mode .chrome-tooltip-image {
+  width: 25px;
+  height: 25px;
+  border-radius: 12.5px;
+  top: 3px;
+  left: 10px;
+}
+
+.chrome-tooltip-image-enabled .chrome-tooltip-image {
+  display: inherit;
+}
