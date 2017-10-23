@@ -1,0 +1,17 @@
+.chrome-time-display {
+  font-size: 109%;
+  display: inline-block;
+  vertical-align: top;
+  padding: 0 5px;
+  white-space: nowrap;
+  line-height: 35px;
+}
+
+.chrome-time-separator,
+.chrome-time-duration {
+  color: #ddd;
+}
+
+.chrome-big-mode .chrome-time-display {
+  line-height: 53px;
+}

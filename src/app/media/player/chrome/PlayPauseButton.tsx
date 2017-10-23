@@ -76,7 +76,7 @@ export class PlayPauseButton extends Component<IPlayPauseButtonProps, {}> {
     const pathRef = (element: SVGPathElement) => this._pathElement = element;
 
     return (
-      <button class="chrome-controls-button chrome-play-button" onClick={onClick}>
+      <button class="chrome-button chrome-play-button" onClick={onClick}>
         <svg width="100%" height="100%" version="1.1" viewBox="0 0 36 36">
           <path d={d} fill="#ffffff" ref={pathRef}></path>
         </svg>

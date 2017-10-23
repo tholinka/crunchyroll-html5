@@ -1,10 +1,11 @@
-import { IPlayerApi, PlaybackState } from "./IPlayerApi";
+import { IPlayerApi, PlaybackState, IVideoDetail } from "./IPlayerApi";
 import { EventTarget } from '../../libs/events/EventTarget';
 import { ISubtitleTrack } from "../subtitles/ISubtitleTrack";
 import { ChromelessPlayer } from "./ChromelessPlayer";
 
 export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   private _player: ChromelessPlayer|undefined;
+  private _nextVideo: IVideoDetail|undefined = undefined;
 
   constructor(
     player?: ChromelessPlayer
@@ -12,6 +13,16 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
     super();
 
     this._player = player;
+  }
+  
+  getNextVideoDetail(): IVideoDetail|undefined {
+    return this._nextVideo;
+  }
+  
+  setNextVideoDetail(nextVideo: IVideoDetail|undefined): void {
+    this._nextVideo = nextVideo;
+
+    this.dispatchEvent('nextvideochange');
   }
 
   setChromelessPlayer(player: ChromelessPlayer) {

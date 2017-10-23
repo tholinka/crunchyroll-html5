@@ -31,6 +31,14 @@
     width: 100%;
     height: 100%;
   }
+
+  & svg {
+    pointer-events: none;
+  }
+}
+
+.chrome-big-mode {
+  font-size: 17px;
 }
 
 .html5-video-player.html5-video-player--autohide {

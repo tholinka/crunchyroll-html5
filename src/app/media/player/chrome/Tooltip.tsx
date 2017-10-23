@@ -9,6 +9,7 @@ export interface IChromeTooltip {
   text?: string;
   textDetail?: boolean;
   hasDuration?: boolean;
+  preview?: boolean;
 }
 
 export interface IChromeTooltipImage {
@@ -42,10 +43,12 @@ export class ChromeTooltip extends Component<{}, {}> {
       this._bgElement.style.width = tooltip.backgroundImage.width + "px";
       this._bgElement.style.height = tooltip.backgroundImage.height + "px";
       this._bgElement.style.background = "url(" + JSON.stringify(tooltip.backgroundImage.src) + ")";
+      this._bgElement.style.backgroundSize = this._bgElement.style.width + " " + this._bgElement.style.height;
     } else {
       this._bgElement.style.width = "";
       this._bgElement.style.height = "";
       this._bgElement.style.background = "";
+      this._bgElement.style.backgroundSize = "";
     }
     
     if (tooltip.duration) {
@@ -65,7 +68,13 @@ export class ChromeTooltip extends Component<{}, {}> {
     } else {
       this._textElement.textContent = "";
     }
-
+    
+    if (tooltip.preview) {
+      this.base.classList.add('chrome-preview');
+    } else {
+      this.base.classList.remove('chrome-preview');
+    }
+    
     if (tooltip.textDetail) {
       this.base.classList.add('chrome-text-detail');
     } else {
@@ -87,7 +96,7 @@ export class ChromeTooltip extends Component<{}, {}> {
     const textRef = (el: HTMLElement) => this._textElement = el;
 
     return (
-      <div class="chrome-tooltip chrome-bottom chrome-preview" style="display: none;max-width:300px;">
+      <div class="chrome-tooltip chrome-bottom" style="display: none;">
         <div class="chrome-tooltip-bg" ref={bgRef}>
           <div class="chrome-tooltip-duration" ref={durationRef}></div>
         </div>

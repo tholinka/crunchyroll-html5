@@ -34,6 +34,13 @@ export enum PlaybackState {
   ENDED
 }
 
+export interface IVideoDetail {
+  title: string;
+  url: string;
+  thumbnailUrl: string;
+  duration: number;
+}
+
 export interface IPlayerApi extends EventTarget {
   setForcePaused(force: boolean): void;
   getPlaybackState(): PlaybackState;
@@ -65,4 +72,7 @@ export interface IPlayerApi extends EventTarget {
    * @param index the index of the subtitle track.
    */
   setSubtitleTrack(index: number): void;
+
+  getNextVideoDetail(): IVideoDetail|undefined;
+  setNextVideoDetail(nextVideo: IVideoDetail|undefined): void;
 }

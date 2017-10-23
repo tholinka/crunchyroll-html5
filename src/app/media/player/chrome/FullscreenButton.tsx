@@ -74,7 +74,7 @@ export class FullscreenButton extends Component<IFullscreenButtonProps, IFullscr
     const svg = fullscreen ? EXIT_SVG : ENTER_SVG;
 
     return (
-      <button class="chrome-controls-button chrome-fullscreen-button" onClick={onClick}>
+      <button class="chrome-button chrome-fullscreen-button" onClick={onClick}>
         {svg}
       </button>
     );

@@ -1,12 +1,14 @@
 import { h, Component } from "preact";
-import { ChromeControlsComponent } from './ChromeControlsComponent';
-import { ChromeProgressBarComponent } from "./ChromeProgressBarComponent";
-import { IPlayerApi } from "../IPlayerApi";
+import { ChromeControlsComponent } from './ControlsComponent';
+import { ChromeProgressBarComponent } from "./ProgressBarComponent";
+import { IPlayerApi, IVideoDetail } from "../IPlayerApi";
 
 export interface IChromeBottomProps {
   api: IPlayerApi;
   onProgressHover: (time: number, percentage: number) => void;
   onProgressEndHover: () => void;
+  onNextVideoHover: (detail: IVideoDetail) => void;
+  onNextVideoEndHover: () => void;
 }
 
 export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
@@ -25,7 +27,10 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
           api={props.api}
           onHover={props.onProgressHover}
           onEndHover={props.onProgressEndHover}></ChromeProgressBarComponent>
-        <ChromeControlsComponent api={props.api}></ChromeControlsComponent>
+        <ChromeControlsComponent
+          api={props.api}
+          onNextVideoHover={props.onNextVideoHover}
+          onNextVideoEndHover={props.onNextVideoEndHover}></ChromeControlsComponent>
       </div>
     );
   }

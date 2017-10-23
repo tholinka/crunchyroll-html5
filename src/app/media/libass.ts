@@ -143,6 +143,7 @@ export class LibAss extends EventTarget {
       width = videoRect.width * this.pixelRatio;
       height = videoRect.height * this.pixelRatio;
     }
+    if (width === 0 || height === 0) return;
 
     if (this.canvas.width !== width || this.canvas.height !== height) {
       this.canvas.width = width;

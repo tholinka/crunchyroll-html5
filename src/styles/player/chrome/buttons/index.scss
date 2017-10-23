@@ -1,7 +1,7 @@
 @import './play';
 @import './fullscreen';
 
-.chrome-controls-button {
+.chrome-button {
   border: none;
   background-color: transparent;
   padding: 0;
@@ -13,16 +13,20 @@
   line-height: inherit;
 }
 
-.chrome-controls .chrome-controls-button {
+.chrome-button:not([aria-disabled=true]):not([disabled]):not([aria-hidden=true]) {
+  cursor: pointer;
+}
+
+.chrome-controls .chrome-button {
   height: 100%;
 }
 
-.chrome-controls-button,
-.chrome-controls-button:focus {
+.chrome-button,
+.chrome-button:focus {
   outline: 0;
 }
 
-.chrome-controls .chrome-controls-button {
+.chrome-controls .chrome-button {
   opacity: .9;
   display: inline-block;
   width: 36px;
@@ -32,15 +36,11 @@
   overflow: hidden;
 }
 
-.chrome-big-mode .chrome-controls .chrome-controls-button {
+.chrome-big-mode .chrome-controls .chrome-button {
   width: 54px;
 }
 
-.chrome-controls-button:not([aria-disabled=true]):not([disabled]):not([aria-hidden=true]) {
-  cursor: pointer;
-}
-
-.chrome-controls .chrome-controls-button:not([aria-disabled=true]):not([disabled]):hover {
+.chrome-controls .chrome-button:not([aria-disabled=true]):not([disabled]):hover {
   opacity: 1;
   -moz-transition: opacity .1s cubic-bezier(0.0,0.0,0.2,1);
   -webkit-transition: opacity .1s cubic-bezier(0.0,0.0,0.2,1);

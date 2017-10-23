@@ -39,6 +39,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   private _subtitleLoading: boolean = false;
   private _lastFullscreenState: boolean = false;
 
+  private _duration: number = NaN;
+
   constructor(props: IChromelessPlayerProps) {
     super(props);
 
@@ -205,8 +207,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     var offsetLeft = videoRect.left;
     var offsetTop = videoRect.top;
 
-    el.style.left = Math.floor(rect.x - offsetLeft) + "px";
-    el.style.top = Math.floor(rect.y - offsetTop) + "px";
+    el.style.left = Math.floor(offsetLeft - rect.x) + "px";
+    el.style.top = Math.floor(offsetTop - rect.y) + "px";
   }
 
   setApi(api: ChromelessPlayerApi) {
@@ -318,14 +320,27 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
   seekTo(time: number): void {
     this._videoElement.currentTime = time;
+    this._api.dispatchEvent(new TimeUpdateEvent(time));
   }
 
   seekBy(seconds: number): void {
-    this._videoElement.currentTime += seconds;
+    const time = this._videoElement.currentTime + seconds;
+    this._videoElement.currentTime = time;
+    this._api.dispatchEvent(new TimeUpdateEvent(time));
   }
 
   getDuration(): number {
-    return this._videoElement.duration;
+    let duration = this._videoElement.duration;
+    if (isNaN(duration)) {
+      return Math.floor(this._duration);
+    }
+    return duration;
+  }
+
+  setDuration(duration: number) {
+    this._duration = duration;
+
+    this._api.dispatchEvent(new DurationChangeEvent(this.getDuration()));
   }
 
   getCurrentTime(): number {
@@ -457,7 +472,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
       .listen(document, "fullscreenchange", this._onFullscreenChange)
       .listen(document, "webkitfullscreenchange", this._onFullscreenChange)
       .listen(document, "mozfullscreenchange", this._onFullscreenChange)
-      .listen(document, "msfullscreenchange", this._onFullscreenChange);
+      .listen(document, "msfullscreenchange", this._onFullscreenChange)
+      .listen(window, "resize", this.resize, { 'passive': true });
     this._subtitleEngine.attach(this._videoElement);
     if (this._source) {
       this.setVideoSource(this._source);

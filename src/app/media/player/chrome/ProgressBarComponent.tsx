@@ -154,6 +154,10 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
       .listen(this.props.api, 'resize', this._onResize, false);
     this._updateState();
   }
+  
+  componentWillUnmount() {
+    this._handler.removeAll();
+  }
 
   render(): JSX.Element {
     const containerRef = (el: HTMLElement) => this._containerElement = el;

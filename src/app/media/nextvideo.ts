@@ -15,8 +15,8 @@ export class NextVideo {
       if (!href) continue;
       if (url.substring(url.length - href.length) === href) {
         const img = links[i].querySelector("img.mug");
-        if (!img) continue;
-        let thumbnail: string = img.getAttribute("src")!;
+        if (!img || !img.hasAttribute('src')) continue;
+        let thumbnail: string = img.getAttribute("src")!.replace(/_[a-zA-Z]+(\.[a-zA-Z]+)$/, "_full$1");
         let seriesAndEpisodeNumber: string = img.getAttribute("alt")!;
         let episode: string = links[i]
           .querySelector(".collection-carousel-overlay-top")!.textContent!

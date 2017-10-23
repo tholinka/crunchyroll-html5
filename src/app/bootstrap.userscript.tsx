@@ -64,43 +64,44 @@ class Bootstrap {
   async run() {
     this.wrapper.innerHTML = "";
 
-    const config: IPlayerConfig = {};
+    const preloadConfig: IPlayerConfig = {};
 
     const { videoId } = Video.parseUrlFragments(location.href);
 
     const thumbnailUrl = Bootstrap.getVideoThumbnailUrl(videoId);
     if (thumbnailUrl) {
-      config.thumbnailUrl = thumbnailUrl;
+      preloadConfig.thumbnailUrl = thumbnailUrl;
     }
 
     const loadVideo = async (player: Player) => {
-      player.loadVideoByConfig(config);
+      player.loadVideoByConfig(preloadConfig);
       var video = await Video.fromDocument(location.href, document, true);
       if (video.streams.length === 0) throw new Error("No stream found.");
+      const stream = video.streams[0];
 
-      player.loadVideoByConfig({
+      const videoConfig: IPlayerConfig = {
         title: video.title,
-        url: video.streams[0].url,
-        subtitles: video.streams[0].subtitles
-      });
+        url: stream.url,
+        duration: stream.duration,
+        subtitles: stream.subtitles
+      };
+      const nextVideo = NextVideo.fromUrlUsingDocument(stream.nextUrl);
+      if (nextVideo) {
+        videoConfig.nextVideo = {
+          title: nextVideo.episodeNumber + ': ' + nextVideo.episodeTitle,
+          duration: typeof nextVideo.duration === 'number' ? nextVideo.duration : NaN,
+          url: nextVideo.url,
+          thumbnailUrl: nextVideo.thumbnailUrl
+        };
+      }
+
+      player.loadVideoByConfig(videoConfig);
     };
     const large = this.wrapper.id === "showmedia_video_box_wide";
 
     render((
-      <Player config={ config } ref={ loadVideo } large={ large }></Player>
+      <Player config={ preloadConfig } ref={ loadVideo } large={ large }></Player>
     ), this.wrapper);
-
-    /*if (video.streams.length > 0) {
-      let stream = video.streams[0];
-
-      if (stream.nextUrl) {
-        this.player.setNextVideo(NextVideo.fromUrlUsingDocument(stream.nextUrl));
-      }
-
-      this.player.setStream(stream);
-    } else {
-      //let stream = await Stream.fromUrl(location.href, video.videoId, "trailer", '0', '');
-    }*/
   }
 }
 
