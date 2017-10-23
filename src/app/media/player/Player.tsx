@@ -217,18 +217,16 @@ export class Player extends Component<IPlayerProps, {}> {
   }
 
   private _setTooltip(tooltip: IChromeTooltip, left: number) {
-    if (!this.base.classList.contains('html5-video-player--autohide')) {
-      this._tooltipComponent.setTooltip(tooltip);
-      this._tooltipComponent.setPosition(0, 0);
+    this._tooltipComponent.setTooltip(tooltip);
+    this._tooltipComponent.setPosition(0, 0);
 
-      const rect = this._tooltipBottomRect;
-      const size = this._tooltipComponent.getSize();
+    const rect = this._tooltipBottomRect;
+    const size = this._tooltipComponent.getSize();
 
-      left = left - size.width/2;
-      left = Math.min(Math.max(left, rect.left), rect.left + rect.width - size.width);
+    left = left - size.width/2;
+    left = Math.min(Math.max(left, rect.left), rect.left + rect.width - size.width);
 
-      this._tooltipComponent.setPosition(left, rect.top - size.height);
-    }
+    this._tooltipComponent.setPosition(left, rect.top - size.height);
   }
 
   private _onProgressHover(time: number, percentage: number) {
