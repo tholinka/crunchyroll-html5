@@ -96,9 +96,6 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     const state = this._preferedState;
     switch (state) {
       case PlaybackState.PLAYING:
-        if (!this._forcedPause) {
-          this._videoElement.play();
-        }
         break;
       default:
         this._updateState(PlaybackState.PAUSED);
@@ -107,8 +104,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
   
   private _onEnded(e: BrowserEvent) {
-    this._updateState(PlaybackState.ENDED);
     this._preferedState = undefined;
+    this._updateState(PlaybackState.ENDED);
   }
 
   private _onCanplay() {
