@@ -45,23 +45,27 @@ npm run build
 ```
 
 ## TODO
+- Add support for tracking progress
+  - Chrunchyroll
+    - Tracking episodes watched
+    - Use Crunchyrolls resume feature.
+  - Kitsu
+    - Tracking episodes watched
+  - MyAnimeList
+    - Tracking episodes watched
+  - Local
+    - Tracking episodes watched
+    - Tracking what you've watched in a video.
+    - Resume videoes that you haven't completely watched yet.
+  - ...
 - Add option to change subtitles to other languages. Currently, only the default
   subtitle is displayed (in most cases this will be English).
 - Add more fonts. Currently, only Arial is available. Should be quite easy, but
   some testing needs to be done for this.
-- Investigate issues with subtitles being scaled 120% on the X axis and how to
-  fix it. On some subtitles the scaleX is set to 120% instead of 100% and causes
-  some weird strecthed out subtitles.
-- Prevent user from right clicking on the video element. There's no reason for
-  user's to be able to do that because the video can't be saved by the browser
-  anyways and I'm not going to add that feature anyways.
 - Consider moving the quality selection into the player.
 - Look into adding Chromecast support.
-- Add video tracking, so that Crunchyroll will remember how far you've gotten in
-  your binge watching.
 - Add an endscreen to indicate the user has finished the currently episode and
   perhaps automatically go to the next episode.
-- Add the episode thumbnail on the video until the episode has loaded.
 - Add multiple versions of this project for userscripts, Chrome, Firefox and
   more.
 - Add a way for the player to remember user choices as how high or low the
