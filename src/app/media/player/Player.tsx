@@ -236,7 +236,7 @@ export class Player extends Component<IPlayerProps, {}> {
     const rect = this._tooltipBottomRect;
     this._setTooltip({
       text: parseAndFormatTime(time)
-    }, rect.width*percentage - rect.left);
+    }, rect.width*percentage + rect.left);
   }
 
   private _onProgressEndHover() {
