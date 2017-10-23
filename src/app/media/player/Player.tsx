@@ -33,6 +33,7 @@ export interface IPlayerConfig {
 
 export class Player extends Component<IPlayerProps, {}> {
   private _config: IPlayerConfig|undefined = undefined;
+  private _actionElement: HTMLElement;
   private _chromelessPlayer: ChromelessPlayer;
   private _cuedThumbnailComponent: CuedThumbnailComponent;
   private _bottomComponent: ChromeBottomComponent;
@@ -364,6 +365,7 @@ export class Player extends Component<IPlayerProps, {}> {
     const bottomRef = (el: ChromeBottomComponent) => this._bottomComponent = el;
     const cuedThumbnailRef = (el: CuedThumbnailComponent) => this._cuedThumbnailComponent = el;
     const tooltipRef = (el: ChromeTooltip) => this._tooltipComponent = el;
+    const actionRef = (el: HTMLElement) => this._actionElement = el;
 
     const onProgressHover = (time: number, percentage: number) => this._onProgressHover(time, percentage);
     const onProgressEndHover = () => this._onProgressEndHover();
@@ -373,6 +375,15 @@ export class Player extends Component<IPlayerProps, {}> {
     const onSizeButtonEndHover = () => this._onSizeButtonEndHover();
     const onFullscreenButtonHover = () => this._onFullscreenButtonHover();
     const onFullscreenButtonEndHover = () => this._onFullscreenButtonEndHover();
+    const onPlayPause = () => {
+      const api = this._api;
+      if (api.getPreferredPlaybackState() === PlaybackState.PLAYING) {
+        api.pauseVideo();
+      } else {
+        api.playVideo();
+      }
+    };
+    const onToggleFullscreen = () => this._api.toggleFullscreen();
 
     const className = "html5-video-player"
       + (this._api.isLarge() ? " html5-video-player--large" : "");
@@ -380,6 +391,11 @@ export class Player extends Component<IPlayerProps, {}> {
       <div class={className}>
         <ChromelessPlayer ref={chromelessRef} api={this.getApi() as ChromelessPlayerApi}></ChromelessPlayer>
         <CuedThumbnailComponent ref={cuedThumbnailRef}></CuedThumbnailComponent>
+        <div
+          ref={actionRef}
+          onClick={onPlayPause}
+          onDblClick={onToggleFullscreen}
+          class="html5-video-action"></div>
         <ChromeTooltip ref={tooltipRef}></ChromeTooltip>
         <div class="html5-video-gradient-bottom"></div>
         <ChromeBottomComponent
