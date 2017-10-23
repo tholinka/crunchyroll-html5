@@ -4,11 +4,16 @@ import { IPlayerApi, IVideoDetail } from "../IPlayerApi";
 import { FullscreenButton } from "./FullscreenButton";
 import { TimeDisplay } from "./TimeDisplay";
 import { NextVideoButton } from "./NextVideoButton";
+import { SizeButton } from "./SizeButton";
 
 export interface IChromeControlsProps {
   api: IPlayerApi;
   onNextVideoHover: (detail: IVideoDetail) => void;
   onNextVideoEndHover: () => void;
+  onSizeButtonHover: () => void;
+  onSizeButtonEndHover: () => void;
+  onFullscreenButtonHover: () => void;
+  onFullscreenButtonEndHover: () => void;
 }
 
 export class ChromeControlsComponent extends Component<IChromeControlsProps, {}> {
@@ -24,7 +29,14 @@ export class ChromeControlsComponent extends Component<IChromeControlsProps, {}>
           <TimeDisplay api={props.api}></TimeDisplay>
         </div>
         <div class="chrome-controls__right">
-          <FullscreenButton api={props.api}></FullscreenButton>
+          <SizeButton
+            api={props.api}
+            onHover={props.onSizeButtonHover}
+            onEndHover={props.onSizeButtonEndHover}></SizeButton>
+          <FullscreenButton
+            api={props.api}
+            onHover={props.onFullscreenButtonHover}
+            onEndHover={props.onFullscreenButtonEndHover}></FullscreenButton>
         </div>
       </div>
     );

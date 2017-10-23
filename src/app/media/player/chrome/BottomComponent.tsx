@@ -9,6 +9,10 @@ export interface IChromeBottomProps {
   onProgressEndHover: () => void;
   onNextVideoHover: (detail: IVideoDetail) => void;
   onNextVideoEndHover: () => void;
+  onSizeButtonHover: () => void;
+  onSizeButtonEndHover: () => void;
+  onFullscreenButtonHover: () => void;
+  onFullscreenButtonEndHover: () => void;
 }
 
 export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
@@ -30,7 +34,11 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
         <ChromeControlsComponent
           api={props.api}
           onNextVideoHover={props.onNextVideoHover}
-          onNextVideoEndHover={props.onNextVideoEndHover}></ChromeControlsComponent>
+          onNextVideoEndHover={props.onNextVideoEndHover}
+          onSizeButtonHover={props.onSizeButtonHover}
+          onSizeButtonEndHover={props.onSizeButtonEndHover}
+          onFullscreenButtonHover={props.onFullscreenButtonHover}
+          onFullscreenButtonEndHover={props.onFullscreenButtonEndHover}></ChromeControlsComponent>
       </div>
     );
   }

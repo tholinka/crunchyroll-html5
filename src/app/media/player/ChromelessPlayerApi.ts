@@ -6,6 +6,7 @@ import { ChromelessPlayer } from "./ChromelessPlayer";
 export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   private _player: ChromelessPlayer|undefined;
   private _nextVideo: IVideoDetail|undefined = undefined;
+  private _large: boolean = false;
 
   constructor(
     player?: ChromelessPlayer
@@ -13,6 +14,16 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
     super();
 
     this._player = player;
+  }
+
+  setLarge(large: boolean): void {
+    this._large = large;
+
+    this.dispatchEvent('sizechange');
+  }
+
+  isLarge(): boolean {
+    return this._large;
   }
   
   getNextVideoDetail(): IVideoDetail|undefined {
@@ -44,9 +55,13 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
     return this._player.getPreferredPlaybackState();
   }
 
-  playVideo(): void {
+  playVideo(force: boolean = false): void {
     if (!this._player) throw new Error("Not initialized");
-    this._player.playVideo();
+    if (force) {
+      this._player.getVideoElement().play();
+    } else {
+      this._player.playVideo();
+    }
   }
 
   pauseVideo(): void {

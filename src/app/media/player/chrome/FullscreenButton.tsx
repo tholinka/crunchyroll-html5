@@ -37,7 +37,9 @@ const EXIT_SVG = (
 );
 
 export interface IFullscreenButtonProps {
-  api: IPlayerApi
+  api: IPlayerApi;
+  onHover?: () => void;
+  onEndHover?: () => void;
 }
 
 export interface IFullscreenButtonState {
@@ -58,10 +60,24 @@ export class FullscreenButton extends Component<IFullscreenButtonProps, IFullscr
   private _onFullscreenChange() {
     this.setState({ fullscreen: this._isFullscreen() });
   }
+  
+  private _onMouseOver() {
+    if (this.props.onHover) {
+      this.props.onHover();
+    }
+  }
+  
+  private _onMouseOut() {
+    if (this.props.onEndHover) {
+      this.props.onEndHover();
+    }
+  }
 
   componentDidMount() {
     this._handler
-      .listen(this.props.api, 'fullscreenchange', this._onFullscreenChange, false);
+      .listen(this.props.api, 'fullscreenchange', this._onFullscreenChange, false)
+      .listen(this.base, 'mouseover', this._onMouseOver, { passive: true })
+      .listen(this.base, 'mouseout', this._onMouseOut, { passive: true });
   }
 
   componentWillUnmount() {

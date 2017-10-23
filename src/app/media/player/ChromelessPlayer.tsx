@@ -267,6 +267,10 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     this._api.dispatchEvent('resize');
   }
 
+  getVideoElement(): HTMLVideoElement {
+    return this._videoElement;
+  }
+
   playVideo() {
     this._preferedState = PlaybackState.PLAYING;
     switch (this._forcedPause ? undefined : this._state) {

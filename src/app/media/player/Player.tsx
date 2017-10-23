@@ -17,8 +17,9 @@ import { parseAndFormatTime } from '../../utils/time';
 import { IRect } from '../../utils/rect';
 
 export interface IPlayerProps {
-  config?: IPlayerConfig
-  large?: boolean
+  config?: IPlayerConfig;
+  large?: boolean;
+  onSizeChange?: (large: boolean) => void;
 }
 
 export interface IPlayerConfig {
@@ -37,12 +38,13 @@ export class Player extends Component<IPlayerProps, {}> {
   private _bottomComponent: ChromeBottomComponent;
   private _tooltipComponent: ChromeTooltip;
   private _element: HTMLElement;
-  private _large: boolean = false;
   private _api: IPlayerApi = new ChromelessPlayerApi();
   private _handler: EventHandler = new EventHandler(this);
 
   private _tooltipBottomRect: IRect;
   private _nextVideoButtonRect: IRect;
+  private _sizeButtonRect: IRect;
+  private _fullscreenButtonRect: IRect;
 
   private _autoHide: boolean = true;
   private _autoHideTimer: number;
@@ -57,7 +59,7 @@ export class Player extends Component<IPlayerProps, {}> {
     if (props.config) {
       this._config = props.config;
     }
-    this._large = !!props.large;
+    this._api.setLarge(!!props.large);
   }
 
   loadVideoByConfig(config: IPlayerConfig) {
@@ -115,12 +117,6 @@ export class Player extends Component<IPlayerProps, {}> {
     }
   }
 
-  setLarge(large: boolean): void {
-    this._large = large;
-
-    this._updateSize();
-  }
-
   setAutoHide(hide: boolean, force: boolean = false): void {
     if (!force) {
       this._autoHide = hide;
@@ -147,12 +143,21 @@ export class Player extends Component<IPlayerProps, {}> {
     return this._api;
   }
 
-  private _updateSize(): void {
-    if (this._large) {
+  private _onSizeChange(): void {
+    const large = this._api.isLarge();
+    if (large) {
       this._element.classList.add("html5-video-player--large");
     } else {
       this._element.classList.remove("html5-video-player--large");
     }
+
+    if (this.props.onSizeChange) {
+      this.props.onSizeChange(large);
+    }
+
+    this._tooltipComponent.base.style.display = "none";
+
+    this.resize();
   }
 
   private _onMouseMouse(e: BrowserEvent) {
@@ -218,6 +223,7 @@ export class Player extends Component<IPlayerProps, {}> {
     this._tooltipComponent.setTooltip({
       text: parseAndFormatTime(time)
     });
+    this._tooltipComponent.setPosition(0, 0);
 
     const size = this._tooltipComponent.getSize();
     const rect = this._tooltipBottomRect;
@@ -250,18 +256,59 @@ export class Player extends Component<IPlayerProps, {}> {
       tooltip.duration = parseAndFormatTime(detail.duration);
     }
     this._tooltipComponent.setTooltip(tooltip);
+    this._tooltipComponent.setPosition(0, 0);
 
     const size = this._tooltipComponent.getSize();
     const rect = this._tooltipBottomRect;
     const btnRect = this._nextVideoButtonRect;
 
     let left = btnRect.left + btnRect.width/2 - size.width/2;
-    left = Math.min(Math.max(left, 0), rect.width - size.width);
+    left = Math.min(Math.max(left, rect.left), rect.left + rect.width - size.width);
 
-    this._tooltipComponent.setPosition(left + rect.left, rect.top - size.height);
+    this._tooltipComponent.setPosition(left, rect.top - size.height);
   }
   
   private _onNextVideoEndHover() {
+    this._tooltipComponent.base.style.display = "none";
+  }
+  
+  private _onSizeButtonHover() {
+    this._tooltipComponent.setTooltip({
+      text: this._api.isLarge() ? 'Small' : 'Large'
+    });
+    this._tooltipComponent.setPosition(0, 0);
+
+    const size = this._tooltipComponent.getSize();
+    const rect = this._tooltipBottomRect;
+    const btnRect = this._sizeButtonRect;
+
+    let left = btnRect.left + btnRect.width/2 - size.width/2;
+    left = Math.min(Math.max(left, rect.left), rect.left + rect.width - size.width);
+
+    this._tooltipComponent.setPosition(left, rect.top - size.height);
+  }
+  
+  private _onSizeButtonEndHover() {
+    this._tooltipComponent.base.style.display = "none";
+  }
+  
+  private _onFullscreenButtonHover() {
+    this._tooltipComponent.setTooltip({
+      text: this._api.isFullscreen() ? 'Exit full screen' : 'Full screen'
+    });
+    this._tooltipComponent.setPosition(0, 0);
+
+    const size = this._tooltipComponent.getSize();
+    const rect = this._tooltipBottomRect;
+    const btnRect = this._fullscreenButtonRect;
+
+    let left = btnRect.left + btnRect.width/2 - size.width/2;
+    left = Math.min(Math.max(left, rect.left), rect.left + rect.width - size.width);
+
+    this._tooltipComponent.setPosition(left, rect.top - size.height);
+  }
+  
+  private _onFullscreenButtonEndHover() {
     this._tooltipComponent.base.style.display = "none";
   }
 
@@ -274,6 +321,10 @@ export class Player extends Component<IPlayerProps, {}> {
       .querySelector(".chrome-progress-bar-padding")!.getBoundingClientRect();
     const nextVideoRect = this._bottomComponent.base
       .querySelector(".chrome-next-button")!.getBoundingClientRect();
+    const sizeButtonRect = this._bottomComponent.base
+      .querySelector(".chrome-size-button")!.getBoundingClientRect();
+    const fullscreenButtonRect = this._bottomComponent.base
+      .querySelector(".chrome-fullscreen-button")!.getBoundingClientRect();
 
     this._tooltipBottomRect = {
       width: bottomRect.width,
@@ -287,6 +338,18 @@ export class Player extends Component<IPlayerProps, {}> {
       left: nextVideoRect.left - rect.left,
       top: nextVideoRect.top - rect.top
     };
+    this._sizeButtonRect = {
+      width: sizeButtonRect.width,
+      height: sizeButtonRect.height,
+      left: sizeButtonRect.left - rect.left,
+      top: sizeButtonRect.top - rect.top
+    };
+    this._fullscreenButtonRect = {
+      width: fullscreenButtonRect.width,
+      height: fullscreenButtonRect.height,
+      left: fullscreenButtonRect.left - rect.left,
+      top: fullscreenButtonRect.top - rect.top
+    };
   }
 
   componentDidMount() {
@@ -294,7 +357,6 @@ export class Player extends Component<IPlayerProps, {}> {
       this.loadVideoByConfig(this._config);
     }
 
-    this._updateSize();
     this.resize();
 
     this._handler
@@ -303,6 +365,7 @@ export class Player extends Component<IPlayerProps, {}> {
       .listen(this._element, 'mouseleave', this._onMouseLeave, false)
       .listen(this._api, 'playbackstatechange', this._onPlaybackStateChange, false)
       .listen(this._api, 'fullscreenchange', this._onFullscreenChange, false)
+      .listen(this._api, 'sizechange', this._onSizeChange, false)
       .listen(window, "resize", this.resize, { 'passive': true });
   }
 
@@ -331,9 +394,13 @@ export class Player extends Component<IPlayerProps, {}> {
     const onProgressEndHover = () => this._onProgressEndHover();
     const onNextVideoHover = (detail: IVideoDetail) => this._onNextVideoHover(detail);
     const onNextVideoEndHover = () => this._onNextVideoEndHover();
+    const onSizeButtonHover = () => this._onSizeButtonHover();
+    const onSizeButtonEndHover = () => this._onSizeButtonEndHover();
+    const onFullscreenButtonHover = () => this._onFullscreenButtonHover();
+    const onFullscreenButtonEndHover = () => this._onFullscreenButtonEndHover();
 
     const className = "html5-video-player"
-      + (this._large ? " html5-video-player--large" : "");
+      + (this._api.isLarge() ? " html5-video-player--large" : "");
     return (
       <div class={className} ref={ref}>
         <ChromelessPlayer ref={chromelessRef} api={this.getApi() as ChromelessPlayerApi}></ChromelessPlayer>
@@ -346,7 +413,11 @@ export class Player extends Component<IPlayerProps, {}> {
           onProgressHover={onProgressHover}
           onProgressEndHover={onProgressEndHover}
           onNextVideoHover={onNextVideoHover}
-          onNextVideoEndHover={onNextVideoEndHover}></ChromeBottomComponent>
+          onNextVideoEndHover={onNextVideoEndHover}
+          onSizeButtonHover={onSizeButtonHover}
+          onSizeButtonEndHover={onSizeButtonEndHover}
+          onFullscreenButtonHover={onFullscreenButtonHover}
+          onFullscreenButtonEndHover={onFullscreenButtonEndHover}></ChromeBottomComponent>
       </div>
     );
   }

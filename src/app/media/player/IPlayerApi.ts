@@ -42,11 +42,14 @@ export interface IVideoDetail {
 }
 
 export interface IPlayerApi extends EventTarget {
+  setLarge(large: boolean): void;
+  isLarge(): boolean;
+
   setForcePaused(force: boolean): void;
   getPlaybackState(): PlaybackState;
   getPreferredPlaybackState(): PlaybackState;
 
-  playVideo(): void;
+  playVideo(force?: boolean): void;
   pauseVideo(): void;
 
   seekTo(time: number): void;
