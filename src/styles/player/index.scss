@@ -41,7 +41,7 @@
   font-size: 17px;
 }
 
-.html5-video-player.html5-video-player--autohide {
+.html5-video-player.html5-video-player--autohide:not(.html5-video-player--preview) {
   cursor: none;
 }
 

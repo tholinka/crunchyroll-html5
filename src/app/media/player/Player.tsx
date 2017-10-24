@@ -15,6 +15,7 @@ import { CuedThumbnailComponent } from './CuedThumbnailComponent';
 import { ChromeTooltip, IChromeTooltip } from './chrome/Tooltip';
 import { parseAndFormatTime } from '../../utils/time';
 import { IRect } from '../../utils/rect';
+import { BezelComponent } from './chrome/BezelComponent';
 
 export interface IPlayerProps {
   config?: IPlayerConfig;
@@ -31,6 +32,19 @@ export interface IPlayerConfig {
   nextVideo?: IVideoDetail
 }
 
+const ICON_PLAY = "M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z";
+const ICON_PAUSE = "M 12,26 16,26 16,10 12,10 z M 21,26 25,26 25,10 21,10 z";
+const ICON_PREV = "m 12,12 h 2 v 12 h -2 z m 3.5,6 8.5,6 V 12 z";
+const ICON_NEXT = "M 12,24 20.5,18 12,12 V 24 z M 22,12 v 12 h 2 V 12 h -2 z";
+const ICON_VOLUME_MUTE = "m 21.48,17.98 c 0,-1.77 -1.02,-3.29 -2.5,-4.03 v 2.21 l 2.45,2.45 c .03,-0.2 .05,-0.41 .05,-0.63 z m 2.5,0 c 0,.94 -0.2,1.82 -0.54,2.64 l 1.51,1.51 c .66,-1.24 1.03,-2.65 1.03,-4.15 0,-4.28 -2.99,-7.86 -7,-8.76 v 2.05 c 2.89,.86 5,3.54 5,6.71 z M 9.25,8.98 l -1.27,1.26 4.72,4.73 H 7.98 v 6 H 11.98 l 5,5 v -6.73 l 4.25,4.25 c -0.67,.52 -1.42,.93 -2.25,1.18 v 2.06 c 1.38,-0.31 2.63,-0.95 3.69,-1.81 l 2.04,2.05 1.27,-1.27 -9,-9 -7.72,-7.72 z m 7.72,.99 -2.09,2.08 2.09,2.09 V 9.98 z";
+const ICON_VOLUME = "M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,19.77 21.5,18 C21.5,16.26 20.48,14.74 19,14 Z";
+const ICON_VOLUME_HIGH = "M19,11.29 C21.89,12.15 24,14.83 24,18 C24,21.17 21.89,23.85 19,24.71 L19,26.77 C23.01,25.86 26,22.28 26,18 C26,13.72 23.01,10.14 19,9.23 L19,11.29 Z";
+
+const ICON_SEEK_BACK_5 = "M 18,11 V 7 l -5,5 5,5 v -4 c 3.3,0 6,2.7 6,6 0,3.3 -2.7,6 -6,6 -3.3,0 -6,-2.7 -6,-6 h -2 c 0,4.4 3.6,8 8,8 4.4,0 8,-3.6 8,-8 0,-4.4 -3.6,-8 -8,-8 z m -1.3,8.9 .2,-2.2 h 2.4 v .7 h -1.7 l -0.1,.9 c 0,0 .1,0 .1,-0.1 0,-0.1 .1,0 .1,-0.1 0,-0.1 .1,0 .2,0 h .2 c .2,0 .4,0 .5,.1 .1,.1 .3,.2 .4,.3 .1,.1 .2,.3 .3,.5 .1,.2 .1,.4 .1,.6 0,.2 0,.4 -0.1,.5 -0.1,.1 -0.1,.3 -0.3,.5 -0.2,.2 -0.3,.2 -0.4,.3 C 18.5,22 18.2,22 18,22 17.8,22 17.6,22 17.5,21.9 17.4,21.8 17.2,21.8 17,21.7 16.8,21.6 16.8,21.5 16.7,21.3 16.6,21.1 16.6,21 16.6,20.8 h .8 c 0,.2 .1,.3 .2,.4 .1,.1 .2,.1 .4,.1 .1,0 .2,0 .3,-0.1 L 18.5,21 c 0,0 .1,-0.2 .1,-0.3 v -0.6 l -0.1,-0.2 -0.2,-0.2 c 0,0 -0.2,-0.1 -0.3,-0.1 h -0.2 c 0,0 -0.1,0 -0.2,.1 -0.1,.1 -0.1,0 -0.1,.1 0,.1 -0.1,.1 -0.1,.1 h -0.7 z";
+const ICON_SEEK_FORWARD_5 = "m 10,19 c 0,4.4 3.6,8 8,8 4.4,0 8,-3.6 8,-8 h -2 c 0,3.3 -2.7,6 -6,6 -3.3,0 -6,-2.7 -6,-6 0,-3.3 2.7,-6 6,-6 v 4 l 5,-5 -5,-5 v 4 c -4.4,0 -8,3.6 -8,8 z m 6.7,.9 .2,-2.2 h 2.4 v .7 h -1.7 l -0.1,.9 c 0,0 .1,0 .1,-0.1 0,-0.1 .1,0 .1,-0.1 0,-0.1 .1,0 .2,0 h .2 c .2,0 .4,0 .5,.1 .1,.1 .3,.2 .4,.3 .1,.1 .2,.3 .3,.5 .1,.2 .1,.4 .1,.6 0,.2 0,.4 -0.1,.5 -0.1,.1 -0.1,.3 -0.3,.5 -0.2,.2 -0.3,.2 -0.5,.3 C 18.3,22 18.1,22 17.9,22 17.7,22 17.5,22 17.4,21.9 17.3,21.8 17.1,21.8 16.9,21.7 16.7,21.6 16.7,21.5 16.6,21.3 16.5,21.1 16.5,21 16.5,20.8 h .8 c 0,.2 .1,.3 .2,.4 .1,.1 .2,.1 .4,.1 .1,0 .2,0 .3,-0.1 L 18.4,21 c 0,0 .1,-0.2 .1,-0.3 v -0.6 l -0.1,-0.2 -0.2,-0.2 c 0,0 -0.2,-0.1 -0.3,-0.1 h -0.2 c 0,0 -0.1,0 -0.2,.1 -0.1,.1 -0.1,0 -0.1,.1 0,.1 -0.1,.1 -0.1,.1 h -0.6 z";
+const ICON_SEEK_BACK_10 = "M 18,11 V 7 l -5,5 5,5 v -4 c 3.3,0 6,2.7 6,6 0,3.3 -2.7,6 -6,6 -3.3,0 -6,-2.7 -6,-6 h -2 c 0,4.4 3.6,8 8,8 4.4,0 8,-3.6 8,-8 0,-4.4 -3.6,-8 -8,-8 z M 16.9,22 H 16 V 18.7 L 15,19 v -0.7 l 1.8,-0.6 h .1 V 22 z m 4.3,-1.8 c 0,.3 0,.6 -0.1,.8 l -0.3,.6 c 0,0 -0.3,.3 -0.5,.3 -0.2,0 -0.4,.1 -0.6,.1 -0.2,0 -0.4,0 -0.6,-0.1 -0.2,-0.1 -0.3,-0.2 -0.5,-0.3 -0.2,-0.1 -0.2,-0.3 -0.3,-0.6 -0.1,-0.3 -0.1,-0.5 -0.1,-0.8 v -0.7 c 0,-0.3 0,-0.6 .1,-0.8 l .3,-0.6 c 0,0 .3,-0.3 .5,-0.3 .2,0 .4,-0.1 .6,-0.1 .2,0 .4,0 .6,.1 .2,.1 .3,.2 .5,.3 .2,.1 .2,.3 .3,.6 .1,.3 .1,.5 .1,.8 v .7 z m -0.9,-0.8 v -0.5 c 0,0 -0.1,-0.2 -0.1,-0.3 0,-0.1 -0.1,-0.1 -0.2,-0.2 -0.1,-0.1 -0.2,-0.1 -0.3,-0.1 -0.1,0 -0.2,0 -0.3,.1 l -0.2,.2 c 0,0 -0.1,.2 -0.1,.3 v 2 c 0,0 .1,.2 .1,.3 0,.1 .1,.1 .2,.2 .1,.1 .2,.1 .3,.1 .1,0 .2,0 .3,-0.1 l .2,-0.2 c 0,0 .1,-0.2 .1,-0.3 v -1.5 z";
+const ICON_SEEK_FORWARD_10 = "m 10,19 c 0,4.4 3.6,8 8,8 4.4,0 8,-3.6 8,-8 h -2 c 0,3.3 -2.7,6 -6,6 -3.3,0 -6,-2.7 -6,-6 0,-3.3 2.7,-6 6,-6 v 4 l 5,-5 -5,-5 v 4 c -4.4,0 -8,3.6 -8,8 z m 6.8,3 H 16 V 18.7 L 15,19 v -0.7 l 1.8,-0.6 h .1 V 22 z m 4.3,-1.8 c 0,.3 0,.6 -0.1,.8 l -0.3,.6 c 0,0 -0.3,.3 -0.5,.3 C 20,21.9 19.8,22 19.6,22 19.4,22 19.2,22 19,21.9 18.8,21.8 18.7,21.7 18.5,21.6 18.3,21.5 18.3,21.3 18.2,21 18.1,20.7 18.1,20.5 18.1,20.2 v -0.7 c 0,-0.3 0,-0.6 .1,-0.8 l .3,-0.6 c 0,0 .3,-0.3 .5,-0.3 .2,0 .4,-0.1 .6,-0.1 .2,0 .4,0 .6,.1 .2,.1 .3,.2 .5,.3 .2,.1 .2,.3 .3,.6 .1,.3 .1,.5 .1,.8 v .7 z m -0.8,-0.8 v -0.5 c 0,0 -0.1,-0.2 -0.1,-0.3 0,-0.1 -0.1,-0.1 -0.2,-0.2 -0.1,-0.1 -0.2,-0.1 -0.3,-0.1 -0.1,0 -0.2,0 -0.3,.1 l -0.2,.2 c 0,0 -0.1,.2 -0.1,.3 v 2 c 0,0 .1,.2 .1,.3 0,.1 .1,.1 .2,.2 .1,.1 .2,.1 .3,.1 .1,0 .2,0 .3,-0.1 l .2,-0.2 c 0,0 .1,-0.2 .1,-0.3 v -1.5 z";
+
 export class Player extends Component<IPlayerProps, {}> {
   private _config: IPlayerConfig|undefined = undefined;
   private _actionElement: HTMLElement;
@@ -38,6 +52,7 @@ export class Player extends Component<IPlayerProps, {}> {
   private _cuedThumbnailComponent: CuedThumbnailComponent;
   private _bottomComponent: ChromeBottomComponent;
   private _tooltipComponent: ChromeTooltip;
+  private _bezelElement: BezelComponent;
   private _api: IPlayerApi = new ChromelessPlayerApi();
   private _handler: EventHandler = new EventHandler(this);
 
@@ -50,6 +65,12 @@ export class Player extends Component<IPlayerProps, {}> {
   private _autoHideTimer: number;
   private _autoHideDelay: number = 200;
   private _autoHideMoveDelay: number = 3000;
+  private _preview: boolean = false;
+
+  private _actionClickTimer: number|undefined = undefined;
+  private _actionClickExecuted: boolean = false;
+
+  private _mouseDown: boolean = false;
 
   private _bigMode: boolean = false;
 
@@ -68,11 +89,11 @@ export class Player extends Component<IPlayerProps, {}> {
     if (config.thumbnailUrl && !config.url) {
       this._cuedThumbnailComponent.setThumbnailUrl(config.thumbnailUrl);
       this._cuedThumbnailComponent.setVisible(true);
-      this.setAutoHide(true, true);
     } else {
       this._cuedThumbnailComponent.setVisible(false);
-      this.setAutoHide(true);
     }
+    this.setPreview(true);
+    this.setAutoHide(true);
     this._api.setNextVideoDetail(config.nextVideo);
   }
 
@@ -117,19 +138,42 @@ export class Player extends Component<IPlayerProps, {}> {
     }
   }
 
-  setAutoHide(hide: boolean, force: boolean = false): void {
-    if (!force) {
-      this._autoHide = hide;
+  setPreview(preview: boolean): void {
+    this._preview = preview;
 
-      const state = this._api.getPlaybackState();
-      if (state !== PlaybackState.PLAYING) {
-        hide = false;
-      }
-      if (this._config && this._config.thumbnailUrl && !this._config.url) {
-        hide = true;
-      }
+    if (preview) {
+      this.base.classList.add('html5-video-player--preview');
+    } else {
+      this.base.classList.remove('html5-video-player--preview');
     }
-    
+
+    this.updateInternalAutoHide();
+  }
+
+  isPreview(): boolean {
+    return this._preview;
+  }
+
+  setAutoHide(hide: boolean): void {
+    this._autoHide = hide;
+    this.updateInternalAutoHide();
+  }
+
+  updateInternalAutoHide(): void {
+    let hide = this._autoHide;
+
+    if (this._mouseDown) {
+      hide = false;
+    }
+
+    const state = this._api.getPlaybackState();
+    if (state !== PlaybackState.PLAYING) {
+      hide = false;
+    }
+    if (this._preview) {
+      hide = true;
+    }
+
     if (hide) {
       this.base.classList.add('html5-video-player--autohide');
       this._bottomComponent.setInternalVisibility(false);
@@ -182,12 +226,125 @@ export class Player extends Component<IPlayerProps, {}> {
     );
   }
 
+  private _playSvgBezel(d: string): void {
+    this._bezelElement.playSvgPath(d);
+  }
+
+  private _onKeyDown(e: BrowserEvent) {
+    const api = this.getApi();
+    switch (e.keyCode) {
+      case 49:
+        api.seekTo(api.getDuration()*0.1);
+        break;
+      case 50:
+        api.seekTo(api.getDuration()*0.2);
+        break;
+      case 51:
+        api.seekTo(api.getDuration()*0.3);
+        break;
+      case 52:
+        api.seekTo(api.getDuration()*0.4);
+        break;
+      case 53:
+        api.seekTo(api.getDuration()*0.5);
+        break;
+      case 54:
+        api.seekTo(api.getDuration()*0.6);
+        break;
+      case 55:
+        api.seekTo(api.getDuration()*0.7);
+        break;
+      case 56:
+        api.seekTo(api.getDuration()*0.8);
+        break;
+      case 57:
+        api.seekTo(api.getDuration()*0.9);
+        break;
+      // Space
+      // K
+      case 32:
+      case 75:
+        var playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
+        if (playing) {
+          this._playSvgBezel(ICON_PAUSE);
+          api.pauseVideo();
+        } else {
+          this._playSvgBezel(ICON_PLAY);
+          api.playVideo();
+        }
+        break;
+      // End
+      case 35:
+        api.seekTo(api.getDuration());
+        break;
+      // Home
+      // 0
+      case 36:
+      case 48:
+        api.seekTo(0);
+        break;
+      // Left arrow
+      case 37:
+        this._playSvgBezel(ICON_SEEK_BACK_5);
+        api.seekTo(Math.max(api.getCurrentTime() - 5, 0));
+        break;
+      // Up arrow
+      case 38:
+        this._playSvgBezel(ICON_VOLUME + " " + ICON_VOLUME_HIGH);
+        api.setVolume(Math.min(api.getVolume() + 5/100, 1));
+        break;
+      // Right arrow
+      case 39:
+        this._playSvgBezel(ICON_SEEK_FORWARD_5);
+        api.seekTo(Math.min(api.getCurrentTime() + 5, api.getDuration()));
+        break;
+      // Down arrow
+      case 40:
+        this._playSvgBezel(ICON_VOLUME);
+        api.setVolume(Math.max(api.getVolume() - 5/100, 0));
+        break;
+      // F
+      case 70:
+        api.toggleFullscreen();
+        break;
+      // J
+      case 74:
+        this._playSvgBezel(ICON_SEEK_BACK_10);
+        api.seekTo(Math.max(api.getCurrentTime() - 10, 0));
+        break;
+      // L
+      case 76:
+        this._playSvgBezel(ICON_SEEK_FORWARD_10);
+        api.seekTo(Math.min(api.getCurrentTime() + 10, api.getDuration()));
+        break;
+      // M
+      case 77:
+        if (api.isMuted()) {
+          this._playSvgBezel(ICON_VOLUME_MUTE);
+          api.mute();
+        } else {
+          this._playSvgBezel(ICON_VOLUME + " " + ICON_VOLUME_HIGH);
+          api.unmute();
+        }
+        break;
+      // ,
+      case 188:
+        break;
+      // .
+      case 190:
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+  }
+
   private _onPlaybackStateChange() {
     const state = this._api.getPlaybackState();
     if (state === PlaybackState.PLAYING) {
       this.setAutoHide(this._autoHide);
     } else {
-      this.setAutoHide(false, true);
+      this.updateInternalAutoHide();
     }
   }
 
@@ -218,6 +375,10 @@ export class Player extends Component<IPlayerProps, {}> {
   }
 
   private _setTooltip(tooltip: IChromeTooltip, left: number) {
+    if (this.isPreview()) {
+      this._tooltipComponent.base.style.display = "none";
+      return;
+    }
     this._tooltipComponent.setTooltip(tooltip);
     this._tooltipComponent.setPosition(0, 0);
 
@@ -290,6 +451,72 @@ export class Player extends Component<IPlayerProps, {}> {
     this._tooltipComponent.base.style.display = "none";
   }
 
+  private _onActionMouseDown(e: BrowserEvent) {
+    e.preventDefault();
+  }
+  
+  private _onActionClick(e: BrowserEvent) {
+    if (typeof this._actionClickTimer === "number") {
+      window.clearTimeout(this._actionClickTimer);
+      this._actionClickTimer = undefined;
+
+      return;
+    }
+
+    const api = this._api;
+    const playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
+
+    if (playing) {
+      this._playSvgBezel(ICON_PAUSE);
+    } else {
+      this._playSvgBezel(ICON_PLAY);
+    }
+
+    this._actionClickExecuted = false;
+    this._actionClickTimer = window.setTimeout(() => {
+      this._actionClickTimer = undefined;
+      this._actionClickExecuted = true;
+
+      const playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
+      if (playing) {
+        api.pauseVideo();
+      } else {
+        api.playVideo();
+      }
+    }, 200);
+  }
+  
+  private _onActionDoubleClick(e: BrowserEvent) {
+    this._bezelElement.stop();
+    const api = this._api;
+    if (this._actionClickExecuted) {
+      this._actionClickExecuted = false;
+      
+      const playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
+      if (playing) {
+        api.pauseVideo();
+      } else {
+        api.playVideo();
+      }
+    }
+
+    api.toggleFullscreen();
+  }
+  
+  private _onMouseDown() {
+    this._mouseDown = true;
+  }
+  
+  private _onMouseUp() {
+    this._mouseDown = false;
+
+    this.updateInternalAutoHide();
+  }
+
+  private _onLoadedMetadata() {
+    this.setPreview(false);
+  }
+
   resize() {
     this._chromelessPlayer.resize();
 
@@ -342,12 +569,19 @@ export class Player extends Component<IPlayerProps, {}> {
     this.resize();
 
     this._handler
+      .listen(this.base, 'mousedown', this._onMouseDown, false)
+      .listen(document, 'mouseup', this._onMouseUp, false)
       .listen(this.base, 'mouseenter', this._onMouseMouse, false)
       .listen(this.base, 'mousemove', this._onMouseMouse, false)
       .listen(this.base, 'mouseleave', this._onMouseLeave, false)
+      .listen(this.base, 'keydown', this._onKeyDown, false)
+      .listen(this._actionElement, 'mousedown', this._onActionMouseDown, false)
+      .listen(this._actionElement, 'click', this._onActionClick, false)
+      .listen(this._actionElement, 'dblclick', this._onActionDoubleClick, false)
       .listen(this._api, 'playbackstatechange', this._onPlaybackStateChange, false)
       .listen(this._api, 'fullscreenchange', this._onFullscreenChange, false)
       .listen(this._api, 'sizechange', this._onSizeChange, false)
+      .listen(this._api, 'loadedmetadata', this._onLoadedMetadata, false)
       .listen(window, "resize", this.resize, { 'passive': true });
   }
 
@@ -366,6 +600,7 @@ export class Player extends Component<IPlayerProps, {}> {
     const cuedThumbnailRef = (el: CuedThumbnailComponent) => this._cuedThumbnailComponent = el;
     const tooltipRef = (el: ChromeTooltip) => this._tooltipComponent = el;
     const actionRef = (el: HTMLElement) => this._actionElement = el;
+    const bezelRef = (el: BezelComponent) => this._bezelElement = el;
 
     const onProgressHover = (time: number, percentage: number) => this._onProgressHover(time, percentage);
     const onProgressEndHover = () => this._onProgressEndHover();
@@ -375,26 +610,20 @@ export class Player extends Component<IPlayerProps, {}> {
     const onSizeButtonEndHover = () => this._onSizeButtonEndHover();
     const onFullscreenButtonHover = () => this._onFullscreenButtonHover();
     const onFullscreenButtonEndHover = () => this._onFullscreenButtonEndHover();
-    const onPlayPause = () => {
-      const api = this._api;
-      if (api.getPreferredPlaybackState() === PlaybackState.PLAYING) {
-        api.pauseVideo();
-      } else {
-        api.playVideo();
-      }
+
+    const attributes = {
+      'tabindex': '0'
     };
-    const onToggleFullscreen = () => this._api.toggleFullscreen();
 
     const className = "html5-video-player"
       + (this._api.isLarge() ? " html5-video-player--large" : "");
     return (
-      <div class={className}>
+      <div class={className} {...attributes}>
         <ChromelessPlayer ref={chromelessRef} api={this.getApi() as ChromelessPlayerApi}></ChromelessPlayer>
         <CuedThumbnailComponent ref={cuedThumbnailRef}></CuedThumbnailComponent>
+        <BezelComponent ref={bezelRef}></BezelComponent>
         <div
           ref={actionRef}
-          onClick={onPlayPause}
-          onDblClick={onToggleFullscreen}
           class="html5-video-action"></div>
         <ChromeTooltip ref={tooltipRef}></ChromeTooltip>
         <div class="html5-video-gradient-bottom"></div>

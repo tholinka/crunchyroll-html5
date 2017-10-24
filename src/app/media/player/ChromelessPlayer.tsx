@@ -145,6 +145,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
   private _onLoadedMetadata() {
     this.resize();
+
+    this._api.dispatchEvent('loadedmetadata');
   }
 
   private _onTimeUpdate() {
@@ -152,7 +154,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   private _onVolumeChange() {
-    this._api.dispatchEvent(new VolumeChangeEvent(this.getVolume()));
+    this._api.dispatchEvent(new VolumeChangeEvent(this.getVolume(), this.isMuted()));
   }
   
   private _onProgress() {
@@ -364,6 +366,18 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
   getVolume(): number {
     return this._videoElement.volume;
+  }
+  
+  mute(): void {
+    this._videoElement.muted = true;
+  }
+  
+  unmute(): void {
+    this._videoElement.muted = false;
+  }
+  
+  isMuted(): boolean {
+    return this._videoElement.muted;
   }
 
   setFullscreenElement(element: HTMLElement): void {

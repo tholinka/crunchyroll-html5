@@ -21,7 +21,7 @@ export class DurationChangeEvent extends Event {
 }
 
 export class VolumeChangeEvent extends Event {
-  constructor(public volume: number) {
+  constructor(public volume: number, public muted: boolean) {
     super('volumechange');
   }
 }
@@ -61,6 +61,9 @@ export interface IPlayerApi extends EventTarget {
 
   setVolume(volume: number): void;
   getVolume(): number;
+  mute(): void;
+  unmute(): void;
+  isMuted(): boolean;
 
   enterFullscreen(): void;
   exitFullscreen(): void;

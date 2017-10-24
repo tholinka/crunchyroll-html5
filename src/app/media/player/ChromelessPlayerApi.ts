@@ -104,6 +104,21 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
     return this._player.getVolume();
   }
 
+  mute(): void {
+    if (!this._player) throw new Error("Not initialized");
+    this._player.mute();
+  }
+
+  unmute(): void {
+    if (!this._player) throw new Error("Not initialized");
+    this._player.unmute();
+  }
+
+  isMuted(): boolean {
+    if (!this._player) throw new Error("Not initialized");
+    return this._player.isMuted();
+  }
+
   enterFullscreen(): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.enterFullscreen();
