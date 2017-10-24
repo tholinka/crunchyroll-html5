@@ -13,6 +13,8 @@ export interface IChromeBottomProps {
   onSizeButtonEndHover: () => void;
   onFullscreenButtonHover: () => void;
   onFullscreenButtonEndHover: () => void;
+  onVolumeMuteButtonHover: () => void;
+  onVolumeMuteButtonEndHover: () => void;
 }
 
 export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
@@ -38,7 +40,9 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
           onSizeButtonHover={props.onSizeButtonHover}
           onSizeButtonEndHover={props.onSizeButtonEndHover}
           onFullscreenButtonHover={props.onFullscreenButtonHover}
-          onFullscreenButtonEndHover={props.onFullscreenButtonEndHover}></ChromeControlsComponent>
+          onFullscreenButtonEndHover={props.onFullscreenButtonEndHover}
+          onVolumeMuteButtonHover={props.onVolumeMuteButtonHover}
+          onVolumeMuteButtonEndHover={props.onVolumeMuteButtonEndHover}></ChromeControlsComponent>
       </div>
     );
   }

@@ -26,6 +26,10 @@ export class CuedThumbnailComponent extends Component<{}, {}> {
     }
   }
 
+  getThumbnailUrl(): string {
+    return this._url;
+  }
+
   setVisible(visible: boolean): void {
     visible = visible && !!this._url;
     if (this._visible === visible) return;
