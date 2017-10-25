@@ -59,7 +59,7 @@ const metadata = {
   'author': parseAuthor(package['author']),
   'match': 'http://www.crunchyroll.com/*',
   'noframes': undefined,
-  'grant': 'GM_xmlhttpRequest'
+  'grant': 'none'
 };
 
 module.exports = merge(common, {

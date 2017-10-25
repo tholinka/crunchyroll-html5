@@ -33,7 +33,7 @@ function processBody(body: string|{[key: string]: string|number}|undefined) {
 }
 
 export async function method(method: string, url: string, body?: string|{[key: string]: string|number}, options?: IOptions): Promise<string> {
-  if (supported.GM_xmlhttpRequest) {
+  /*if (supported.GM_xmlhttpRequest) {
     return new Promise<string>((resolve, reject) => {
       const details: GMXMLHttpRequestOptions = {
         url: url,
@@ -50,7 +50,7 @@ export async function method(method: string, url: string, body?: string|{[key: s
 
       GM_xmlhttpRequest(details);
     });
-  } else {
+  } else {*/
     return new Promise<string>((resolve, reject) => {
       const req = new XMLHttpRequest();
 
@@ -72,7 +72,7 @@ export async function method(method: string, url: string, body?: string|{[key: s
       }
       req.send(processBody(body));
     });
-  }
+  /*}*/
 }
 
 export async function get(url: string, options?: IOptions): Promise<string> {
