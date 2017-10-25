@@ -92,9 +92,9 @@ class Bootstrap {
         duration: stream.duration,
         subtitles: stream.subtitles
       };
-      if (thumbnailUrl) {
+      /*if (thumbnailUrl) {
         videoConfig.thumbnailUrl = thumbnailUrl;
-      }
+      }*/
       const nextVideo = NextVideo.fromUrlUsingDocument(stream.nextUrl);
       if (nextVideo) {
         videoConfig.nextVideo = {
