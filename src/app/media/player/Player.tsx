@@ -17,6 +17,7 @@ import { parseAndFormatTime } from '../../utils/time';
 import { IRect } from '../../utils/rect';
 import { BezelComponent } from './chrome/BezelComponent';
 import { ICON_PAUSE, ICON_PLAY, ICON_SEEK_BACK_5, ICON_VOLUME, ICON_VOLUME_HIGH, ICON_SEEK_FORWARD_5, ICON_SEEK_BACK_10, ICON_SEEK_FORWARD_10, ICON_VOLUME_MUTE } from './assets';
+import { BufferComponent } from './chrome/BufferComponent';
 
 export interface IPlayerProps {
   config?: IPlayerConfig;
@@ -638,6 +639,7 @@ export class Player extends Component<IPlayerProps, {}> {
       <div class={className} {...attributes}>
         <ChromelessPlayer ref={chromelessRef} api={this.getApi() as ChromelessPlayerApi}></ChromelessPlayer>
         <CuedThumbnailComponent ref={cuedThumbnailRef}></CuedThumbnailComponent>
+        <BufferComponent api={this.getApi()}></BufferComponent>
         <BezelComponent ref={bezelRef}></BezelComponent>
         <div
           ref={actionRef}
