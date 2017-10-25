@@ -77,11 +77,10 @@ export class Player extends Component<IPlayerProps, {}> {
     this._updateChromelessPlayer(config);
     if (config.thumbnailUrl) {
       this._cuedThumbnailComponent.setThumbnailUrl(config.thumbnailUrl);
-      this._cuedThumbnailComponent.setVisible(true);
+      this.setPreview(true);
     } else {
-      this._cuedThumbnailComponent.setVisible(false);
+      this.setPreview(false);
     }
-    this.setPreview(true);
     this.setAutoHide(true);
     this._api.setNextVideoDetail(config.nextVideo);
 
@@ -352,6 +351,8 @@ export class Player extends Component<IPlayerProps, {}> {
     } else {
       this.base.classList.remove("chrome-big-mode");
     }
+
+    this.resize();
   }
 
   private _onFullscreenChange() {
