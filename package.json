@@ -1,5 +1,6 @@
 {
   "name": "crunchyroll-html5",
+  "description": "A fully fledged HTML5 player for Crunchyroll.",
   "author": {
     "name": "Jeppe Rune Mortensen",
     "email": "jepperm@gmail.com"
@@ -24,6 +25,7 @@
     "@types/text-encoding": "^0.0.32",
     "cssnano": "^3.10.0",
     "file-loader": "^1.1.5",
+    "mkdirp": "^0.5.1",
     "ncp": "^2.0.0",
     "node-sass": "^4.5.3",
     "postcss-cssnext": "^3.0.2",

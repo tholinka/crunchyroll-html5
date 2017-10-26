@@ -4,6 +4,7 @@ const package = require('./package.json');
 const merge = require('webpack-merge');
 const common = require('./webpack.common.config.js');
 const path = require('path');
+const utils = require('./utils');
 
 /**
  * Generate the user
@@ -33,30 +34,11 @@ const generateMetadataBlock = (metadata) => {
     + '// ==/UserScript==\n\n';
 };
 
-/**
- * Parse the author into a string.
- * @param {{name: string, email: string, url: string}|string} author  the author
- * @return {string} the author.
- */
-const parseAuthor = (author) => {
-  if (typeof author === 'string') return author;
-
-  let a = author['name'];
-  if (author['email']) {
-    a += ' <' + author['email'] + '>';
-  }
-  if (author['url']) {
-    a += ' (' + author['url'] + ')';
-  }
-
-  return a;
-};
-
 const metadata = {
   'name': package['name'],
   'description': package['description'],
   'version': package['version'],
-  'author': parseAuthor(package['author']),
+  'author': utils.parseAuthor(package['author']),
   'match': 'http://www.crunchyroll.com/*',
   'noframes': undefined,
   'grant': 'none'

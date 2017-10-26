@@ -11,15 +11,15 @@ declare interface VendorWindow extends Window {
 export const requestAnimationFrame: (callback: Function) => number = (() => {
   const win = window as VendorWindow;
   if (typeof win.requestAnimationFrame === "function") {
-    return win.requestAnimationFrame;
+    return win.requestAnimationFrame.bind(win);
   } else if (typeof win.webkitRequestAnimationFrame === "function") {
-    return win.webkitRequestAnimationFrame;
+    return win.webkitRequestAnimationFrame.bind(win);
   } else if (typeof win.mozRequestAnimationFrame === "function") {
-    return win.mozRequestAnimationFrame;
+    return win.mozRequestAnimationFrame.bind(win);
   } else if (typeof win.oRequestAnimationFrame === "function") {
-    return win.oRequestAnimationFrame;
+    return win.oRequestAnimationFrame.bind(win);
   } else if (typeof win.msRequestAnimationFrame === "function") {
-    return win.msRequestAnimationFrame;
+    return win.msRequestAnimationFrame.bind(win);
   }
 
   const delay = 1000/60;
@@ -31,15 +31,15 @@ export const requestAnimationFrame: (callback: Function) => number = (() => {
 export const cancelAnimationFrame: (id: number) => void = (() => {
   const win = window as VendorWindow;
   if (typeof win.cancelAnimationFrame === "function") {
-    return win.cancelAnimationFrame;
+    return win.cancelAnimationFrame.bind(win);
   } else if (typeof win.webkitCancelAnimationFrame === "function") {
-    return win.webkitCancelAnimationFrame;
+    return win.webkitCancelAnimationFrame.bind(win);
   } else if (typeof win.mozCancelAnimationFrame === "function") {
-    return win.mozCancelAnimationFrame;
+    return win.mozCancelAnimationFrame.bind(win);
   } else if (typeof win.oCancelAnimationFrame === "function") {
-    return win.oCancelAnimationFrame;
+    return win.oCancelAnimationFrame.bind(win);
   } else if (typeof win.msCancelAnimationFrame === "function") {
-    return win.msCancelAnimationFrame;
+    return win.msCancelAnimationFrame.bind(win);
   }
 
   return (id: number) => {
