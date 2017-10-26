@@ -1,16 +1,7 @@
 import { EventTarget } from '../libs/events/EventTarget';
 import { EventHandler } from '../libs/events/EventHandler';
 import { Event } from '../libs/events/Event';
-import * as _ from 'lodash';
-import { binaryToBlob } from '../utils/blob';
-
-const libassWorkerJS = require('raw-loader!../../../vendor/JavascriptSubtitlesOctopus/subtitles-octopus-worker.js');
-const libassDefaultFont = require('binary-loader!../../../vendor/JavascriptSubtitlesOctopus/default.ttf');
-const libassFontsConfig = require('raw-loader!../../../vendor/JavascriptSubtitlesOctopus/fonts.conf');
-
-const libassWorkerUrl = URL.createObjectURL(new Blob([libassWorkerJS], { type: "text/javascript" }));
-const libassDefaultFontUrl = URL.createObjectURL(binaryToBlob(libassDefaultFont, "application/octet-stream"));
-const libassFontsConfigUrl = URL.createObjectURL(new Blob([libassFontsConfig], { type: "application/xml" }));
+import { getWorkerUrl, getFiles } from '../SubtitleEngineLoader';
 
 export interface IVideoRect {
   width: number,
@@ -81,16 +72,13 @@ export class LibAss extends EventTarget {
       width: this.canvas.width,
       height: this.canvas.height,
       URL: document.URL,
-      currentScriptUrl: libassWorkerUrl,
+      currentScriptUrl: getWorkerUrl(),
       preMain: true,
       subUrl: url,
       subContent: content,
       fonts: this.fonts,
       availableFonts: this.availableFonts,
-      files: {
-        'fonts.conf': { url: libassFontsConfigUrl },
-        'default.ttf': { url: libassDefaultFontUrl }
-      }
+      files: getFiles()
     });
   }
   
@@ -258,7 +246,7 @@ export class LibAss extends EventTarget {
   private createWorker() {
     if (this.worker) return;
 
-    this.worker = new Worker(libassWorkerUrl);
+    this.worker = new Worker(getWorkerUrl());
     this.worker.onerror = error => this.onWorkerError(error);
     this.worker.onmessage = event => this.onWorkerMessage(event);
   }

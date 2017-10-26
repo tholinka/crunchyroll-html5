@@ -9,10 +9,13 @@
   "license": "MIT",
   "scripts": {
     "dev:userscript": "webpack  --config webpack.userscript.config.js",
+    "dev:webextension": "webpack  --config webpack.webextension.config.js",
     "build:userscript": "webpack  --config webpack.userscript.prod.config.js",
-    "build": "npm run build:userscript"
+    "build:webextension": "webpack  --config webpack.webextension.prod.config.js",
+    "build": "npm run build:userscript && npm run build:webextension"
   },
   "devDependencies": {
+    "@types/chrome": "^0.0.50",
     "@types/greasemonkey": "^0.0.28",
     "@types/hls.js": "^0.7.4",
     "@types/lodash": "^4.14.78",
@@ -20,6 +23,8 @@
     "@types/pako": "^1.0.0",
     "@types/text-encoding": "^0.0.32",
     "cssnano": "^3.10.0",
+    "file-loader": "^1.1.5",
+    "ncp": "^2.0.0",
     "node-sass": "^4.5.3",
     "postcss-cssnext": "^3.0.2",
     "postcss-import": "^11.0.0",

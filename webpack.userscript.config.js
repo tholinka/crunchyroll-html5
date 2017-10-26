@@ -64,7 +64,7 @@ const metadata = {
 
 module.exports = merge(common, {
   entry: {
-    index: './src/app/bootstrap.userscript.tsx'
+    index: './src/app/bootstrap.userscript.ts'
   },
   output: {
     filename: 'crunchyroll-html5.user.js',

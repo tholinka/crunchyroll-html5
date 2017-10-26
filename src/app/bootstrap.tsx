@@ -7,6 +7,12 @@ import { PlaybackState } from './media/player/IPlayerApi';
 
 const css = require('../styles/bootstrap.scss');
 
+export function run() {
+  if (Video.validateUrl(location.href)) {
+    (new Bootstrap()).run();
+  }
+}
+
 class Bootstrap {
   private _wrapper: Element;
   private _player: Player;
@@ -118,8 +124,4 @@ class Bootstrap {
         onSizeChange={onSizeChange}></Player>
     ), this._wrapper);
   }
-}
-
-if (Video.validateUrl(location.href)) {
-  (new Bootstrap()).run();
 }
