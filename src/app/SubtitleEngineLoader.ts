@@ -2,6 +2,7 @@
 
 export let workerUrl: string;
 export let files: {[key: string]: { url: string }} = {};
+export let fonts: string[] = [];
 
 export function setWorkerUrl(url: string) {
   workerUrl = url;

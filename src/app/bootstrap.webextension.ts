@@ -1,5 +1,5 @@
 import { binaryToBlob } from "./utils/blob";
-import { addFile, setWorkerUrl } from "./SubtitleEngineLoader";
+import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
 import { run } from './bootstrap';
 
 function getURL(path: string): string {
@@ -20,5 +20,30 @@ setWorkerUrl(workerUrl);
 
 addFile('default.ttf', defaultFile);
 addFile('fonts.conf', fontFile);
+
+const arial = getURL('/fonts/arial.ttf');
+const arialbd = getURL('/fonts/arialbd.ttf');
+const arialbi = getURL('/fonts/arialbi.ttf');
+const ariali = getURL('/fonts/ariali.ttf');
+const ariblk = getURL('/fonts/ariblk.ttf');
+
+const times = getURL('/fonts/times.ttf');
+const timesbd = getURL('/fonts/timesbd.ttf');
+const timesbi = getURL('/fonts/timesbi.ttf');
+const timesi = getURL('/fonts/timesi.ttf');
+
+const trebuc = getURL('/fonts/trebuc.ttf');
+const trebucbd = getURL('/fonts/trebucbd.ttf');
+const trebucbi = getURL('/fonts/trebucbi.ttf');
+const trebucit = getURL('/fonts/trebucit.ttf');
+
+// Arial
+fonts.push(arial, arialbd, arialbi, ariali, ariblk);
+
+// Times New Roman
+fonts.push(times, timesbd, timesbi, timesi);
+
+// Trebuchet MS
+fonts.push(trebuc, trebucbd, trebucbi, trebucit);
 
 run();

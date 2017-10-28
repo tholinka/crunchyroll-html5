@@ -12,5 +12,9 @@ export async function trackProgress(stream: Stream, currentTime: number, elapsed
     ht: '0',
     playhead: currentTime,
     media_id: stream.mediaId
+  }, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
   });
 }

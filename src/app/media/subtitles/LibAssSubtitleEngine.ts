@@ -4,9 +4,10 @@ import { Subtitle } from '../video';
 import { EventHandler } from '../../libs/events/EventHandler';
 import { ISubtitleTrack } from './ISubtitleTrack';
 import { EventTarget } from '../../libs/events/EventTarget';
+import { fonts } from '../../SubtitleEngineLoader';
 
 export class LibAssSubtitleEngine extends EventTarget implements ISubtitleEngine {
-  private libass = new LibAss();
+  private libass = new LibAss(fonts);
   private track: ISubtitleTrack;
   private handler: EventHandler = new EventHandler(this);
 

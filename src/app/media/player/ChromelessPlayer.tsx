@@ -7,7 +7,7 @@ import { SubtitleContainerComponent } from './SubtitleContainerComponent';
 import { LibAssSubtitleEngine } from '../subtitles/LibAssSubtitleEngine';
 import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
 import { IRect } from '../../utils/rect';
-import { IPlayerApi, PlaybackState, PlaybackStateChangeEvent, TimeUpdateEvent, VolumeChangeEvent, DurationChangeEvent } from './IPlayerApi';
+import { IPlayerApi, PlaybackState, PlaybackStateChangeEvent, TimeUpdateEvent, VolumeChangeEvent, DurationChangeEvent, SeekEvent } from './IPlayerApi';
 import { getFullscreenElement, requestFullscreen, exitFullscreen } from '../../utils/fullscreen';
 import { ChromelessPlayerApi } from './ChromelessPlayerApi';
 
@@ -323,12 +323,14 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
   seekTo(time: number): void {
     this._videoElement.currentTime = time;
+    this._api.dispatchEvent(new SeekEvent(time));
     this._api.dispatchEvent(new TimeUpdateEvent(time));
   }
 
   seekBy(seconds: number): void {
     const time = this._videoElement.currentTime + seconds;
     this._videoElement.currentTime = time;
+    this._api.dispatchEvent(new SeekEvent(time));
     this._api.dispatchEvent(new TimeUpdateEvent(time));
   }
 

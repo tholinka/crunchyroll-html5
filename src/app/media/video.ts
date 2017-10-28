@@ -153,7 +153,8 @@ export class Stream {
     public episodeNumber: string,
     public episodeTitle: string,
     public seriesTitle: string,
-    public nextUrl: string
+    public nextUrl: string,
+    public pingBackIntervals: number[]    
   ) {}
 
   static async fromUrl(url: string, videoId: string, fmt: string, streamFormat: string, streamQuality: string): Promise<Stream> {
@@ -212,9 +213,18 @@ export class Stream {
       subtitles.push(subtitle);
     }
 
+    let pingBackIntervals: number[];
+    const pingBackIntervalsElement = doc.querySelector("pingBackIntervals");
+    if (pingBackIntervalsElement && pingBackIntervalsElement.textContent) {
+      pingBackIntervals = pingBackIntervalsElement.textContent
+        .split(" ").map(value => parseInt(value, 10));
+    } else {
+      pingBackIntervals = [30000];
+    }
+
     return new Stream(file, fmt, width, height, duration, subtitles, mediaId,
       mediaType, encodeId, thumbnailUrl, episodeNumber, episodeTitle,
-      seriesTitle, nextUrl);
+      seriesTitle, nextUrl, pingBackIntervals);
   }
 }
 

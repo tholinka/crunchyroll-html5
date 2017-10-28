@@ -28,9 +28,8 @@ const generateManifest = () => {
       }
     ],
     'web_accessible_resources': [
-      'vendor/JavascriptSubtitlesOctopus/subtitles-octopus-worker.js',
-      'vendor/JavascriptSubtitlesOctopus/default.ttf',
-      'vendor/JavascriptSubtitlesOctopus/fonts.conf'
+      'vendor/JavascriptSubtitlesOctopus/*',
+      'fonts/*'
     ]
   }, null, 2);
 };
@@ -41,6 +40,12 @@ mkdirp('./dist/webextension', (err) => {
     return;
   }
   ncp('./vendor', './dist/webextension/vendor', (err) => {
+    if (err) {
+      console.error(err);
+    }
+  });
+
+  ncp('./src/fonts', './dist/webextension/fonts', (err) => {
     if (err) {
       console.error(err);
     }

@@ -4,6 +4,7 @@ import { Player, IPlayerConfig } from './media/player/Player';
 import { importCSS, importCSSByUrl } from './utils/css';
 import { h, render } from 'preact';
 import { PlaybackState } from './media/player/IPlayerApi';
+import { VideoTracker } from './Tracking';
 
 const css = require('../styles/bootstrap.scss');
 
@@ -91,6 +92,7 @@ class Bootstrap {
       var video = await Video.fromDocument(location.href, document, true);
       if (video.streams.length === 0) throw new Error("No stream found.");
       const stream = video.streams[0];
+      const tracking = new VideoTracker(stream, player.getApi());
 
       const videoConfig: IPlayerConfig = {
         title: video.title,

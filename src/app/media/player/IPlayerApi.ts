@@ -8,6 +8,12 @@ export class PlaybackStateChangeEvent extends Event {
   }
 }
 
+export class SeekEvent extends Event {
+  constructor(public time: number) {
+    super('seek');
+  }
+}
+
 export class TimeUpdateEvent extends Event {
   constructor(public time: number) {
     super('timeupdate');
