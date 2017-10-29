@@ -3,7 +3,7 @@ import { NextVideo } from './media/nextvideo';
 import { Player, IPlayerConfig } from './media/player/Player';
 import { importCSS, importCSSByUrl } from './utils/css';
 import { h, render } from 'preact';
-import { PlaybackState } from './media/player/IPlayerApi';
+import { PlaybackState, NextVideoEvent } from './media/player/IPlayerApi';
 import { VideoTracker } from './Tracking';
 
 const css = require('../styles/bootstrap.scss');
@@ -14,9 +14,17 @@ export function run() {
   }
 }
 
+interface IVideoDetail {
+  url: string;
+  thumbnailUrl: string;
+}
+
 class Bootstrap {
   private _wrapper: Element;
   private _player: Player;
+  private _tracking: VideoTracker|undefined = undefined;
+
+  private _currentVideoDetail: IVideoDetail|undefined = undefined;
 
   constructor() {
     let wrapper = document.querySelector("#showmedia_video_box");
@@ -73,6 +81,51 @@ class Bootstrap {
     return url.replace(/_[a-zA-Z]+(\.[a-zA-Z]+)$/, "_full$1");
   }
 
+  async loadVideo(detail: IVideoDetail, remote: boolean = false) {
+    if (this._tracking) {
+      this._tracking.dispose();
+      this._tracking = undefined;
+    }
+    const player = this._player;
+
+    this._currentVideoDetail = detail;
+
+    player.loadVideoByConfig({
+      thumbnailUrl: detail.thumbnailUrl.replace(/_[a-zA-Z]+(\.[a-zA-Z]+)$/, "_full$1")
+    });
+
+    let video: Video;
+
+    if (remote) {
+      video = await Video.fromUrl(detail.url, true);
+    } else {
+      video = await Video.fromDocument(detail.url, document, true);
+    }
+    if (video.streams.length === 0) throw new Error("No stream found.");
+    const stream = video.streams[0];
+    this._tracking = new VideoTracker(stream, player.getApi());
+
+    const videoConfig: IPlayerConfig = {
+      title: video.title,
+      url: stream.url,
+      duration: stream.duration,
+      subtitles: stream.subtitles,
+      startTime: stream.startTime
+    };
+    
+    const nextVideo = NextVideo.fromUrlUsingDocument(stream.nextUrl);
+    if (nextVideo) {
+      videoConfig.nextVideo = {
+        title: nextVideo.episodeNumber + ': ' + nextVideo.episodeTitle,
+        duration: typeof nextVideo.duration === 'number' ? nextVideo.duration : NaN,
+        url: nextVideo.url,
+        thumbnailUrl: nextVideo.thumbnailUrl
+      };
+    }
+
+    player.loadVideoByConfig(videoConfig);
+  }
+
   async run() {
     this._wrapper.innerHTML = "";
 
@@ -88,33 +141,23 @@ class Bootstrap {
     const loadVideo = async (player: Player) => {
       this._player = player;
 
-      player.loadVideoByConfig(preloadConfig);
-      var video = await Video.fromDocument(location.href, document, true);
-      if (video.streams.length === 0) throw new Error("No stream found.");
-      const stream = video.streams[0];
-      const tracking = new VideoTracker(stream, player.getApi());
+      const api = player.getApi();
+      api.listen('fullscreenchange', () => {
+        if (api.isFullscreen() || !this._currentVideoDetail) return;
 
-      const videoConfig: IPlayerConfig = {
-        title: video.title,
-        url: stream.url,
-        duration: stream.duration,
-        subtitles: stream.subtitles,
-        startTime: stream.startTime
-      };
-      /*if (thumbnailUrl) {
-        videoConfig.thumbnailUrl = thumbnailUrl;
-      }*/
-      const nextVideo = NextVideo.fromUrlUsingDocument(stream.nextUrl);
-      if (nextVideo) {
-        videoConfig.nextVideo = {
-          title: nextVideo.episodeNumber + ': ' + nextVideo.episodeTitle,
-          duration: typeof nextVideo.duration === 'number' ? nextVideo.duration : NaN,
-          url: nextVideo.url,
-          thumbnailUrl: nextVideo.thumbnailUrl
-        };
-      }
+        location.href = this._currentVideoDetail.url;
+      });
+      api.listen('nextvideo', (e: NextVideoEvent) => {
+        if (!api.isFullscreen()) return;
+        e.preventDefault();
 
-      player.loadVideoByConfig(videoConfig);
+        this.loadVideo(e.detail, true);
+      }, false);
+
+      this.loadVideo({
+        thumbnailUrl: Bootstrap.getVideoThumbnailUrl(videoId) || '',
+        url: location.href
+      }, false);
     };
     const large = this._wrapper.id === "showmedia_video_box_wide";
     const onSizeChange = (large: boolean) => this._onSizeChange(large);

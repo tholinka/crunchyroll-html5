@@ -122,6 +122,8 @@ export class Player extends Component<IPlayerProps, {}> {
 
     if (config.url) {
       this._chromelessPlayer.setVideoSource(new HlsSource(config.url), config.startTime);
+    } else {
+      this._chromelessPlayer.removeVideoSource();
     }
     if (typeof config.duration === 'number') {
       this._chromelessPlayer.setDuration(config.duration);

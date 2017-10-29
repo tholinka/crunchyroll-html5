@@ -32,6 +32,12 @@ export class VolumeChangeEvent extends Event {
   }
 }
 
+export class NextVideoEvent extends Event {
+  constructor(public detail: IVideoDetail) {
+    super('nextvideo');
+  }
+}
+
 export enum PlaybackState {
   UNSTARTED,
   PAUSED,

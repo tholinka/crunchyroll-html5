@@ -2,8 +2,9 @@ import { IPlayerApi, TimeUpdateEvent, SeekEvent, PlaybackStateChangeEvent, Playb
 import { EventHandler } from "./libs/events/EventHandler";
 import { Stream } from "./media/video";
 import { trackProgress } from "./media/crunchyroll";
+import { Disposable } from "./libs/disposable/Disposable";
 
-export class VideoTracker {
+export class VideoTracker extends Disposable {
   private _handler: EventHandler = new EventHandler(this);
 
   private _stream: Stream;
@@ -15,6 +16,8 @@ export class VideoTracker {
   private _callCount: number = 1;
 
   constructor(stream: Stream, api: IPlayerApi) {
+    super();
+
     this._stream = stream;
     this._api = api;
     this._intervals = stream.pingBackIntervals;
@@ -23,6 +26,12 @@ export class VideoTracker {
       .listen(api, 'playbackstatechange', this._onPlaybackStateChange, false)
       .listen(api, 'seek', this._onSeek, false)
       .listen(api, 'timeupdate', this._onTimeUpdate, false);
+  }
+
+  protected disposeInternal() {
+    super.disposeInternal();
+
+    this._handler.dispose();
   }
 
   private _onPlaybackStateChange(e: PlaybackStateChangeEvent) {

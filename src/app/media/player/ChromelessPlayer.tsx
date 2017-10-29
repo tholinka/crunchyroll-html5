@@ -430,6 +430,13 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     this._api.dispatchEvent(new TimeUpdateEvent(startTime));
   }
 
+  removeVideoSource(): void {
+    if (this._source) {
+      this._source.detach();
+      this._source = undefined;
+    }
+  }
+
   async setSubtitleTrack(index: number): Promise<any> {
     this._currentSubtitleTrack = index;
     if (index === -1) {
