@@ -88,7 +88,11 @@ class Bootstrap {
     }
     const player = this._player;
 
-    this._currentVideoDetail = detail;
+    if (remote) {
+      this._currentVideoDetail = detail;
+    } else {
+      this._currentVideoDetail = undefined;
+    }
 
     player.loadVideoByConfig({
       thumbnailUrl: detail.thumbnailUrl.replace(/_[a-zA-Z]+(\.[a-zA-Z]+)$/, "_full$1")
@@ -143,7 +147,9 @@ class Bootstrap {
 
       const api = player.getApi();
       api.listen('fullscreenchange', () => {
-        if (api.isFullscreen() || !this._currentVideoDetail) return;
+        if (api.isFullscreen()) return;
+        if (!this._currentVideoDetail) return;
+        if (this._currentVideoDetail.url === location.href) return;
 
         location.href = this._currentVideoDetail.url;
       });
