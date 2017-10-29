@@ -31,7 +31,8 @@ export interface IPlayerConfig {
   thumbnailUrl?: string;
   subtitles?: Subtitle[];
   duration?: number;
-  nextVideo?: IVideoDetail
+  nextVideo?: IVideoDetail;
+  startTime?: number;
 }
 
 export class Player extends Component<IPlayerProps, {}> {
@@ -120,7 +121,7 @@ export class Player extends Component<IPlayerProps, {}> {
     }
 
     if (config.url) {
-      this._chromelessPlayer.setVideoSource(new HlsSource(config.url));
+      this._chromelessPlayer.setVideoSource(new HlsSource(config.url), config.startTime);
     }
     if (typeof config.duration === 'number') {
       this._chromelessPlayer.setDuration(config.duration);

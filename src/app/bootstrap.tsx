@@ -98,7 +98,8 @@ class Bootstrap {
         title: video.title,
         url: stream.url,
         duration: stream.duration,
-        subtitles: stream.subtitles
+        subtitles: stream.subtitles,
+        startTime: stream.startTime
       };
       /*if (thumbnailUrl) {
         videoConfig.thumbnailUrl = thumbnailUrl;

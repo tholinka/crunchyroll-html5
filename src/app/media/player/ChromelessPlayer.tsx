@@ -416,7 +416,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
    * Set the video source.
    * @param source the video source.
    */
-  setVideoSource(source: ISource): void {
+  setVideoSource(source: ISource, startTime: number = 0): void {
     if (this._source) {
       this._source.detach();
     }
@@ -424,7 +424,10 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
     this._source.attach(this._videoElement);
 
+    this._videoElement.currentTime = startTime;
     this._videoElement.play();
+
+    this._api.dispatchEvent(new TimeUpdateEvent(startTime));
   }
 
   async setSubtitleTrack(index: number): Promise<any> {

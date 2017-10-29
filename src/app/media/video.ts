@@ -154,7 +154,8 @@ export class Stream {
     public episodeTitle: string,
     public seriesTitle: string,
     public nextUrl: string,
-    public pingBackIntervals: number[]    
+    public pingBackIntervals: number[],
+    public startTime: number
   ) {}
 
   static async fromUrl(url: string, videoId: string, fmt: string, streamFormat: string, streamQuality: string): Promise<Stream> {
@@ -179,6 +180,7 @@ export class Stream {
     const width: number = parseInt(streamInfo.querySelector("metadata width")!.textContent!, 10);
     const height: number = parseInt(streamInfo.querySelector("metadata height")!.textContent!, 10);
     const duration: number = parseFloat(streamInfo.querySelector("metadata duration")!.textContent!);
+    const startTime: number = parseFloat(doc.querySelector("startTime")!.textContent!);
 
     const thumbnailUrl: string = doc.querySelector("media_metadata episode_image_url")!.textContent!;
     const nextUrl: string = doc.querySelector("nextUrl")!.textContent!;
@@ -224,7 +226,7 @@ export class Stream {
 
     return new Stream(file, fmt, width, height, duration, subtitles, mediaId,
       mediaType, encodeId, thumbnailUrl, episodeNumber, episodeTitle,
-      seriesTitle, nextUrl, pingBackIntervals);
+      seriesTitle, nextUrl, pingBackIntervals, startTime);
   }
 }
 
