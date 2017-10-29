@@ -26,6 +26,7 @@
     "@types/node": "^8.0.17",
     "@types/pako": "^1.0.0",
     "@types/text-encoding": "^0.0.32",
+    "@types/url-parse": "^1.1.0",
     "cssnano": "^3.10.0",
     "file-loader": "^1.1.5",
     "mkdirp": "^0.5.1",
@@ -56,6 +57,7 @@
     "preact": "^8.2.5",
     "raw-loader": "^0.5.1",
     "text-encoding": "^0.6.4",
+    "url-parse": "^1.1.9",
     "webworkify-webpack-dropin": "^1.1.9"
   }
 }

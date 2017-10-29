@@ -5,6 +5,7 @@ import { importCSS, importCSSByUrl } from './utils/css';
 import { h, render } from 'preact';
 import { PlaybackState, NextVideoEvent } from './media/player/IPlayerApi';
 import { VideoTracker } from './Tracking';
+import parse = require('url-parse');
 
 const css = require('../styles/bootstrap.scss');
 
@@ -107,6 +108,13 @@ class Bootstrap {
     }
     if (video.streams.length === 0) throw new Error("No stream found.");
     const stream = video.streams[0];
+    let startTime = stream.startTime;
+    if (!remote) {
+      const url = parse(detail.url, true);
+      if (url.query && url.query.hasOwnProperty('t')) {
+        startTime = parseFloat(url.query['t']!);
+      }
+    }
     this._tracking = new VideoTracker(stream, player.getApi());
 
     const videoConfig: IPlayerConfig = {
@@ -114,7 +122,7 @@ class Bootstrap {
       url: stream.url,
       duration: stream.duration,
       subtitles: stream.subtitles,
-      startTime: stream.startTime
+      startTime: startTime
     };
     
     const nextVideo = NextVideo.fromUrlUsingDocument(stream.nextUrl);
@@ -151,7 +159,13 @@ class Bootstrap {
         if (!this._currentVideoDetail) return;
         if (this._currentVideoDetail.url === location.href) return;
 
-        location.href = this._currentVideoDetail.url;
+        const url = parse(this._currentVideoDetail.url, true);
+        if (!url.query) {
+          url.query = {};
+        }
+        url.query['t'] = Math.floor(api.getCurrentTime()) + '';
+
+        location.href = url.toString();
       });
       api.listen('nextvideo', (e: NextVideoEvent) => {
         if (!api.isFullscreen()) return;
