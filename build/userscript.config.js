@@ -1,6 +1,6 @@
 const webpack = require("webpack");
 const WrapperPlugin = require('wrapper-webpack-plugin');
-const package = require('./package.json');
+const package = require('../package.json');
 const merge = require('webpack-merge');
 const common = require('./webpack.common.config.js');
 const path = require('path');
@@ -46,11 +46,11 @@ const metadata = {
 
 module.exports = merge(common, {
   entry: {
-    index: './src/app/bootstrap.userscript.ts'
+    index: path.join(__dirname, '..', 'src/app/bootstrap.userscript.ts')
   },
   output: {
     filename: 'crunchyroll-html5.user.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, '..', 'dist')
   },
   plugins: [
     new WrapperPlugin({

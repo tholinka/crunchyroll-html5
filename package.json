@@ -9,10 +9,13 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev:userscript": "webpack --config webpack.userscript.config.js",
-    "dev:webextension": "webpack --config webpack.webextension.config.js",
-    "build:userscript": "webpack --config webpack.userscript.prod.config.js",
-    "build:webextension": "webpack --config webpack.webextension.prod.config.js",
+    "dev:userscript": "webpack --config build/userscript.config.js",
+    "dev:webextension": "webpack --config build/webextension.config.js",
+    "build:userscript": "webpack --config build/userscript.prod.config.js",
+    "build:webextension": "npm run build:webextension:background && npm run build:webextension:content && npm run build:webextension:assets",
+    "build:webextension:background": "webpack --config build/webextension.background.prod.config.js",
+    "build:webextension:content": "webpack --config build/webextension.content.prod.config.js",
+    "build:webextension:assets": "node build/webextension.assets.js",
     "build": "npm run build:userscript && npm run build:webextension"
   },
   "devDependencies": {
