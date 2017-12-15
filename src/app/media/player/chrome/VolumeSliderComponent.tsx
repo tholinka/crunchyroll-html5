@@ -126,7 +126,9 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
   private _onResize(): void {
     this._sliderRect = this._sliderElement.getBoundingClientRect();
     this._handleWidth = this._handleElement.offsetWidth;
-    this._sliderWidth = (this._sliderElement.scrollWidth - this._handleWidth/2)/2;
+
+    // Hard coded these values as offsetWidth can't be used due to it animating.
+    this._sliderWidth = this._handleWidth === 12 ? 52 : 78;
 
     this._updateInternal();
   }
