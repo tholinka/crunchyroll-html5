@@ -1,20 +1,37 @@
 import { h, Component, render } from "preact";
-import { requestAnimationFrame, cancelAnimationFrame } from '../../../utils/animation';
+import { EventHandler } from "../../../libs/events/EventHandler";
 
 export class BezelComponent extends Component<{}, {}> {
+  private _handler: EventHandler = new EventHandler(this);
   private _iconElement: HTMLElement;
-  private _frameId: number;
+
+  private _handleAnimationEnd() {
+    this.stop();
+  }
+
+  componentDidMount() {
+    this._handler
+      .listen(this.base, 'animationend', this._handleAnimationEnd, false)
+      .listen(this.base, 'webkitAnimationEnd', this._handleAnimationEnd, false)
+      .listen(this.base, 'MSAnimationEnd', this._handleAnimationEnd, false)
+      .listen(this.base, 'oAnimationEnd', this._handleAnimationEnd, false);
+  }
+
+  componentWillUnmount() {
+    this._handler.removeAll();
+  }
 
   play(element: JSX.Element): void {
     this.stop();
 
-    cancelAnimationFrame(this._frameId);
-    this._frameId = requestAnimationFrame(() => {
-      this._iconElement.innerHTML = "";
-      render(element, this._iconElement);
+    this._iconElement.innerHTML = "";
+    render(element, this._iconElement);
 
-      this.base.style.display = "";
-    });
+    // Trigger reflow
+    void this.base.offsetWidth;
+
+    // Display bezel animation
+    this.base.style.display = "";
   }
 
   playSvgPath(d: string): void {
