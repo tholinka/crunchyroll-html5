@@ -5,7 +5,7 @@
     "name": "Jeppe Rune Mortensen",
     "email": "jepperm@gmail.com"
   },
-  "version": "0.3.2",
+  "version": "0.3.3",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
