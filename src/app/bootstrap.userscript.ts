@@ -2,7 +2,7 @@ import { binaryToBlob } from "./utils/blob";
 import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
 import { run } from './bootstrap';
 
-const libassWorkerJS = require('raw-loader!../../vendor/JavascriptSubtitlesOctopus/subtitles-octopus-worker.js');
+const libassWorkerJS = require('raw-loader!../../vendor/JavascriptSubtitlesOctopusAsm/subtitles-octopus-worker.js');
 const libassDefaultFont = require('binary-loader!../../vendor/JavascriptSubtitlesOctopus/default.ttf');
 const libassFontsConfig = require('raw-loader!../../vendor/JavascriptSubtitlesOctopus/fonts.conf');
 

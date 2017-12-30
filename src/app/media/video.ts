@@ -180,7 +180,11 @@ export class Stream {
     const width: number = parseInt(streamInfo.querySelector("metadata width")!.textContent!, 10);
     const height: number = parseInt(streamInfo.querySelector("metadata height")!.textContent!, 10);
     const duration: number = parseFloat(streamInfo.querySelector("metadata duration")!.textContent!);
-    const startTime: number = parseFloat(doc.querySelector("startTime")!.textContent!);
+    const startTimeElement: Element|null = doc.querySelector("startTime");
+    let startTime: number = 0;
+    if (startTimeElement) {
+      startTime = parseFloat(startTimeElement.textContent!);
+    }
 
     const thumbnailUrl: string = doc.querySelector("media_metadata episode_image_url")!.textContent!;
     const nextUrl: string = doc.querySelector("nextUrl")!.textContent!;

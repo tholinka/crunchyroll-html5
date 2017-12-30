@@ -26,6 +26,26 @@ limitations under the License.
   'use strict';
   var Worker_ = window.Worker;
   var URL = window.URL || window.webkitURL;
+  var XMLHttpRequestPatchBlob = function(baseUrl) {
+    var blobFunction = function(baseUrl) {
+      var open = self.XMLHttpRequest.prototype.open;
+
+      self.XMLHttpRequest.prototype.open = function() {
+        var args = Array.prototype.slice.call(arguments);
+        if (args.length >= 2 && typeof args[1] === 'string') {
+          var url = new URL(args[1], baseUrl);
+          args[1] = url.toString();
+        }
+
+        open.apply(this, args);
+      };
+    };
+
+    var fn = '(' + blobFunction.toString() + ')(' + JSON.stringify(baseUrl.toString()) + ');';
+
+    return new Blob([fn], { type: 'text/plain' });
+  };
+
   // Create dummy worker for the following purposes:
   // 1. Don't override the global Worker object if the fallback isn't
   //    going to work (future API changes?)
@@ -71,7 +91,7 @@ limitations under the License.
     x.responseType = 'blob';
     x.onload = function() {
       // http://stackoverflow.com/a/10372280/938089
-      var workerURL = URL.createObjectURL(x.response);
+      var workerURL = URL.createObjectURL(new Blob([XMLHttpRequestPatchBlob(new URL(scriptURL, chrome.runtime.getURL(''))), x.response]));
       bindWorker(worker, workerURL);
     };
     x.open('GET', scriptURL);
