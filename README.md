@@ -12,6 +12,9 @@ is the answer.
 - Subtitles, we all want subtitles for our weeb shows. Otherwise the majority of
   us won't be able to enjoy our shows.
 
+## Screenshots
+![Preview](https://github.com/YePpHa/crunchyroll-html5/raw/master/screenshots/preview.gif)
+
 ## Subtitle Engine
 The browser is really bad at displaying subtitles so I had to find a library
 that's able to render SSA/ASS subtitles. I've looked into just using WebVTT, but
