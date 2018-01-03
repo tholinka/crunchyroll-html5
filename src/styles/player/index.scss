@@ -3,6 +3,11 @@
 @import "./cued-thumbnail";
 @import "./gradient";
 
+#content > .html5-video-player {
+  width: 100%;
+  height: 100%;
+}
+
 .html5-video-player {
   position: relative;
   width: 640px;

@@ -5,6 +5,7 @@ import { padLeft, padRight, hexStringToByte } from '../utils/string';
 import { TextDecoder, TextEncoder } from 'text-encoding';
 import * as aes from 'aes-js';
 import { SHA1 } from '../utils/hash/sha1';
+import * as parseUrl from 'url-parse';
 
 function assToVtt(text: string): string {
   const defaultReplacements: any = {
@@ -141,7 +142,6 @@ const FORMAT_IDS: any = {
 export class Stream {
   constructor(
     public url: string,
-    public fmt: string,
     public width: number,
     public height: number,
     public duration: number,
@@ -158,20 +158,21 @@ export class Stream {
     public startTime: number
   ) {}
 
-  static async fromUrl(url: string, videoId: string, fmt: string, streamFormat: string, streamQuality: string): Promise<Stream> {
-    const streamUrl = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig"
-        + "&media_id=" + encodeURIComponent(videoId)
-        + "&video_format=" + encodeURIComponent(streamFormat)
-        + "&video_quality=" + encodeURIComponent(streamQuality)
-        + "&current_page=" + encodeURIComponent(url);
-    const response = await request.get(streamUrl, {
+  private static async _init(url: string, allowRedirect: boolean = true): Promise<Stream> {
+    const response = await request.get(url, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
-      }
+      },
+      background: location.protocol === 'https:'
     });
     const doc = (new DOMParser()).parseFromString(response, "text/xml");
     const streamInfo = doc.querySelector("stream_info");
-    if (!streamInfo) throw new Error("Tag stream_info not found.");
+    if (!streamInfo) {
+      const m = response.match(/document\.location\.href=(.*?);/);
+      if (!m || !allowRedirect)
+        throw new Error("Tag stream_info not found.");
+      return await Stream._init(JSON.parse(m[1]), false);
+    }
     const mediaId: string = streamInfo.querySelector("media_id")!.textContent!;
     const mediaType: string = streamInfo.querySelector("media_type")!.textContent!;
     const encodeId: string = streamInfo.querySelector("video_encode_id")!.textContent!;
@@ -228,9 +229,29 @@ export class Stream {
       pingBackIntervals = [30000];
     }
 
-    return new Stream(file, fmt, width, height, duration, subtitles, mediaId,
+    return new Stream(file, width, height, duration, subtitles, mediaId,
       mediaType, encodeId, thumbnailUrl, episodeNumber, episodeTitle,
       seriesTitle, nextUrl, pingBackIntervals, startTime);
+  }
+
+  static async fromCurrentPage(currentPage: string, mediaId: string, streamFormat: string, streamQuality: string): Promise<Stream> {
+    const streamUrl = location.protocol + "//www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig"
+        + "&media_id=" + encodeURIComponent(mediaId)
+        + "&video_format=" + encodeURIComponent(streamFormat)
+        + "&video_quality=" + encodeURIComponent(streamQuality)
+        + "&current_page=" + encodeURIComponent(currentPage);
+    return await Stream._init(streamUrl);
+  }
+
+  static async fromAffiliate(currentPage: string, affiliateId: string, mediaId: string, streamFormat: string, streamQuality: string, autoPlay: boolean): Promise<Stream> {
+    const streamUrl = location.protocol + "//www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig"
+        + "&media_id=" + encodeURIComponent(mediaId)
+        + "&video_format=" + encodeURIComponent(streamFormat)
+        + "&video_quality=" + encodeURIComponent(streamQuality)
+        + "&aff=" + encodeURIComponent(affiliateId)
+        + "&current_page=" + encodeURIComponent(currentPage)
+        + "&auto_play=" + (autoPlay ? "1" : "0");
+    return await Stream._init(streamUrl);
   }
 }
 
@@ -253,7 +274,9 @@ export class Subtitle {
     if (this._content) {
       return this._content;
     } else {
-      let subResponse = await request.get(this.url);
+      let subResponse = await request.get(this.url, {
+        background: location.protocol === 'https:'
+      });
       let subDoc = (new DOMParser()).parseFromString(subResponse, "text/xml");
       let id = subDoc.querySelector("subtitle")!.getAttribute("id")!;
       let iv = subDoc.querySelector("iv")!.textContent!;
@@ -390,35 +413,195 @@ export class SubtitleContent {
   }
 }
 
-export class Video {
-  constructor(
-    public url: string,
-    public videoId: string,
-    public title: string,
-    public description: string,
-    public streams: Stream[]
-  ) {}
+export interface IMediaDocument {
+  getTitle(): string;
+  getDescription(): string;
+  getMediaId(): string;
+  getMediaFormats(): IMediaFormat[];
+  getDefaultMediaFormat(): IMediaFormat|undefined;
+  getStartTime(): number;
+  isAutoPlay(): boolean;
+}
 
-  static validateUrl(url: string): boolean {
-    const re = /https?:\/\/(?:(www|m)\.)?(crunchyroll\.(?:com|fr)\/(?:media(?:-|\/\?id=)|[^/]*\/[^/?&]*?)([0-9]+))(?:[/?&]|$)/g;
-    return !!re.exec(url);
+export interface IMediaFormat {
+  default: boolean;
+  format: string;
+  quality: string;
+
+  getStream(): Promise<Stream>;
+}
+
+interface IAffiliateQuery {
+  aff?: string;
+  media_id?: string;
+  video_format?: string;
+  video_quality?: string;
+  auto_play?: string;
+  t?: string;
+}
+
+export class AffiliateMediaFormat implements IMediaFormat {
+  private _currentUrl: string;
+  private _affiliateId: string;
+  private _mediaId: string;
+  private _autoPlay: boolean;
+
+  public default: boolean;
+  public format: string;
+  public quality: string;
+
+  constructor(currentUrl: string, affiliateId: string, mediaId: string, format: string, quality: string, def: boolean, autoPlay: boolean) {
+    this._currentUrl = currentUrl;
+    this._affiliateId = affiliateId;
+    this._mediaId = mediaId;
+    this._autoPlay = autoPlay;
+
+    this.format = format;
+    this.quality = quality;
+    this.default = def;
   }
 
-  static async fromDocument(url: string, doc: Document, onlyDefault: boolean = false): Promise<Video> {
-    const { videoId } = Video.parseUrlFragments(url);
+  async getStream(): Promise<Stream> {
+    return await Stream.fromAffiliate(this._currentUrl, this._affiliateId, this._mediaId, this.format, this.quality, this._autoPlay);
+  }
+}
 
-    /*var note = doc.querySelector(".showmedia-trailer-notice");
-    if (note && note.textContent.trim() !== "")
-      throw new Error(note.textContent.trim());*/
+export class AffiliateMediaDocument implements IMediaDocument {
+  private _mediaId: string;
+  private _formats: IMediaFormat[];
 
+  private _startTime: number;
+  private _autoPlay: boolean;
+
+  constructor(url: string) {
+    const fragments = AffiliateMediaDocument.parseUrlFragments(url);
+    if (!fragments) throw new Error("Unable to parse URL");
+
+    this._mediaId = fragments.mediaId;
+    this._autoPlay = fragments.autoPlay;
+    this._formats = [
+      new AffiliateMediaFormat(
+        url,
+        fragments.affiliateId,
+        fragments.mediaId,
+        fragments.videoFormat,
+        fragments.videoQuality,
+        true,
+        fragments.autoPlay
+      )
+    ];
+  }
+
+  getStartTime(): number {
+    return this._startTime;
+  }
+
+  isAutoPlay(): boolean {
+    return this._autoPlay;
+  }
+
+  getTitle(): string {
+    return "";
+  }
+
+  getDescription(): string {
+    return "";
+  }
+
+  getMediaId(): string {
+    return this._mediaId;
+  }
+
+  getMediaFormats(): IMediaFormat[] {
+    return this._formats;
+  }
+
+  getDefaultMediaFormat(): IMediaFormat|undefined {
+    const formats = this.getMediaFormats();
+    for (let i = 0; i < formats.length; i++) {
+      if (formats[i].default) {
+        return formats[i];
+      }
+    }
+    return undefined;
+  }
+
+  static parseUrlFragments(url: string) {
+    // https://www.crunchyroll.com/boruto-naruto-next-generations/episode-17-run-sarada-740239
+    const re = /^https?:\/\/(?:(?:www|m)\.)?(?:crunchyroll\.(?:com|fr))\/affiliate_iframeplayer\?/g;
+    const m = re.exec(url);
+    if (!m) return undefined;
+
+    const query = parseUrl(url, true).query as IAffiliateQuery;
+
+    if (typeof query.aff !== "string") throw new Error("`aff` not in query");
+    if (typeof query.media_id !== "string") throw new Error("`media_id` not in query");
+    if (typeof query.video_format !== "string") throw new Error("`video_format` not in query");
+    if (typeof query.video_quality !== "string") throw new Error("`video_quality` not in query");
+
+    return {
+      affiliateId: query.aff,
+      mediaId: query.media_id,
+      videoFormat: query.video_format,
+      videoQuality: query.video_quality,
+      autoPlay: query.auto_play === "1",
+      startTime: parseFloat(query.t || '-1')
+    };
+  }
+}
+
+export class MediaFormat implements IMediaFormat {
+  private _currentUrl: string;
+  private _mediaId: string;
+
+  public default: boolean;
+  public format: string;
+  public quality: string;
+
+  constructor(currentUrl: string, mediaId: string, format: string, quality: string, def: boolean) {
+    this._currentUrl = currentUrl;
+    this._mediaId = mediaId;
+
+    this.format = format;
+    this.quality = quality;
+    this.default = def;
+  }
+
+  async getStream(): Promise<Stream> {
+    return await Stream.fromCurrentPage(this._currentUrl, this._mediaId, this.format, this.quality)
+  }
+}
+
+interface IMediaDocumentQuery {
+  t?: string;
+  auto_play?: string;
+}
+
+export class MediaDocument implements IMediaDocument {
+  private _mediaId: string;
+  private _title: string;
+  private _description: string;
+
+  private _autoPlay: boolean;
+  private _startTime: number;
+
+  private _formats: IMediaFormat[] = [];
+
+  constructor(url: string, doc: Document) {
+    const fragments = MediaDocument.parseUrlFragments(url);
+    if (!fragments) throw new Error("Unable to parse URL");
+
+    this._mediaId = fragments.mediaId;
+    
     if (doc.documentElement.innerText.indexOf("To view this, please log in to verify you are 18 or older.") !== -1)
       throw new Error("User is required to log in.");
-
-    const title = doc.querySelector("h1[itemscope] a span[itemprop=title]")!
+    
+    this._title = doc.querySelector("h1[itemscope] a span[itemprop=title]")!
       .parentNode!.parentNode!.textContent!
       .replace(/[\s]+/g, " ")
       .trim();
-    const description = toArray(doc.querySelector(".description")!.childNodes)
+    
+    this._description = toArray(doc.querySelector(".description")!.childNodes)
       .filter(node => {
         return node.nodeType === Node.TEXT_NODE;
       })
@@ -427,61 +610,107 @@ export class Video {
       })
       .join('')
       .trim();
-
-    const fmts: string[] = [];
+    const query = parseUrl(url, true).query as IMediaDocumentQuery;
+    if (typeof query.t === 'string') {
+      this._startTime = parseFloat(query.t);
+    } else {
+      this._startTime = -1;
+    }
+    if (typeof query.auto_play === 'string') {
+      this._autoPlay = query.auto_play === "1";
+    } else {
+      this._autoPlay = true;
+    }
     const fmtElements = doc.querySelectorAll("a[token^=showmedia\\.]");
     for (let i = 0; i < fmtElements.length; i++) {
       if (fmtElements[i].getAttribute("href")!.indexOf("/freetrial") === 0)
         continue;
-      if (onlyDefault && !fmtElements[i].classList.contains('dark-button'))
-        continue;
-      fmts.push(fmtElements[i].getAttribute("token")!.substring(10));
+      const token = fmtElements[i].getAttribute("token")!.substring(10);
+      const [ streamQuality, streamFormat ] = FORMAT_IDS[token];
+
+      this._formats.push(
+        new MediaFormat(
+          url,
+          fragments.mediaId,
+          streamFormat,
+          streamQuality,
+          fmtElements[i].classList.contains('dark-button')
+        )
+      );
     }
-
-    const streams: Stream[] = [];
-
-    for (let i = 0; i < fmts.length; i++) {
-      let [ streamQuality, streamFormat ] = FORMAT_IDS[fmts[i]];
-
-      streams.push(await Stream.fromUrl(url, videoId, fmts[i], streamFormat, streamQuality));
-    }
-
-    return new Video(url, videoId, title, description, streams);
   }
 
-  static parseUrlFragments(url: string): {
-    prefix: string,
-    webpageUrl: string,
-    videoId: string
-  } {
+  static async fromUrl(url: string): Promise<MediaDocument> {
+    const fragments = MediaDocument.parseUrlFragments(url);
+    if (!fragments) throw new Error("Unable to parse URL");
+
+    let { prefix, webpageUrl } = fragments;
+
+    if (prefix === 'm') {
+      const mobileResponse: string = await request.get(url, {
+        background: location.protocol === 'https:'
+      });
+      webpageUrl = searchFor(mobileResponse, "<link rel=\"canonical\" href=\"", "\" />");
+    } else {
+      webpageUrl = location.protocol + '//www.' + webpageUrl;
+    }
+
+    const response = await request.get(webpageUrl, {
+      background: location.protocol === 'https:'
+    });
+    const doc = (new DOMParser()).parseFromString(response, "text/html");
+
+    return new MediaDocument(webpageUrl, doc);
+  }
+
+  isAutoPlay(): boolean {
+    return this._autoPlay;
+  }
+
+  getStartTime(): number {
+    return this._startTime;
+  }
+
+  getTitle(): string {
+    return this._title;
+  }
+
+  getDescription(): string {
+    return this._description;
+  }
+
+  getMediaId(): string {
+    return this._mediaId;
+  }
+
+  getMediaFormats(): IMediaFormat[] {
+    return this._formats;
+  }
+
+  getDefaultMediaFormat(): IMediaFormat|undefined {
+    const formats = this.getMediaFormats();
+    for (let i = 0; i < formats.length; i++) {
+      if (formats[i].default) {
+        return formats[i];
+      }
+    }
+    return undefined;
+  }
+
+  static parseUrlFragments(url: string) {
+    // https://www.crunchyroll.com/boruto-naruto-next-generations/episode-17-run-sarada-740239
     const re = /https?:\/\/(?:(www|m)\.)?(crunchyroll\.(?:com|fr)\/(?:media(?:-|\/\?id=)|[^/]*\/[^/?&]*?)([0-9]+))(?:[/?&]|$)/g;
     const m = re.exec(url);
-    if (!m) throw new Error("Unable to match url.");
+    if (!m) return undefined;
 
     const prefix: string = m[1];
     const webpageUrl: string = m[2];
-    const videoId: string = m[3];
+    const mediaId: string = m[3];
 
     return {
       prefix: prefix,
       webpageUrl: webpageUrl,
-      videoId: videoId
-    }
-  }
-
-  static async fromUrl(url: string, onlyDefault: boolean = false): Promise<Video> {
-    let { prefix, webpageUrl, videoId } = Video.parseUrlFragments(url);
-
-    if (prefix === 'm') {
-      const mobileResponse: string = await request.get(url);
-      webpageUrl = searchFor(mobileResponse, "<link rel=\"canonical\" href=\"", "\" />");
-    } else {
-      webpageUrl = 'http://www.' + webpageUrl;
-    }
-
-    const response = await request.get(webpageUrl);
-    const doc = (new DOMParser()).parseFromString(response, "text/html");
-
-    return Video.fromDocument(url, doc, onlyDefault);
+      mediaId: mediaId
+    };
   }
 }

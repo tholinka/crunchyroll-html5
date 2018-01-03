@@ -503,7 +503,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
       .listen(window, "resize", this.resize, { 'passive': true });
     this._subtitleEngine.attach(this._videoElement);
     if (this._source) {
-      this.setVideoSource(this._source);
+      this.setVideoSource(this._source, undefined);
     }
     this.resize();
   }

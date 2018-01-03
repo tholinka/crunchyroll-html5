@@ -1,3 +1,7 @@
 .html5-video-player--fullscreen .chrome-controls .chrome-size-button {
   display: none;
 }
+
+.chrome-controls .chrome-button.chrome-size-button--hidden {
+  display: none;
+}

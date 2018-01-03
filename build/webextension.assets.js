@@ -30,6 +30,16 @@ const generateManifest = () => {
           'patch-worker.js',
           'content-script.js'
         ]
+      }, {
+        'all_frames': true,
+        'matches': [
+          '*://www.crunchyroll.com/affiliate_iframeplayer*'
+        ],
+        'js': [
+          'vendor/browser-polyfill.min.js',
+          'patch-worker.js',
+          'content-script.js'
+        ]
       }
     ],
     'web_accessible_resources': [

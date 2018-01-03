@@ -22,6 +22,7 @@ import { BufferComponent } from './chrome/BufferComponent';
 export interface IPlayerProps {
   config?: IPlayerConfig;
   large?: boolean;
+  sizeEnabled?: boolean;
   onSizeChange?: (large: boolean) => void;
 }
 
@@ -33,9 +34,11 @@ export interface IPlayerConfig {
   duration?: number;
   nextVideo?: IVideoDetail;
   startTime?: number;
+  autoplay?: boolean;
 }
 
 export class Player extends Component<IPlayerProps, {}> {
+  private _configCued: boolean = false;
   private _config: IPlayerConfig|undefined = undefined;
   private _actionElement: HTMLElement;
   private _chromelessPlayer: ChromelessPlayer;
@@ -74,15 +77,32 @@ export class Player extends Component<IPlayerProps, {}> {
     this._api.setLarge(!!props.large);
   }
 
+  cueVideoByConfig(config: IPlayerConfig) {
+    this._config = config;
+    this._configCued = true;
+    if (config.thumbnailUrl) {
+      this._cuedThumbnailComponent.setThumbnailUrl(config.thumbnailUrl);
+    } else {
+      this._cuedThumbnailComponent.setThumbnailUrl('');
+    }
+    this._cuedThumbnailComponent.setButtonVisible(true);
+    this.setPreview(true);
+    this.setAutoHide(true);
+
+    this.resize();
+  }
+
   loadVideoByConfig(config: IPlayerConfig) {
     this._config = config;
     this._updateChromelessPlayer(config);
-    if (config.thumbnailUrl) {
+    if (config.thumbnailUrl && !config.url) {
       this._cuedThumbnailComponent.setThumbnailUrl(config.thumbnailUrl);
       this.setPreview(true);
     } else {
+      this._cuedThumbnailComponent.setThumbnailUrl('');
       this.setPreview(false);
     }
+    this._cuedThumbnailComponent.setButtonVisible(false);
     this.setAutoHide(true);
     this._api.setNextVideoDetail(config.nextVideo);
 
@@ -90,6 +110,7 @@ export class Player extends Component<IPlayerProps, {}> {
   }
 
   private async _updateChromelessPlayer(config: IPlayerConfig) {
+    this._configCued = false;
     if (config.subtitles) {
       const tracks: ISubtitleTrack[] = [];
       let defaultTrack: number = 0;
@@ -341,6 +362,25 @@ export class Player extends Component<IPlayerProps, {}> {
       this.setAutoHide(this._autoHide);
     } else {
       this.updateInternalAutoHide();
+    }
+
+    const unstarted = this.base.classList.contains('unstarted-mode');
+
+    this.base.classList.remove("playing-mode", "ended-mode", "unstarted-mode");
+    switch (state) {
+      case PlaybackState.PLAYING:
+        this.base.classList.add("playing-mode");
+        break;
+      case PlaybackState.PAUSED:
+        this.base.classList.add("paused-mode");
+        break;
+      case PlaybackState.UNSTARTED:
+        this.base.classList.add("unstarted-mode");
+        break;
+    }
+
+    if (unstarted) {
+      this.resize();
     }
   }
 
@@ -631,17 +671,38 @@ export class Player extends Component<IPlayerProps, {}> {
     const onFullscreenButtonEndHover = () => this._onFullscreenButtonEndHover();
     const onVolumeMuteButtonHover = () => this._onVolumeMuteButtonHover();
     const onVolumeMuteButtonEndHover = () => this._onVolumeMuteButtonEndHover();
+    const onCuedThumbnailClick = () => {
+      if (this._config && this._configCued) {
+        this._updateChromelessPlayer(this._config);
+
+        this._cuedThumbnailComponent.setVisible(false);
+
+        this.setPreview(false);
+        this.setAutoHide(true);
+
+        this.resize();
+      }
+    };
 
     const attributes = {
       'tabindex': '0'
     };
 
-    const className = "html5-video-player"
+    let autoplay = true;
+    if (this.props.config && typeof this.props.config.autoplay === 'boolean') {
+      autoplay = this.props.config.autoplay;
+    }
+
+    const className = "html5-video-player unstarted-mode"
       + (this._api.isLarge() ? " html5-video-player--large" : "");
     return (
       <div class={className} {...attributes}>
-        <ChromelessPlayer ref={chromelessRef} api={this.getApi() as ChromelessPlayerApi}></ChromelessPlayer>
-        <CuedThumbnailComponent ref={cuedThumbnailRef}></CuedThumbnailComponent>
+        <ChromelessPlayer
+          ref={chromelessRef}
+          api={this.getApi() as ChromelessPlayerApi}></ChromelessPlayer>
+        <CuedThumbnailComponent
+          ref={cuedThumbnailRef}
+          onClick={onCuedThumbnailClick}></CuedThumbnailComponent>
         <BufferComponent api={this.getApi()}></BufferComponent>
         <BezelComponent ref={bezelRef}></BezelComponent>
         <div
@@ -656,6 +717,7 @@ export class Player extends Component<IPlayerProps, {}> {
           onProgressEndHover={onProgressEndHover}
           onNextVideoHover={onNextVideoHover}
           onNextVideoEndHover={onNextVideoEndHover}
+          sizeButtonVisible={this.props.sizeEnabled}
           onSizeButtonHover={onSizeButtonHover}
           onSizeButtonEndHover={onSizeButtonEndHover}
           onFullscreenButtonHover={onFullscreenButtonHover}

@@ -8,6 +8,7 @@ const LARGE_PATH = "m 28,11 0,14 -20,0 0,-14 z m -18,2 16,0 0,10 -16,0 0,-10 z";
 
 export interface ISizeButtonProps {
   api: IPlayerApi;
+  visible?: boolean;
   onHover?: () => void;
   onEndHover?: () => void;
 }
@@ -58,8 +59,11 @@ export class SizeButton extends Component<ISizeButtonProps, {}> {
     const onClick = () => this._onClick();
     const pathRef = (element: SVGPathElement) => this._pathElement = element;
 
+    const visible = typeof this.props.visible === "boolean" ? this.props.visible : true;
+    const className = "chrome-button chrome-size-button" + (visible ? "" : " chrome-size-button--hidden");
+
     return (
-      <button class="chrome-button chrome-size-button" onClick={onClick}>
+      <button class={className} onClick={onClick}>
         <svg width="100%" height="100%" version="1.1" viewBox="0 0 36 36">
           <path d={d} fill-rule="evenodd" fill="#ffffff" ref={pathRef}></path>
         </svg>

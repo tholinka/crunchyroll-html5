@@ -15,6 +15,7 @@ export interface IChromeBottomProps {
   onProgressEndHover: () => void;
   onNextVideoHover: (detail: IVideoDetail) => void;
   onNextVideoEndHover: () => void;
+  sizeButtonVisible?: boolean;
   onSizeButtonHover: () => void;
   onSizeButtonEndHover: () => void;
   onFullscreenButtonHover: () => void;
@@ -107,6 +108,7 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
           <div class="chrome-controls__right">
             <SizeButton
               api={props.api}
+              visible={props.sizeButtonVisible}
               onHover={props.onSizeButtonHover}
               onEndHover={props.onSizeButtonEndHover}></SizeButton>
             <FullscreenButton

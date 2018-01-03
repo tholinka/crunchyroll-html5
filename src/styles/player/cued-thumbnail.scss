@@ -8,6 +8,14 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  z-index: 14;
+}
+
+.html5-video-cued-thumbnail-overlay[aria-hidden=true] {
+  opacity: 0;
+  -moz-transition: opacity .25s cubic-bezier(0.4,0.0,1,1);
+  -webkit-transition: opacity .25s cubic-bezier(0.4,0.0,1,1);
+  transition: opacity .25s cubic-bezier(0.4,0.0,1,1)
 }
 
 .html5-video-cued-thumbnail-overlay-image {
@@ -17,4 +25,40 @@
   width: 100%;
   height: 100%;
   position: absolute;
+}
+
+.unstarted-mode:not(.playing-mode) .html5-video-cued-thumbnail-overlay:not([aria-hidden=true]) {
+  cursor: pointer;
+}
+
+.chrome-large-play-button {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 68px;
+  height: 48px;
+  margin-left: -34px;
+  margin-top: -24px;
+  transition: opacity .25s cubic-bezier(0.0,0.0,0.2,1);
+  z-index: 63;
+}
+
+.chrome-large-play-button svg {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.chrome-large-play-button-bg {
+  transition: fill .1s cubic-bezier(0.4,0.0,1,1),fill-opacity .1s cubic-bezier(0.4,0.0,1,1);
+  fill: #212121;
+  fill-opacity: .8;
+}
+
+.html5-video-cued-thumbnail-overlay:hover .chrome-large-play-button-bg {
+  transition: fill .1s cubic-bezier(0.0,0.0,0.2,1),fill-opacity .1s cubic-bezier(0.0,0.0,0.2,1);
+  fill: #f00;
+  fill-opacity: 1;
 }
