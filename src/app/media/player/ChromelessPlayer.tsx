@@ -62,6 +62,21 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     }
   }
 
+  private _play() {
+    this._videoElement.play()
+    .then(null, (err: Error) => {
+      const name = err.name;
+      
+      if (name === "NotAllowedError") {
+        // It failed to auto-play, set to pause state instead.
+        this._preferedState = PlaybackState.PAUSED;
+        this._updateState(this._preferedState);
+      } else if (name === "NotSupportedError") {
+        console.error(err);
+      }
+    });
+  }
+
   private _updateState(state: PlaybackState) {
     this._state = state;
 
@@ -120,7 +135,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
       case PlaybackState.PAUSED:
         this._videoElement.pause();
       default:
-        this._videoElement.play();
+        this._play();
     }
   }
 
@@ -279,7 +294,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
       case PlaybackState.ENDED:
         if (!this._subtitleLoading) {
           this._videoElement.currentTime = 0;
-          this._videoElement.play();
+          this._play();
           break;
         }
       case PlaybackState.PLAYING:
@@ -291,7 +306,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
         if (this._subtitleLoading) {
           this._api.dispatchEvent(new PlaybackStateChangeEvent(this._preferedState));
         } else {
-          this._videoElement.play();
+          this._play();
         }
         break;
       default:
@@ -425,8 +440,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     this._source.attach(this._videoElement);
 
     this._videoElement.currentTime = startTime;
-    this._videoElement.play();
-
+    
     this._api.dispatchEvent(new TimeUpdateEvent(startTime));
   }
 
@@ -528,7 +542,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     };
     return (
       <div class="html5-video-container" ref={ containerRef }>
-        <video ref={ videoRef } class="video-stream" { ...attributes }></video>
+        <video ref={ videoRef } class="video-stream" autoPlay={true} { ...attributes }></video>
         <SubtitleContainerComponent engine={ this._subtitleEngine }></SubtitleContainerComponent>
       </div>
     );
