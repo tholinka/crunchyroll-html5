@@ -119,6 +119,10 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
     return this._player.isMuted();
   }
 
+  isFullscreenEnabled(): boolean {
+    return document.fullscreenEnabled;
+  }
+
   enterFullscreen(): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.enterFullscreen();

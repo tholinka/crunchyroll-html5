@@ -5,19 +5,19 @@
   transform: none;
 }
 
-.chrome-fullscreen-button:hover .chrome-fullscreen-btn-corner-0 {
+.chrome-fullscreen-button:not([aria-disabled=true]):hover .chrome-fullscreen-btn-corner-0 {
   animation: chrome-fullscreen-button-corner-0-animation .4s cubic-bezier(0.4,0.0,0.2,1);
 }
 
-.chrome-fullscreen-button:hover .chrome-fullscreen-btn-corner-1 {
+.chrome-fullscreen-button:not([aria-disabled=true]):hover .chrome-fullscreen-btn-corner-1 {
   animation: chrome-fullscreen-button-corner-1-animation .4s cubic-bezier(0.4,0.0,0.2,1);
 }
 
-.chrome-fullscreen-button:hover .chrome-fullscreen-btn-corner-2 {
+.chrome-fullscreen-button:not([aria-disabled=true]):hover .chrome-fullscreen-btn-corner-2 {
   animation: chrome-fullscreen-button-corner-2-animation .4s cubic-bezier(0.4,0.0,0.2,1);
 }
 
-.chrome-fullscreen-button:hover .chrome-fullscreen-btn-corner-3 {
+.chrome-fullscreen-button:not([aria-disabled=true]):hover .chrome-fullscreen-btn-corner-3 {
   animation: chrome-fullscreen-button-corner-3-animation .4s cubic-bezier(0.4,0.0,0.2,1);
 }
 

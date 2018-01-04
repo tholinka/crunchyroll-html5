@@ -49,12 +49,20 @@ export interface IFullscreenButtonState {
 export class FullscreenButton extends Component<IFullscreenButtonProps, IFullscreenButtonState> {
   private _handler = new EventHandler(this);
 
+  private _isEnabled(): boolean {
+    return this.props.api.isFullscreenEnabled();
+  }
+
   private _isFullscreen() {
     return this.props.api.isFullscreen();
   }
 
   private _onClick() {
-    this.props.api.toggleFullscreen();
+    if (this._isEnabled()) {
+      this.props.api.toggleFullscreen();
+    } else {
+      // Show popup to alert the user about the fullscreen mode being disabled.
+    }
   }
 
   private _onFullscreenChange() {
@@ -62,12 +70,16 @@ export class FullscreenButton extends Component<IFullscreenButtonProps, IFullscr
   }
   
   private _onMouseOver() {
+    if (!this._isEnabled()) return;
+
     if (this.props.onHover) {
       this.props.onHover();
     }
   }
   
   private _onMouseOut() {
+    if (!this._isEnabled()) return;
+
     if (this.props.onEndHover) {
       this.props.onEndHover();
     }
@@ -89,8 +101,15 @@ export class FullscreenButton extends Component<IFullscreenButtonProps, IFullscr
 
     const svg = fullscreen ? EXIT_SVG : ENTER_SVG;
 
+    const attributes: {
+      'aria-disabled'?: string
+    } = {};
+    if (!this._isEnabled()) {
+      attributes['aria-disabled'] = "true";
+    }
+
     return (
-      <button class="chrome-button chrome-fullscreen-button" onClick={onClick}>
+      <button class="chrome-button chrome-fullscreen-button" onClick={onClick} {...attributes}>
         {svg}
       </button>
     );

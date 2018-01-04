@@ -77,6 +77,7 @@ export interface IPlayerApi extends EventTarget {
   unmute(): void;
   isMuted(): boolean;
 
+  isFullscreenEnabled(): boolean;
   enterFullscreen(): void;
   exitFullscreen(): void;
   toggleFullscreen(): void;
