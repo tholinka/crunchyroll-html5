@@ -8,6 +8,26 @@ declare interface VendorDocument extends Document {
   msExitFullscreen(): void;
   mozFullScreenElement: Element;
   msFullscreenElement: Element;
+
+  mozFullScreenEnabled: boolean;
+  webkitFullscreenEnabled: boolean;
+  msFullscreenEnabled: boolean;
+}
+
+export function isFullscreenEnabled() {
+  const doc = document as VendorDocument;
+
+  if (typeof doc.mozFullScreenEnabled === "boolean") {
+    return doc.mozFullScreenEnabled;
+  } else if (typeof doc.fullscreenEnabled === "boolean") {
+    return doc.fullscreenEnabled;
+  } else if (typeof doc.webkitFullscreenEnabled === "boolean") {
+    return doc.webkitFullscreenEnabled;
+  } else if (typeof doc.msFullscreenEnabled === "boolean") {
+    return doc.msFullscreenEnabled;
+  }
+
+  return true;
 }
 
 export function requestFullscreen(element: Element) {

@@ -1,7 +1,8 @@
-import { IPlayerApi, PlaybackState, IVideoDetail } from "./IPlayerApi";
+import { IPlayerApi, PlaybackState, IVideoDetail } from './IPlayerApi';
 import { EventTarget } from '../../libs/events/EventTarget';
-import { ISubtitleTrack } from "../subtitles/ISubtitleTrack";
-import { ChromelessPlayer } from "./ChromelessPlayer";
+import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
+import { ChromelessPlayer } from './ChromelessPlayer';
+import { isFullscreenEnabled } from '../../utils/fullscreen';
 
 export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   private _player: ChromelessPlayer|undefined;
@@ -120,7 +121,7 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   }
 
   isFullscreenEnabled(): boolean {
-    return document.fullscreenEnabled;
+    return isFullscreenEnabled();
   }
 
   enterFullscreen(): void {
