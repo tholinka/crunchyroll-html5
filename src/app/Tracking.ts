@@ -13,7 +13,7 @@ export class VideoTracker extends Disposable {
   private _lastTime: number = 0;
 
   private _intervals: number[];
-  private _callCount: number = 1;
+  private _callCount: number = 0;
 
   constructor(stream: Stream, api: IPlayerApi) {
     super();
@@ -34,16 +34,23 @@ export class VideoTracker extends Disposable {
     this._handler.dispose();
   }
 
+  private _track(time: number, interval: number) {
+    this._elapsedTime = 0;
+    this._callCount++;
+
+    trackProgress(this._stream, time, interval, this._callCount);
+  }
+
+  private _getInterval() {
+    const intervalIndex = Math.min(this._callCount, this._intervals.length - 1);
+
+    return this._intervals[intervalIndex]/1000;
+  }
+
   private _onPlaybackStateChange(e: PlaybackStateChangeEvent) {
     if (e.state !== PlaybackState.ENDED) return;
 
-    const intervalIndex = Math.min(this._callCount - 1, this._intervals.length);
-    const interval = this._intervals[intervalIndex];
-    this._elapsedTime = 0;
-
-    trackProgress(this._stream, this._api.getDuration(), interval/1000, this._callCount);
-
-    this._callCount++;
+    this._track(this._api.getDuration(), this._getInterval());
   }
   
   private _onSeek(e: SeekEvent) {
@@ -56,14 +63,9 @@ export class VideoTracker extends Disposable {
 
     this._elapsedTime += dt;
 
-    const intervalIndex = Math.min(this._callCount - 1, this._intervals.length);
-    const interval = this._intervals[intervalIndex];
-    if (this._elapsedTime >= interval/1000) {
-      this._elapsedTime = 0;
-
-      trackProgress(this._stream, e.time, interval/1000, this._callCount);
-
-      this._callCount++;
+    const interval = this._getInterval();
+    if (this._elapsedTime >= interval) {
+      this._track(e.time, interval);
     }
   }
 }
