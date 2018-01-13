@@ -19,6 +19,7 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
   private _minValue: number;
   private _maxValue: number;
   private _value: number;
+  private _muted: boolean;
 
   private _sliderElement: HTMLElement;
   private _handleElement: HTMLElement;
@@ -37,10 +38,12 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
     if (isFinite(volume)) {
       this._value = volume;
     }
+    this._muted = props.api.isMuted();
   }
 
   private _onVolumeChange(e: VolumeChangeEvent): void {
     this._value = e.volume;
+    this._muted = e.muted;
 
     this._updateInternal();
   }
@@ -134,9 +137,13 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
   }
 
   private _updateInternal(): void {
-    const value: number = this.getValue();
+    let value: number = this.getValue();
     const minValue: number = this.getMinValue();
     const maxValue: number = this.getMaxValue();
+
+    if (this._muted) {
+      value = minValue;
+    }
 
     this.base.setAttribute("aria-valuemin", (minValue * 100) + '');
     this.base.setAttribute("aria-valuemax", (maxValue * 100) + '');
