@@ -113,7 +113,7 @@ export class Player extends Component<IPlayerProps, {}> {
     this._configCued = false;
     if (config.subtitles) {
       const tracks: ISubtitleTrack[] = [];
-      let defaultTrack: number = 0;
+      let defaultTrack: number = -1;
       let selectedSubtitleId: number|undefined = undefined;
       let queries = parseSimpleQuery(location.search);
 
