@@ -45,6 +45,9 @@ const generateManifest = () => {
     'web_accessible_resources': [
       'vendor/JavascriptSubtitlesOctopus/*',
       'fonts/*'
+    ],
+    'permissions': [
+      "*://v.vrv.co/*"
     ]
   }, null, 2);
 };

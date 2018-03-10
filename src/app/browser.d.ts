@@ -76,6 +76,7 @@ declare namespace browser {
 		const onUpdateAvailable: IListener<{ version: string; }>;
 		const onBrowserUpdateAvailable: IListener<void>;
 		const onMessage: IMessageListener;
+		const connect: (connectInfo?: { name?: string }) => browser.runtime.Port;
 
 		type OnInstalledReason = "install"|"update"|"browser_update"|"shared_module_update";
 
