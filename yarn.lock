@@ -34,14 +34,6 @@
   version "8.0.17"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.17.tgz#677bc8c118cfb76013febb62ede1f31d2c7222a1"
 
-"@types/pako@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@types/pako/-/pako-1.0.0.tgz#eaae8364d1b7f752e263bc3fd68dfec98e6136c5"
-
-"@types/text-encoding@^0.0.32":
-  version "0.0.32"
-  resolved "https://registry.yarnpkg.com/@types/text-encoding/-/text-encoding-0.0.32.tgz#52289b320a406850b14f08f48b475ca021218048"
-
 "@types/url-parse@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@types/url-parse/-/url-parse-1.1.0.tgz#61f8e1b52024d07fceb73fd7f8292e5ddd2b60a1"
@@ -297,10 +289,6 @@ bcrypt-pbkdf@^1.0.0:
   resolved "https://registry.yarnpkg.com/bcrypt-pbkdf/-/bcrypt-pbkdf-1.0.1.tgz#63bc5dcb61331b92bc05fd528953c33462a06f8d"
   dependencies:
     tweetnacl "^0.14.3"
-
-big-integer@^1.6.23:
-  version "1.6.23"
-  resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.23.tgz#e85d508220c74e3f43a4ce72eed51f3da4db94d1"
 
 big-integer@^1.6.26:
   version "1.6.26"
@@ -743,9 +731,9 @@ cross-spawn@^5.0.1:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
-crunchyroll-lib@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/crunchyroll-lib/-/crunchyroll-lib-1.0.1.tgz#27b4c5ef5b5649dcb2488c49641ba748eed17e2f"
+crunchyroll-lib@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/crunchyroll-lib/-/crunchyroll-lib-1.0.10.tgz#ea2f463419d207c9cbbf9e48a4d8558462e3682b"
   dependencies:
     aes-js "^3.1.0"
     base64-js "^1.2.3"
@@ -2251,10 +2239,6 @@ p-locate@^2.0.0:
   resolved "https://registry.yarnpkg.com/p-locate/-/p-locate-2.0.0.tgz#20a0103b222a70c8fd39cc2e580680f3dde5ec43"
   dependencies:
     p-limit "^1.1.0"
-
-pako@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.5.tgz#d2205dfe5b9da8af797e7c163db4d1f84e4600bc"
 
 pako@^1.0.6:
   version "1.0.6"

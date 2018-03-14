@@ -1,4 +1,3 @@
-import { Subtitle } from '../video';
 import { EventTarget } from '../../libs/events/EventTarget';
 import { ISubtitleTrack } from './ISubtitleTrack';
 

@@ -2,7 +2,6 @@ import { h, Component, render } from 'preact';
 import { ChromelessPlayer } from './ChromelessPlayer';
 import { HlsSource } from './HlsSource';
 import { ISource } from './ISource';
-import { Subtitle } from '../video';
 import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
 import { requestFullscreen, exitFullscreen, getFullscreenElement } from '../../utils/fullscreen';
 import { ChromeBottomComponent } from './chrome/BottomComponent';
@@ -18,6 +17,8 @@ import { IRect } from '../../utils/rect';
 import { BezelComponent } from './chrome/BezelComponent';
 import { ICON_PAUSE, ICON_PLAY, ICON_SEEK_BACK_5, ICON_VOLUME, ICON_VOLUME_HIGH, ICON_SEEK_FORWARD_5, ICON_SEEK_BACK_10, ICON_SEEK_FORWARD_10, ICON_VOLUME_MUTE } from './assets';
 import { BufferComponent } from './chrome/BufferComponent';
+import { ISubtitle } from 'crunchyroll-lib/models/ISubtitle';
+import { SubtitleToAss } from '../../converter/SubtitleToAss';
 
 export interface IPlayerProps {
   config?: IPlayerConfig;
@@ -30,7 +31,7 @@ export interface IPlayerConfig {
   title?: string;
   url?: string;
   thumbnailUrl?: string;
-  subtitles?: Subtitle[];
+  subtitles?: ISubtitle[];
   duration?: number;
   nextVideo?: IVideoDetail;
   startTime?: number;
@@ -121,9 +122,9 @@ export class Player extends Component<IPlayerProps, {}> {
         let useSubtitle = false;
         if (queries.hasOwnProperty('ssid')) {
           let id: string = queries['ssid'];
-          useSubtitle = config.subtitles[i].id === id;
+          useSubtitle = config.subtitles[i].getId().toString() === id;
         } else {
-          useSubtitle = config.subtitles[i].isDefault;
+          useSubtitle = config.subtitles[i].isDefault();
         }
         if (useSubtitle) {
           defaultTrack = i;
@@ -131,9 +132,10 @@ export class Player extends Component<IPlayerProps, {}> {
         
         let subtitle = config.subtitles[i];
         tracks.push({
-          label: subtitle.title,
+          label: subtitle.getTitle(),
           getContent: async (): Promise<string> => {
-            return (await subtitle.getContent()).toAss();
+            const converter = new SubtitleToAss(subtitle);
+            return await converter.getContentAsAss();
           }
         });
       }

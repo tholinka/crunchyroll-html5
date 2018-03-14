@@ -1,6 +1,5 @@
 import { LibAss } from '../libass';
 import { ISubtitleEngine, ISubtitleRect } from './ISubtitleEngine';
-import { Subtitle } from '../video';
 import { EventHandler } from '../../libs/events/EventHandler';
 import { ISubtitleTrack } from './ISubtitleTrack';
 import { EventTarget } from '../../libs/events/EventTarget';

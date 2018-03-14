@@ -1,13 +1,13 @@
-import { IPlayerApi, TimeUpdateEvent, SeekEvent, PlaybackStateChangeEvent, PlaybackState } from "./media/player/IPlayerApi";
-import { EventHandler } from "./libs/events/EventHandler";
-import { Stream } from "./media/video";
-import { trackProgress } from "./media/crunchyroll";
-import { Disposable } from "./libs/disposable/Disposable";
+import { IPlayerApi, TimeUpdateEvent, SeekEvent, PlaybackStateChangeEvent, PlaybackState } from "../media/player/IPlayerApi";
+import { EventHandler } from "../libs/events/EventHandler";
+import { trackProgress } from "./crunchyroll";
+import { Disposable } from "../libs/disposable/Disposable";
+import { IMedia } from "crunchyroll-lib/models/IMedia";
 
 export class VideoTracker extends Disposable {
   private _handler: EventHandler = new EventHandler(this);
 
-  private _stream: Stream;
+  private _media: IMedia;
   private _api: IPlayerApi;
   private _elapsedTime: number = 0;
   private _lastTime: number = 0;
@@ -15,12 +15,12 @@ export class VideoTracker extends Disposable {
   private _intervals: number[];
   private _callCount: number = 0;
 
-  constructor(stream: Stream, api: IPlayerApi) {
+  constructor(media: IMedia, api: IPlayerApi) {
     super();
 
-    this._stream = stream;
+    this._media = media;
     this._api = api;
-    this._intervals = stream.pingBackIntervals;
+    this._intervals = media.getPingIntervals();
 
     this._handler
       .listen(api, 'playbackstatechange', this._onPlaybackStateChange, false)
@@ -38,7 +38,7 @@ export class VideoTracker extends Disposable {
     this._elapsedTime = 0;
     this._callCount++;
 
-    trackProgress(this._stream, time, interval, this._callCount);
+    trackProgress(this._media, time, interval, this._callCount);
   }
 
   private _getInterval() {

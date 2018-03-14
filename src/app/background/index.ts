@@ -1,17 +1,13 @@
 import { IBrowserMessage } from "../IBrowserMessage";
-import * as request from "../utils/xhr";
+import { BodyType, IHttpClient } from "crunchyroll-lib/models/http/IHttpClient";
+import container from "crunchyroll-lib/config";
 
 browser.runtime.onMessage.addListener((message: IBrowserMessage, sender, sendResponse) => {
   switch (message.name) {
     case "xhr": {
-      const method: string = message.args[0];
-      const url: string = message.args[1];
-      const body: request.BodyType|undefined = message.args[2];
+      const httpClient = container.get<IHttpClient>("IHttpClient");
 
-      const options = message.args[3] as request.IOptions;
-      options.background = false;
-
-      return request.method(message.args[0], message.args[1], message.args[2], options);
+      return httpClient.method.apply(httpClient, message.args);
     }
   }
   return undefined;

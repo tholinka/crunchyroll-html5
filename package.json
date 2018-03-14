@@ -10,7 +10,10 @@
   "license": "MIT",
   "scripts": {
     "dev:userscript": "webpack --config build/userscript.config.js",
-    "dev:webextension": "webpack --config build/webextension.config.js",
+    "dev:webextension": "npm run dev:webextension:background && npm run dev:webextension:content && npm run dev:webextension:assets",
+    "dev:webextension:background": "webpack --config build/webextension.background.config.js",
+    "dev:webextension:content": "webpack --config build/webextension.content.config.js",
+    "dev:webextension:assets": "node build/webextension.assets.js",
     "build:userscript": "webpack --config build/userscript.prod.config.js",
     "build:webextension": "npm run build:webextension:background && npm run build:webextension:content && npm run build:webextension:assets",
     "build:webextension:background": "webpack --config build/webextension.background.prod.config.js",
@@ -24,8 +27,6 @@
     "@types/hls.js": "^0.7.4",
     "@types/lodash": "^4.14.78",
     "@types/node": "^8.0.17",
-    "@types/pako": "^1.0.0",
-    "@types/text-encoding": "^0.0.32",
     "@types/url-parse": "^1.1.0",
     "cssnano": "^3.10.0",
     "file-loader": "^1.1.5",
@@ -45,19 +46,15 @@
     "wrapper-webpack-plugin": "^1.0.0"
   },
   "dependencies": {
-    "aes-js": "^3.1.0",
-    "big-integer": "^1.6.23",
     "binary-loader": "^0.0.1",
-    "crunchyroll-lib": "^1.0.1",
+    "crunchyroll-lib": "^1.0.10",
     "css-loader": "^0.28.4",
     "hls.js": "^0.7.11",
     "imports-loader": "^0.7.1",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
-    "pako": "^1.0.5",
     "preact": "^8.2.5",
     "raw-loader": "^0.5.1",
-    "text-encoding": "^0.6.4",
     "url-parse": "^1.2.0",
     "webworkify-webpack-dropin": "^1.1.9"
   }
