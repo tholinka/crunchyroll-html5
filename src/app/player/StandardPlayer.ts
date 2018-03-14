@@ -39,7 +39,7 @@ export function getSelectedQuality(): string|undefined {
   const fmtElements = document.querySelectorAll("a[token^=showmedia\\.]");
   for (let i = 0; i < fmtElements.length; i++) {
     const href = fmtElements[i].getAttribute("href");
-    if (!href || href.indexOf("/freetrial") === 0)
+    if (!href || href.indexOf("/freetrial") === 0 || !fmtElements[i].classList.contains('dark-button'))
       continue;
     const token = fmtElements[i].getAttribute("token");
     if (!token) continue;
