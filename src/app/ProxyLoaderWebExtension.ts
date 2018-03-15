@@ -49,7 +49,7 @@ export class ProxyLoaderWebExtension {
   }
 
   destroy(): void {
-    this._port.disconnect();
+    this._callBackground("destroy");
   }
 
   abort(): void {

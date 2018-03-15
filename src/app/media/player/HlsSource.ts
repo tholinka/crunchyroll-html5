@@ -9,9 +9,9 @@ export class HlsSource extends Disposable implements ISource {
   constructor(url: string) {
     super();
 
-    this._hls = new Hls(/*{
-      loader: ProxyLoaderWebExtension
-    }*/);
+    this._hls = new Hls({
+      pLoader: ProxyLoaderWebExtension
+    });
 
     this._hls.loadSource(url);
   }
