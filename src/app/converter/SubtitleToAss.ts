@@ -129,7 +129,7 @@ class SubtitleStyleXMLModel extends BaseXMLModel {
   }
 
   get marginL(): string {
-    return this._element.getAttribute("marginL");
+    return this._element.getAttribute("margin_l");
   }
 
   get marginR(): string {

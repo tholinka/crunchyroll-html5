@@ -147,6 +147,8 @@ export class PlayerController {
 
     this._url = detail.url;
     this._changedMedia = true;
+    this._autoPlay = true;
+    this._startTime = undefined;
 
     if (this._tracking) {
       this._tracking.dispose();
