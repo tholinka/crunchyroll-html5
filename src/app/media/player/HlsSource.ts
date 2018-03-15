@@ -1,12 +1,17 @@
 import * as Hls from 'hls.js';
 import { ISource, ISourceLevel, ISourceAudioTrack } from './ISource';
 import { Disposable } from '../../libs/disposable/Disposable';
+import { ProxyLoaderWebExtension } from '../../ProxyLoaderWebExtension';
 
 export class HlsSource extends Disposable implements ISource {
-  private _hls = new Hls();
+  private _hls: Hls;
 
   constructor(url: string) {
     super();
+
+    this._hls = new Hls(/*{
+      loader: ProxyLoaderWebExtension
+    }*/);
 
     this._hls.loadSource(url);
   }
