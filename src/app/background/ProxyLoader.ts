@@ -4,6 +4,16 @@ export interface LoaderStats extends Hls.LoaderStats {
   loaded: number;
 }
 
+interface IStats {
+  trequest: number;
+  retry: number;
+  aborted?: boolean;
+  tfirst?: number;
+  tload?: number;
+  loaded?: number;
+  total?: number;
+}
+
 export class ProxyLoader {
   private loader?: XMLHttpRequest;
   
@@ -13,7 +23,7 @@ export class ProxyLoader {
   private context: Hls.LoaderContext;
   private config: Hls.LoaderConfig;
   private callbacks: Hls.LoaderCallbacks;
-  private stats: LoaderStats;
+  private stats: IStats;
   private retryDelay: number;
 
   destroy(): void {
@@ -43,7 +53,7 @@ export class ProxyLoader {
     this.context = context;
     this.config = config;
     this.callbacks = callbacks;
-    this.stats = { trequest: performance.now(), retry: 0, aborted: false, loaded: 0, tfirst: 0, tload: 0, total: 0, bw: 0 };
+    this.stats = { trequest: performance.now(), retry: 0 };
     this.retryDelay = config.retryDelay;
     this.loadInternal();
   }
@@ -101,7 +111,7 @@ export class ProxyLoader {
         let status = xhr.status;
         // http status between 200 to 299 are all successful
         if (status >= 200 && status < 300) {
-          stats.tload = Math.max(stats.tfirst, performance.now());
+          stats.tload = Math.max(stats.tfirst || 0, performance.now());
           let data, len;
           if (context.responseType === 'arraybuffer') {
             data = xhr.response;
@@ -112,7 +122,7 @@ export class ProxyLoader {
           }
           stats.loaded = stats.total = len;
           let response = { url: xhr.responseURL, data: data };
-          this.callbacks.onSuccess(response, stats, context);
+          this.callbacks.onSuccess(response, stats as any as Hls.LoaderStats, context);
         } else {
           // if max nb of retries reached or if http status between 400 and 499 (such error cannot be recovered, retrying is useless), return error
           if (stats.retry >= config.maxRetry || (status >= 400 && status < 499)) {
@@ -136,7 +146,7 @@ export class ProxyLoader {
   }
 
   loadtimeout () {
-    this.callbacks.onTimeout(this.stats, this.context);
+    this.callbacks.onTimeout(this.stats as any as Hls.LoaderStats, this.context);
   }
 
   loadprogress(event: Event) {

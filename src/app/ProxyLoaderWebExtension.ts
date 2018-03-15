@@ -60,9 +60,13 @@ export class ProxyLoaderWebExtension {
     this._context = context;
     this._callbacks = callbacks;
 
-    let contextClone = Object.assign({}, this._context);
-    delete (contextClone as any).loader;
+    let slimContext = {
+      url: context.url,
+      rangeStart: context.rangeStart,
+      rangeEnd: context.rangeEnd,
+      responseType: context.responseType
+    } as Hls.LoaderContext;
 
-    this._callBackground("load", [ contextClone, config ]);
+    this._callBackground("load", [ slimContext, config, Object.keys(callbacks) ]);
   }
 }

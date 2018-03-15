@@ -34,12 +34,12 @@ browser.runtime.onConnect.addListener(port => {
 
     switch (message.method) {
       case "load": {
-        loader.load(message.args[0], message.args[1], {
-          onError: passCallback.bind(undefined, "onError"),
-          onProgress: passCallback.bind(undefined, "onProgress"),
-          onSuccess: passCallback.bind(undefined, "onSuccess"),
-          onTimeout: passCallback.bind(undefined, "onTimeout")
-        });
+        let callbacks: {[key: string]: Function} = {};
+        for (let i = 0; i < message.args[2].length; i++) {
+          callbacks[message.args[2][i]] = passCallback.bind(undefined, message.args[2][i]);
+        }
+
+        loader.load(message.args[0], message.args[1], callbacks as any as Hls.LoaderCallbacks);
         break;
       }
       case "abort": {
