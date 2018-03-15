@@ -3,8 +3,12 @@ import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
 import { run } from './bootstrap';
 import { setCrossHttpClient } from "./config";
 import { GreasemonkeyHttpClient } from "./http/GreasemonkeyHttpClient";
+import { setPlaylistLoader } from "./playlistLoader";
+import { ProxyLoaderGreasemonkey } from "./libs/greasemonkey/ProxyLoaderGreasemonkey";
 
 setCrossHttpClient(GreasemonkeyHttpClient);
+
+setPlaylistLoader(ProxyLoaderGreasemonkey);
 
 const libassWorkerJS = require('raw-loader!../../vendor/JavascriptSubtitlesOctopusAsm/subtitles-octopus-worker.js');
 const libassDefaultFont = require('binary-loader!../../vendor/JavascriptSubtitlesOctopus/default.ttf');

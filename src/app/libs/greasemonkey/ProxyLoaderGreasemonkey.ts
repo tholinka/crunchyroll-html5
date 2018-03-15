@@ -1,3 +1,6 @@
+import { Event } from '../events/Event';
+import { CrossXMLHttpRequest } from "./CrossXMLHttpRequest";
+
 export interface LoaderStats extends Hls.LoaderStats {
   aborted: boolean;
   retry: number;
@@ -14,8 +17,10 @@ interface IStats {
   total?: number;
 }
 
-export class ProxyLoader {
-  private loader?: XMLHttpRequest;
+let useGreasemonkeyProxy = false;
+
+export class ProxyLoaderGreasemonkey {
+  private loader?: CrossXMLHttpRequest|XMLHttpRequest;
   
   private requestTimeout?: number;
   private retryTimeout?: number;
@@ -60,7 +65,11 @@ export class ProxyLoader {
 
   loadInternal() {
     let xhr, context = this.context;
-    xhr = this.loader = new XMLHttpRequest();
+    if (useGreasemonkeyProxy) {
+      xhr = this.loader = new CrossXMLHttpRequest();
+    } else {
+      xhr = this.loader = new XMLHttpRequest();
+    }
 
     let stats = this.stats;
     stats.tfirst = 0;
@@ -80,15 +89,38 @@ export class ProxyLoader {
 
     xhr.onreadystatechange = this.readystatechange.bind(this);
     xhr.onprogress = this.loadprogress.bind(this);
+    xhr.onerror = this._error.bind(this);
     xhr.responseType = context.responseType as XMLHttpRequestResponseType;
 
     // setup timeout before we perform request
     this.requestTimeout = window.setTimeout(this.loadtimeout.bind(this), this.config.timeout);
-    xhr.send();
+    (xhr as any).send();
+  }
+
+  private _error(event: Event): void {
+    const xhr = event.currentTarget as CrossXMLHttpRequest;
+    if (useGreasemonkeyProxy || xhr.status !== 0) return;
+    useGreasemonkeyProxy = true;
+
+    this.loader = undefined;
+
+    if (this.requestTimeout !== undefined) {
+      window.clearTimeout(this.requestTimeout);
+      this.requestTimeout = undefined;
+    }
+
+    if (this.retryTimeout !== undefined) {
+      window.clearTimeout(this.retryTimeout);
+      this.retryTimeout = undefined;
+    }
+
+    this.stats = { trequest: performance.now(), retry: 0 };
+    this.retryDelay = this.config.retryDelay;
+    this.loadInternal();
   }
 
   readystatechange(event: Event) {
-    let xhr = event.currentTarget as XMLHttpRequest,
+    let xhr = event.currentTarget as CrossXMLHttpRequest,
       readyState = xhr.readyState,
       stats = this.stats,
       context = this.context,
@@ -123,7 +155,7 @@ export class ProxyLoader {
           stats.loaded = stats.total = len;
           let response = { url: xhr.responseURL, data: data };
           this.callbacks.onSuccess(response, stats as any as Hls.LoaderStats, context);
-        } else {
+        } else if (useGreasemonkeyProxy || status !== 0) {
           // if max nb of retries reached or if http status between 400 and 499 (such error cannot be recovered, retrying is useless), return error
           if (stats.retry >= config.maxRetry || (status >= 400 && status < 499)) {
             this.callbacks.onError({ code: status, text: xhr.statusText }, context);
@@ -150,8 +182,7 @@ export class ProxyLoader {
   }
 
   loadprogress(event: Event) {
-    let xhr = event.currentTarget as XMLHttpRequest,
-      stats = this.stats;
+    let stats = this.stats;
 
     stats.loaded = (event as any).loaded as number;
     if ((event as any).lengthComputable as boolean)

@@ -243,7 +243,6 @@ export class PlayerController {
    * Returns whether sizing is enabled.
    */
   isSizeEnabled(): boolean {
-    // return /https?:\/\/(?:(www|m)\.)?(crunchyroll\.(?:com|fr)\/(?:media(?:-|\/\?id=)|[^/]*\/[^/?&]*?)([0-9]+))(?:[/?&]|$)/g.test(window.location.href);
     return this._sizeEnabled;
   }
 
