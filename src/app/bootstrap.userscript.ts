@@ -1,6 +1,10 @@
 import { binaryToBlob } from "./utils/blob";
 import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
 import { run } from './bootstrap';
+import { setPlaylistLoader } from "./playlistLoader";
+import { ProxyLoaderGreasemonkey } from "./ProxyLoaderGreasemonkey";
+
+setPlaylistLoader(ProxyLoaderGreasemonkey);
 
 const libassWorkerJS = require('raw-loader!../../vendor/JavascriptSubtitlesOctopusAsm/subtitles-octopus-worker.js');
 const libassDefaultFont = require('binary-loader!../../vendor/JavascriptSubtitlesOctopus/default.ttf');

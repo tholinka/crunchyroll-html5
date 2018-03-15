@@ -1,7 +1,7 @@
 import * as Hls from 'hls.js';
 import { ISource, ISourceLevel, ISourceAudioTrack } from './ISource';
 import { Disposable } from '../../libs/disposable/Disposable';
-import { ProxyLoaderWebExtension } from '../../ProxyLoaderWebExtension';
+import { getPlaylistLoader } from '../../playlistLoader';
 
 export class HlsSource extends Disposable implements ISource {
   private _hls: Hls;
@@ -9,9 +9,9 @@ export class HlsSource extends Disposable implements ISource {
   constructor(url: string) {
     super();
 
-    this._hls = new Hls(/*{
-      loader: ProxyLoaderWebExtension
-    }*/);
+    this._hls = new Hls({
+      loader: getPlaylistLoader()
+    });
 
     this._hls.loadSource(url);
   }

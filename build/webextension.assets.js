@@ -47,7 +47,7 @@ const generateManifest = () => {
       'fonts/*'
     ],
     'permissions': [
-      "*://v.vrv.co/*"
+      "<all_urls>"
     ]
   }, null, 2);
 };
