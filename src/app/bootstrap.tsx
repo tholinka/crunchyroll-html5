@@ -11,6 +11,20 @@ import { bindCrossHttpClientAsDefault } from './config';
 const css = require('../styles/bootstrap.scss');
 
 export function run() {
+  if (document.readyState === "complete") {
+    _run();
+  } else {
+    const fn = function() {
+      if (document.readyState === "complete") {
+        document.removeEventListener("readystatechange", fn, false);
+        _run();
+      }
+    };
+    document.addEventListener("readystatechange", fn, false);
+  }
+}
+
+function _run() {
   const url = window.location.href;
 
   let mediaId = getMediaId(url);

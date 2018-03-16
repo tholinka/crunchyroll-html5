@@ -4,7 +4,7 @@ const package = require('../package.json');
 const merge = require('webpack-merge');
 const common = require('./webpack.common.config.js');
 const path = require('path');
-const utils = require('./utils');
+const utils = require('../build/utils');
 
 /**
  * Generate the user

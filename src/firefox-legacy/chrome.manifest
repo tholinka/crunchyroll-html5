@@ -1,0 +1,2 @@
+content crunchyroll-html5 chrome/content/
+content crunchyroll-html5 chrome/content/ contentaccessible=yes remoteenabled=yes

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+  <Description about="urn:mozilla:install-manifest">
+    <em:id>{4669b9f1-f1a2-46d6-a686-5a68be73d204}</em:id>
+    <em:type>2</em:type>
+    <em:multiprocessCompatible>true</em:multiprocessCompatible>
+    <em:hasEmbeddedWebExtension>true</em:hasEmbeddedWebExtension>
+    <em:bootstrap>true</em:bootstrap>
+
+    <!-- Front End MetaData -->
+    <em:name>Crunchyroll HTML5</em:name>
+    <em:description>${description}</em:description>
+    <em:version>${version}</em:version>
+    <em:creator>Jeppe Rune Mortensen</em:creator>
+    <em:homepageURL>https://github.com/YePpHa/crunchyroll-html5</em:homepageURL>
+
+    <!-- Firefox -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <em:minVersion>19.0</em:minVersion>
+        <em:maxVersion>56.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+    
+    <!-- Firefox Mobile -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{aa3c5121-dab2-40e2-81ca-7ea25febc110}</em:id>
+        <em:minVersion>19.0</em:minVersion>
+        <em:maxVersion>56.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+    
+    <!-- SeaMonkey -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
+        <em:minVersion>2.0</em:minVersion>
+        <em:maxVersion>2.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+    
+    <!-- PaleMoon -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{8de7fcbb-c55c-4fbe-bfc5-fc555c87dbc4}</em:id>
+        <em:minVersion>25.0</em:minVersion>
+        <em:maxVersion>25.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+  </Description>
+</RDF>
