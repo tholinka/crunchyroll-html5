@@ -34,3 +34,14 @@ export function parseSimpleQuery(query: string): {[key: string]: string} {
   }
   return queries as {[key: string]: string};
 }
+
+export function buildQuery(query: {[key: string]: string}): string {
+  const builder: string[] = [];
+
+  for (let key in query) {
+    if (query.hasOwnProperty(key)) {
+      builder.push(encodeURIComponent(key) + "=" + encodeURIComponent(query[key]));
+    }
+  }
+  return builder.join("&");
+}

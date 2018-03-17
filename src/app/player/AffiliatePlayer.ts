@@ -12,7 +12,7 @@ interface IAffiliateQuery {
 
 export interface IAffiliateMediaData {
   affiliateId: string;
-  mediaId: string;
+  mediaId: number;
   videoFormat: string;
   videoQuality: string;
   autoPlay: boolean;
@@ -39,7 +39,7 @@ export function parseUrlFragments(url: string): IAffiliateMediaData|undefined {
 
   return {
     affiliateId: query.aff,
-    mediaId: query.media_id,
+    mediaId: parseInt(query.media_id, 10),
     videoFormat: query.video_format,
     videoQuality: query.video_quality,
     autoPlay: query.auto_play === "1",

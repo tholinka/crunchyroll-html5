@@ -6,6 +6,8 @@ import { NextVideoEvent, PlaybackState } from '../media/player/IPlayerApi';
 import parse = require('url-parse');
 import { IMedia } from 'crunchyroll-lib/models/IMedia';
 import { VideoTracker } from './Tracking';
+import { getCollectionCarouselDetail, getMediaMetadataFromDOM } from '../media/CollectionCarouselParser';
+import { getCollectionCarouselPage, ICollectionCarouselPage } from './crunchyroll';
 
 export interface IPlayerControllerOptions {
   quality?: keyof Formats;
@@ -21,7 +23,7 @@ export interface IPlayerControllerOptions {
 export class PlayerController {
   private _element: Element;
   private _url: string;
-  private _mediaId: string;
+  private _mediaId: number;
 
   private _sizeEnabled: boolean = true;
 
@@ -37,7 +39,9 @@ export class PlayerController {
 
   private _tracking?: VideoTracker;
 
-  constructor(element: Element, url: string, mediaId: string, options?: IPlayerControllerOptions) {
+  private _cachedCarouselPage?: ICollectionCarouselPage;
+
+  constructor(element: Element, url: string, mediaId: number, options?: IPlayerControllerOptions) {
     this._element = element;
     this._url = url;
     this._mediaId = mediaId;
@@ -54,7 +58,7 @@ export class PlayerController {
     }
   }
 
-  private _getThumbnailByMediaId(mediaId: string): string|undefined {
+  private _getThumbnailByMediaId(mediaId: number): string|undefined {
     const img = document.querySelector("a.link.block-link.block[href$=\"-" + mediaId + "\"] img.mug");
     if (!img) return undefined;
 
@@ -91,7 +95,7 @@ export class PlayerController {
     location.href = url.toString();
   }
 
-  private _loadMedia(media: IMedia): void {
+  private async _loadMedia(media: IMedia): Promise<void> {
     if (!this._player) return;
     if (this._tracking) {
       this._tracking.dispose();
@@ -117,7 +121,24 @@ export class PlayerController {
     // Register the next video if there's one
     const nextVideoUrl = media.getNextVideoUrl();
     if (nextVideoUrl) {
-      const nextVideo = NextVideo.fromUrlUsingDocument(nextVideoUrl);
+      let nextVideo = NextVideo.fromUrlUsingDocument(nextVideoUrl);
+      if (!nextVideo) {
+        try {
+          const detail = getCollectionCarouselDetail(nextVideoUrl);
+          const mediaMetadata = getMediaMetadataFromDOM();
+          if (mediaMetadata) {
+            if (!this._cachedCarouselPage || !this._cachedCarouselPage.data || !this._cachedCarouselPage.data[detail.mediaId]) {
+              this._cachedCarouselPage = await getCollectionCarouselPage(detail.mediaId, detail.groupId, mediaMetadata.collection_id, detail.index);
+            }
+            if (this._cachedCarouselPage.data && this._cachedCarouselPage.data[detail.mediaId]) {
+              const doc = (new DOMParser()).parseFromString("<html><head></head><body>" + this._cachedCarouselPage.data[detail.mediaId] + "</body></html>", "text/html");
+              nextVideo = NextVideo.fromElement(doc.body);
+            }
+          }
+        } catch (e) {
+          // Do nothing
+        }
+      }
       if (nextVideo) {
         videoConfig.nextVideo = {
           title: nextVideo.episodeNumber + ': ' + nextVideo.episodeTitle,
@@ -172,7 +193,7 @@ export class PlayerController {
       });
     }
 
-    this._loadMedia(media);
+    await this._loadMedia(media);
   }
 
   /**
@@ -188,18 +209,18 @@ export class PlayerController {
     let media: IMedia;
 
     if (this._mediaFormat && this._mediaQuality) {
-      media = await getMedia(this._mediaId, this._mediaFormat, this._mediaQuality, this._url, {
+      media = await getMedia(this._mediaId.toString(), this._mediaFormat, this._mediaQuality, this._url, {
         affiliateId: this._affiliateId,
         autoPlay: this._autoPlay
       });
     } else {
-      media = await getMedia(this._mediaId, this._quality, this._url, {
+      media = await getMedia(this._mediaId.toString(), this._quality, this._url, {
         affiliateId: this._affiliateId,
         autoPlay: this._autoPlay
       });
     }
 
-    this._loadMedia(media);
+    await this._loadMedia(media);
   }
 
   private _onSizeChange(large: boolean): void {

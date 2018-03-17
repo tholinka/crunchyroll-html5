@@ -77,7 +77,7 @@ class Bootstrap {
     importCSS(css);
   }
 
-  async run(mediaId: string, options?: IPlayerControllerOptions) {
+  async run(mediaId: number, options?: IPlayerControllerOptions) {
     this._wrapper.innerHTML = "";
 
     const player = new PlayerController(this._wrapper, window.location.href, mediaId, options);
