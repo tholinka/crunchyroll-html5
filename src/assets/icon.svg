@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   width="480"
+   height="480"
+   viewBox="0 0 127 127"
+   version="1.1">
+  <g transform="translate(0,-170)">
+    <rect
+       style="fill:#f78b24"
+       width="127"
+       height="127"
+       x="0"
+       y="170" />
+    <circle
+       cx="64"
+       cy="234"
+       style="fill:#ffffff"
+       r="62" />
+    <circle
+       cx="70"
+       cy="240"
+       style="fill:#f78b24"
+       r="56" />
+    <path
+       style="fill:#ffffff"
+       d="m 118,234 -39,22 -39,22 0,-45 0,-45 39,22 z"
+       transform="matrix(0.92284002,0,0,0.91760333,7.6915,24.531294)" />
+    <circle
+       style="fill:#f78b24"
+       cx="90"
+       cy="226"
+       r="16" />
+  </g>
+</svg>

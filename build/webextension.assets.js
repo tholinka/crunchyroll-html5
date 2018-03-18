@@ -9,10 +9,18 @@ const mkdirp = require('mkdirp');
 const generateManifest = () => {
   return JSON.stringify({
     'manifest_version': 2,
-    'name': package.name,
+    'name': package.productName,
     'version': package.version,
     'description': package.description,
     'author': utils.parseAuthor(package.author),
+    'icons': {
+      '16': 'assets/icon16.png',
+      '32': 'assets/icon32.png',
+      '48': 'assets/icon48.png',
+      '64': 'assets/icon64.png',
+      '96': 'assets/icon96.png',
+      '128': 'assets/icon128.png'
+    },
     'background': {
       'scripts': [
         'vendor/browser-polyfill.min.js',
@@ -64,6 +72,12 @@ mkdirp(path.join(__dirname, '../dist/webextension'), (err) => {
   });
 
   ncp(path.join(__dirname, '../src/fonts'), path.join(__dirname, '../dist/webextension/fonts'), (err) => {
+    if (err) {
+      console.error(err);
+    }
+  });
+
+  ncp(path.join(__dirname, '../src/assets'), path.join(__dirname, '../dist/webextension/assets'), (err) => {
     if (err) {
       console.error(err);
     }

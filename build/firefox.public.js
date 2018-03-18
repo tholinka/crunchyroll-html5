@@ -9,6 +9,11 @@ const excludeVendorFilenames = [
   'patch-worker.js'
 ];
 
+const includeAssetsFilenames = [
+  'icon32.png',
+  'icon64.png'
+];
+
 mkdirp(path.join(__dirname, '../dist/firefox/chrome/content'), (err) => {
   if (err) {
     console.error(err);
@@ -26,6 +31,17 @@ mkdirp(path.join(__dirname, '../dist/firefox/chrome/content'), (err) => {
   });
 
   ncp(path.join(__dirname, '../src/fonts'), path.join(__dirname, '../dist/firefox/chrome/content/fonts'), (err) => {
+    if (err) {
+      console.error(err);
+    }
+  });
+
+  ncp(path.join(__dirname, '../src/assets'), path.join(__dirname, '../dist/firefox/assets'), {
+    filter: (filename) => {
+      const base = path.resolve(__dirname, '../assets');
+      return (includeAssetsFilenames.indexOf(path.relative(base, filename)) !== -1);
+    }
+  }, (err) => {
     if (err) {
       console.error(err);
     }

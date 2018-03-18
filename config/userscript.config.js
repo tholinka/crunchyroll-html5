@@ -35,7 +35,7 @@ const generateMetadataBlock = (metadata) => {
 };
 
 const metadata = {
-  'name': package['name'],
+  'name': package['productName'],
   'description': package['description'],
   'version': package['version'],
   'author': utils.parseAuthor(package['author']),

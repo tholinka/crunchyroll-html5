@@ -3,12 +3,14 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>{4669b9f1-f1a2-46d6-a686-5a68be73d204}</em:id>
     <em:type>2</em:type>
+    <em:iconURL>resource://crunchyroll-html5/assets/icon32.png</em:iconURL>
+    <em:iconURL64>resource://crunchyroll-html5/assets/icon64.png</em:iconURL64>
     <em:multiprocessCompatible>true</em:multiprocessCompatible>
     <em:hasEmbeddedWebExtension>true</em:hasEmbeddedWebExtension>
     <em:bootstrap>true</em:bootstrap>
 
     <!-- Front End MetaData -->
-    <em:name>Crunchyroll HTML5</em:name>
+    <em:name>${productName}</em:name>
     <em:description>${description}</em:description>
     <em:version>${version}</em:version>
     <em:creator>Jeppe Rune Mortensen</em:creator>

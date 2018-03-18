@@ -1,15 +1,17 @@
 {
   "name": "crunchyroll-html5",
+  "productName": "Crunchyroll HTML5",
   "description": "A fully fledged HTML5 player for Crunchyroll.",
   "author": {
     "name": "Jeppe Rune Mortensen",
     "email": "jepperm@gmail.com"
   },
-  "version": "0.7.1",
+  "version": "0.7.2",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "npm run build:userscript && npm run build:webextension && npm run build:firefox",
+    "clean": "shx rm -rf dist",
+    "build": "npm run clean && npm run build:userscript && npm run build:webextension && npm run build:firefox",
     "build:userscript": "webpack --config config/userscript.prod.config.js",
     "build:webextension": "npm run build:webextension:background && npm run build:webextension:content && npm run build:webextension:assets",
     "build:webextension:background": "webpack --config config/webextension.background.prod.config.js",
