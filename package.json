@@ -6,8 +6,8 @@
     "name": "Jeppe Rune Mortensen",
     "email": "jepperm@gmail.com"
   },
-  "version": "0.7.2",
-  "main": "index.js",
+  "version": "0.7.3",
+  "main": "dist/crunchyroll-html5.user.js",
   "license": "MIT",
   "scripts": {
     "clean": "shx rm -rf dist",
@@ -61,7 +61,7 @@
   },
   "dependencies": {
     "binary-loader": "^0.0.1",
-    "crunchyroll-lib": "^1.0.10",
+    "crunchyroll-lib": "^1.0.11",
     "css-loader": "^0.28.4",
     "hls.js": "^0.7.11",
     "imports-loader": "^0.7.1",
