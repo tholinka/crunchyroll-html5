@@ -6,7 +6,7 @@
     "name": "Jeppe Rune Mortensen",
     "email": "jepperm@gmail.com"
   },
-  "version": "0.7.3",
+  "version": "0.8.0",
   "main": "dist/crunchyroll-html5.user.js",
   "license": "MIT",
   "scripts": {
