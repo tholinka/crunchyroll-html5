@@ -379,18 +379,30 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
   setVolume(volume: number): void {
     this._videoElement.volume = volume;
+
+    if (!this._source) {
+      this._onVolumeChange();
+    }
   }
 
   getVolume(): number {
     return this._videoElement.volume;
   }
+
+  setMuted(muted: boolean): void {
+    this._videoElement.muted = muted;
+
+    if (!this._source) {
+      this._onVolumeChange();
+    }
+  }
   
   mute(): void {
-    this._videoElement.muted = true;
+    this.setMuted(true);
   }
   
   unmute(): void {
-    this._videoElement.muted = false;
+    this.setMuted(false);
   }
   
   isMuted(): boolean {

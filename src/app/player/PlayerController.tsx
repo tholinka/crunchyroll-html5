@@ -2,12 +2,14 @@ import { h, render } from 'preact';
 import { Player, IPlayerConfig } from '../media/player/Player';
 import { getMediaByUrl, Formats, getMedia } from 'crunchyroll-lib/media';
 import { NextVideo } from '../media/nextvideo';
-import { NextVideoEvent, PlaybackState } from '../media/player/IPlayerApi';
+import { NextVideoEvent, PlaybackState, VolumeChangeEvent } from '../media/player/IPlayerApi';
 import parse = require('url-parse');
 import { IMedia } from 'crunchyroll-lib/models/IMedia';
 import { VideoTracker } from './Tracking';
 import { getCollectionCarouselDetail, getMediaMetadataFromDOM } from '../media/CollectionCarouselParser';
 import { getCollectionCarouselPage, ICollectionCarouselPage } from './crunchyroll';
+import container from "../../config/inversify.config";
+import { IStorageSymbol, IStorage } from '../storage/IStorage';
 
 export interface IPlayerControllerOptions {
   quality?: keyof Formats;
@@ -18,6 +20,11 @@ export interface IPlayerControllerOptions {
   sizeEnabled?: boolean;
   autoPlay?: boolean;
   affiliateId?: string;
+}
+
+declare interface IVolumeData {
+  volume: number;
+  muted: boolean;
 }
 
 export class PlayerController {
@@ -77,6 +84,20 @@ export class PlayerController {
     };
   }
 
+  private async _onVolumeChange(e: VolumeChangeEvent): Promise<void> {
+    const volume = e.volume;
+    const muted = e.muted;
+
+    const storage = container.get<IStorage>(IStorageSymbol);
+
+    const data = {
+      volume: volume,
+      muted: muted
+    } as IVolumeData;
+
+    await storage.set<IVolumeData>('volume', data);
+  }
+
   private _onFullscreenChange(): void {
     if (!this._player || this._player.getApi().isFullscreen()) return;
 
@@ -118,6 +139,14 @@ export class PlayerController {
       thumbnailUrl: metadata.getEpisodeImageUrl()
     } as IPlayerConfig;
 
+    const storage = container.get<IStorage>(IStorageSymbol);
+
+    const volumeData = await storage.get<IVolumeData>('volume');
+    if (volumeData) {
+      videoConfig.muted = volumeData.muted;
+      videoConfig.volume = volumeData.volume;
+    }
+
     // Register the next video if there's one
     const nextVideoUrl = media.getNextVideoUrl();
     if (nextVideoUrl) {
@@ -136,7 +165,7 @@ export class PlayerController {
             }
           }
         } catch (e) {
-          // Do nothing
+          // It failed to get the carousel details for the next video.
         }
       }
       if (nextVideo) {
@@ -205,6 +234,7 @@ export class PlayerController {
     const api = player.getApi();
     api.listen('fullscreenchange', () => this._onFullscreenChange());
     api.listen('nextvideo', (e: NextVideoEvent) => this._onNextVideo(e));
+    api.listen('volumechange', (e: VolumeChangeEvent) => this._onVolumeChange(e));
 
     let media: IMedia;
 

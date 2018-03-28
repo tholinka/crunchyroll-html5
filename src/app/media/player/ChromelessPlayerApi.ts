@@ -115,6 +115,11 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
     this._player.unmute();
   }
 
+  setMuted(muted: boolean): void {
+    if (!this._player) throw new Error("Not initialized");
+    this._player.setMuted(muted);
+  }
+
   isMuted(): boolean {
     if (!this._player) throw new Error("Not initialized");
     return this._player.isMuted();

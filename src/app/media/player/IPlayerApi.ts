@@ -75,6 +75,7 @@ export interface IPlayerApi extends EventTarget {
   getVolume(): number;
   mute(): void;
   unmute(): void;
+  setMuted(muted: boolean): void;
   isMuted(): boolean;
 
   isFullscreenEnabled(): boolean;

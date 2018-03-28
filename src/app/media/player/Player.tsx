@@ -36,6 +36,8 @@ export interface IPlayerConfig {
   nextVideo?: IVideoDetail;
   startTime?: number;
   autoplay?: boolean;
+  volume?: number;
+  muted?: boolean;
 }
 
 export class Player extends Component<IPlayerProps, {}> {
@@ -143,11 +145,20 @@ export class Player extends Component<IPlayerProps, {}> {
       this._chromelessPlayer.setSubtitleTrack(defaultTrack);
     }
 
+    if (config.volume !== undefined) {
+      this._chromelessPlayer.setVolume(config.volume);
+    }
+
+    if (config.muted !== undefined) {
+      this._chromelessPlayer.setMuted(config.muted);
+    }
+
     if (config.url) {
       this._chromelessPlayer.setVideoSource(new HlsSource(config.url), config.startTime);
     } else {
       this._chromelessPlayer.removeVideoSource();
     }
+    
     if (typeof config.duration === 'number') {
       this._chromelessPlayer.setDuration(config.duration);
     } else {

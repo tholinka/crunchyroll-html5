@@ -213,6 +213,9 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
       .listen(this.base, 'keydown', this._onKeyDown, false)
       .listen(this.props.api, 'volumechange', this._onVolumeChange, false)
       .listen(this.props.api, 'resize', this._onResize, false);
+
+    this._value = this.props.api.getVolume();
+    this._muted = this.props.api.isMuted();
     this._onResize();
   }
 

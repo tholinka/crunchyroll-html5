@@ -44,11 +44,11 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
     }
   }
 
-  private _onVolumeChange(e: VolumeChangeEvent): void {
-    if (e.muted || e.volume === 0) {
+  private _onVolumeData(volume: number, muted: boolean): void {
+    if (muted || volume === 0) {
       this._setState(VolumeMuteState.MUTED);
     } else {
-      if (e.volume < 0.5) {
+      if (volume < 0.5) {
         this._setState(VolumeMuteState.LOW);
       } else {
         this._setState(VolumeMuteState.HIGH);
@@ -57,6 +57,10 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
     if (this._mouseover) {
       this._onMouseOver();
     }
+  }
+
+  private _onVolumeChange(e: VolumeChangeEvent): void {
+    this._onVolumeData(e.volume, e.muted);
   }
 
   private _setState(state: VolumeMuteState, animate: boolean = true): void {
@@ -197,6 +201,8 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
       .listen(this.base, 'mouseout', this._onMouseOut, { passive: true })
       .listen(this._animation, 'animationend', this._onAnimationEnd, false)
       .listen(this.props.api, 'volumechange', this._onVolumeChange, false);
+    
+    this._onVolumeData(this.props.api.getVolume(), this.props.api.isMuted());
   }
 
   componentWillUnmount() {
