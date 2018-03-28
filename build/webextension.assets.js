@@ -55,7 +55,8 @@ const generateManifest = () => {
       'fonts/*'
     ],
     'permissions': [
-      "<all_urls>"
+      "<all_urls>",
+      "storage"
     ]
   }, null, 2);
 };

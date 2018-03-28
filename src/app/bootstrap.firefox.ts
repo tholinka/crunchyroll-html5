@@ -6,6 +6,10 @@ import { setCrossHttpClient } from "./config";
 import { GreasemonkeyHttpClient } from "./http/GreasemonkeyHttpClient";
 import { ProxyLoaderGreasemonkey } from "./libs/greasemonkey/ProxyLoaderGreasemonkey";
 import { setPlaylistLoader } from "./playlistLoader";
+import { LocalStorageMechanism } from "./storage/mechanism/LocalStorageMechanism";
+import { IMechanismSymbol, IMechanism } from "./storage/mechanism/IMechanism";
+import container from "../config/inversify.config";
+import { EmptyMechanism } from "./storage/mechanism/EmptyMechanism";
 
 function getURL(path: string): string {
   return "chrome://crunchyroll-html5/content" + path;
@@ -49,4 +53,15 @@ fonts.push(times, timesbd, timesbi, timesi);
 // Trebuchet MS
 fonts.push(trebuc, trebucbd, trebucbi, trebucit);
 
-run();
+async function main() {
+  if (await LocalStorageMechanism.isAvailable()) {
+    container.bind<IMechanism>(IMechanismSymbol).to(LocalStorageMechanism);
+  } else {
+    // No storage mechanism is available
+    container.bind<IMechanism>(IMechanismSymbol).to(EmptyMechanism);
+  }
+
+  run();
+}
+
+main();

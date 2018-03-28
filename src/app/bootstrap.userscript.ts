@@ -5,6 +5,12 @@ import { setCrossHttpClient } from "./config";
 import { GreasemonkeyHttpClient } from "./http/GreasemonkeyHttpClient";
 import { setPlaylistLoader } from "./playlistLoader";
 import { ProxyLoaderGreasemonkey } from "./libs/greasemonkey/ProxyLoaderGreasemonkey";
+import container from "../config/inversify.config";
+import { IMechanism, IMechanismSymbol } from "./storage/mechanism/IMechanism";
+import { GreasemonkeyMechanism } from "./storage/mechanism/GreasemonkeyMechanism";
+import { LegacyGreasemonkeyMechanism } from "./storage/mechanism/LegacyGreasemonkeyMechanism";
+import { LocalStorageMechanism } from "./storage/mechanism/LocalStorageMechanism";
+import { EmptyMechanism } from "./storage/mechanism/EmptyMechanism";
 
 setCrossHttpClient(GreasemonkeyHttpClient);
 
@@ -23,45 +29,19 @@ setWorkerUrl(libassWorkerUrl);
 addFile('default.ttf', libassDefaultFontUrl);
 addFile('fonts.conf', libassFontsConfigUrl);
 
-/*const arial = require('raw-loader!../fonts/arial.ttf');
-const arialbd = require('raw-loader!../fonts/arialbd.ttf');
-const arialbi = require('raw-loader!../fonts/arialbi.ttf');
-const ariali = require('raw-loader!../fonts/ariali.ttf');
-const ariblk = require('raw-loader!../fonts/ariblk.ttf');
+async function main() {
+  if (await LegacyGreasemonkeyMechanism.isAvailable()) {
+    container.bind<IMechanism>(IMechanismSymbol).to(LegacyGreasemonkeyMechanism);
+  } else if (await GreasemonkeyMechanism.isAvailable()) {
+    container.bind<IMechanism>(IMechanismSymbol).to(GreasemonkeyMechanism);
+  } else if (await LocalStorageMechanism.isAvailable()) {
+    container.bind<IMechanism>(IMechanismSymbol).to(LocalStorageMechanism);
+  } else {
+    // No storage mechanism is available
+    container.bind<IMechanism>(IMechanismSymbol).to(EmptyMechanism);
+  }
 
-const times = require('raw-loader!../fonts/times.ttf');
-const timesbd = require('raw-loader!../fonts/timesbd.ttf');
-const timesbi = require('raw-loader!../fonts/timesbi.ttf');
-const timesi = require('raw-loader!../fonts/timesi.ttf');
+  run();
+}
 
-const trebuc = require('raw-loader!../fonts/trebuc.ttf');
-const trebucbd = require('raw-loader!../fonts/trebucbd.ttf');
-const trebucbi = require('raw-loader!../fonts/trebucbi.ttf');
-const trebucit = require('raw-loader!../fonts/trebucit.ttf');
-
-// Arial
-fonts.push(
-  URL.createObjectURL(new Blob([arial], { type: "text/javascript" })),
-  URL.createObjectURL(new Blob([arialbd], { type: "text/javascript" })),
-  URL.createObjectURL(new Blob([arialbi], { type: "text/javascript" })),
-  URL.createObjectURL(new Blob([ariali], { type: "text/javascript" })),
-  URL.createObjectURL(new Blob([ariblk], { type: "text/javascript" }))
-);
-
-// Times New Roman
-fonts.push(
-  URL.createObjectURL(new Blob([times], { type: "text/javascript" })),
-  URL.createObjectURL(new Blob([timesbd], { type: "text/javascript" })),
-  URL.createObjectURL(new Blob([timesbi], { type: "text/javascript" })),
-  URL.createObjectURL(new Blob([timesi], { type: "text/javascript" }))
-);
-
-// Trebuchet MS
-fonts.push(
-  URL.createObjectURL(new Blob([trebuc], { type: "text/javascript" })),
-  URL.createObjectURL(new Blob([trebucbd], { type: "text/javascript" })),
-  URL.createObjectURL(new Blob([trebucbi], { type: "text/javascript" })),
-  URL.createObjectURL(new Blob([trebucit], { type: "text/javascript" }))
-);*/
-
-run();
+main();

@@ -3,6 +3,9 @@ import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
 import { run } from './bootstrap';
 import { BackgroundHttpClient } from "./http/BackgroundHttpClient";
 import { setCrossHttpClient } from "./config";
+import container from "../config/inversify.config";
+import { IMechanism, IMechanismSymbol } from "./storage/mechanism/IMechanism";
+import { WebExtensionMechanism } from "./storage/mechanism/WebExtensionMechanism";
 
 function getURL(path: string): string {
   if (chrome && chrome.extension && typeof chrome.extension.getURL === "function") {
@@ -49,5 +52,7 @@ fonts.push(times, timesbd, timesbi, timesi);
 
 // Trebuchet MS
 fonts.push(trebuc, trebucbd, trebucbi, trebucit);
+
+container.bind<IMechanism>(IMechanismSymbol).to(WebExtensionMechanism);
 
 run();

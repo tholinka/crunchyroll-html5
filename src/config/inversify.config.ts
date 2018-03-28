@@ -9,7 +9,6 @@ const container = new Container({
   autoBindInjectable: true
 });
 
-container.bind<IMechanism>(IMechanismSymbol).to(LocalStorageMechanism);
 container.bind<IStorage>(IStorageSymbol).to(JsonStorage);
 
 export default container;

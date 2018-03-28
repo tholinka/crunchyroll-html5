@@ -37,7 +37,7 @@ export class GreasemonkeyHttpClient implements IHttpClient {
         }
       }
 
-      GM_xmlhttpRequest(details);
+      request(details);
     });
   }
 
@@ -48,4 +48,16 @@ export class GreasemonkeyHttpClient implements IHttpClient {
   post(url: string, body?: BodyType, options?: IOptions): Promise<IResponse<string>> {
     return this.method("POST", url, body, options);
   }
+}
+
+function request(options: GMXMLHttpRequestOptions): GMXMLHttpRequestResult {
+  if (typeof GM_xmlhttpRequest === "undefined") {
+    return GM.xmlHttpRequest(options);
+  } else {
+    return GM_xmlhttpRequest(options);
+  }
+}
+
+declare namespace GM {
+  function xmlHttpRequest(options: GMXMLHttpRequestOptions): GMXMLHttpRequestResult;
 }

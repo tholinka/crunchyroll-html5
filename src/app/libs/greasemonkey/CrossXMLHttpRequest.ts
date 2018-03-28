@@ -98,7 +98,7 @@ export class CrossXMLHttpRequest {
 
     if (body) console.warn("Body is not supported");
 
-    this.loader = GM_xmlhttpRequest({
+    this.loader = request({
       method: this._method,
       url: this._url,
       headers: this._headers,
@@ -171,4 +171,16 @@ export class CrossXMLHttpRequest {
       this.ontimeout(new Event("timeout", this));
     }
   }
+}
+
+function request(options: GMXMLHttpRequestOptions): GMXMLHttpRequestResult {
+  if (typeof GM_xmlhttpRequest === "undefined") {
+    return GM.xmlHttpRequest(options);
+  } else {
+    return GM_xmlhttpRequest(options);
+  }
+}
+
+declare namespace GM {
+  function xmlHttpRequest(options: GMXMLHttpRequestOptions): GMXMLHttpRequestResult;
 }

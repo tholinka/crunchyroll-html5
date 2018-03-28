@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { IMechanism } from "./IMechanism";
+import { IMechanism, StorageTestAvailabilityKey } from "./IMechanism";
 import { StorageError } from "../StorageError";
 
 @injectable()
@@ -38,5 +38,17 @@ export class LocalStorageMechanism implements IMechanism {
 
   async remove(key: string): Promise<void> {
     this._storage.removeItem(key);
+  }
+
+  static async isAvailable(): Promise<boolean> {
+    try {
+      const storage = window.localStorage;
+      storage.setItem(StorageTestAvailabilityKey, '1');
+      storage.removeItem(StorageTestAvailabilityKey);
+
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

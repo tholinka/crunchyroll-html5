@@ -5,14 +5,19 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js']
   },
+  optimization: {
+    minimize: false
+  },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
-        loader: 'ts-loader',
-        options: {
-          transpileOnly: true
+        use: {
+          loader: 'ts-loader',
+          options: {
+            transpileOnly: true
+          }
         }
       },
       {

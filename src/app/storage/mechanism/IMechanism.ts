@@ -20,3 +20,4 @@ export interface IMechanism {
 }
 
 export const IMechanismSymbol = Symbol.for("IMechanismSymbol");
+export const StorageTestAvailabilityKey = '__sak';

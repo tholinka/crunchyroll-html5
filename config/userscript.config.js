@@ -36,12 +36,23 @@ const generateMetadataBlock = (metadata) => {
 
 const metadata = {
   'name': package['productName'],
+  'namespace': 'https://github.com/YePpHa/crunchyroll-html5',
   'description': package['description'],
   'version': package['version'],
   'author': utils.parseAuthor(package['author']),
-  'match': 'http://www.crunchyroll.com/*',
-  'noframes': undefined,
-  'grant': 'GM_xmlhttpRequest',
+  'match': [
+    'http://www.crunchyroll.com/*',
+    'https://www.crunchyroll.com/*'
+  ],
+  'source': package['repository']['url'],
+  'grant': [
+    'GM_xmlhttpRequest',
+    'GM_getValue',
+    'GM_setValue',
+    'GM.xmlHttpRequest',
+    'GM.getValue',
+    'GM.setValue'
+  ],
   'connect': '*'
 };
 
