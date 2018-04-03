@@ -66,7 +66,7 @@
   },
   "dependencies": {
     "binary-loader": "^0.0.1",
-    "crunchyroll-lib": "^1.0.11",
+    "crunchyroll-lib": "^1.1.1",
     "css-loader": "^0.28.4",
     "hls.js": "^0.7.11",
     "imports-loader": "^0.7.1",
