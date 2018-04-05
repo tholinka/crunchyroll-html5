@@ -423,6 +423,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
     const element = this._fullscreenElement || this._containerElement;
     requestFullscreen(element);
+    element.focus();
   }
 
   exitFullscreen(): void {

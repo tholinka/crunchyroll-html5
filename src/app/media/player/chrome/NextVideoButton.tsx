@@ -1,6 +1,6 @@
 import { h, Component } from "preact";
 import { SvgPathMorphAnimation } from "../../../libs/animation/SvgPathMorphAnimation";
-import { IPlayerApi, PlaybackState, IVideoDetail, NextVideoEvent } from "../IPlayerApi";
+import { IPlayerApi, PlaybackState, IVideoDetail } from "../IPlayerApi";
 import { EventHandler } from "../../../libs/events/EventHandler";
 
 export interface INextVideoButtonProps {
@@ -61,14 +61,8 @@ export class NextVideoButton extends Component<INextVideoButtonProps, {}> {
     const style = detail ? "" : "display: none;";
 
     const onClick = (e: Event) => {
-      const detail = this.props.api.getNextVideoDetail();
-      if (!detail) return;
-      const event = new NextVideoEvent(detail);
-      this.props.api.dispatchEvent(event);
-
-      if (event.defaultPrevented) {
-        e.preventDefault();
-      }
+      this.props.api.playNextVideo();
+      e.preventDefault();
     };
 
     return (

@@ -188,10 +188,12 @@ export class PlayerController {
   }
 
   private async _onNextVideo(e: NextVideoEvent): Promise<void> {
-    if (!this._player || !this._player.getApi().isFullscreen()) return;
+    if (!this._player) return;
 
-    // Stop the player from navigating to the next video
-    e.preventDefault();
+    if (!this._player.getApi().isFullscreen()) {
+      window.location.href = e.detail.url;
+      return;
+    }
 
     const detail = e.detail;
 

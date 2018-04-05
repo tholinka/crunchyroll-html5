@@ -66,6 +66,7 @@ export interface IPlayerApi extends EventTarget {
 
   seekTo(time: number): void;
   seekBy(seconds: number): void;
+  playNextVideo(): void;
   
   getDuration(): number;
   getCurrentTime(): number;

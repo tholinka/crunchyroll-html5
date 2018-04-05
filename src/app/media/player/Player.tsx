@@ -15,7 +15,7 @@ import { ChromeTooltip, IChromeTooltip } from './chrome/Tooltip';
 import { parseAndFormatTime } from '../../utils/time';
 import { IRect } from '../../utils/rect';
 import { BezelComponent } from './chrome/BezelComponent';
-import { ICON_PAUSE, ICON_PLAY, ICON_SEEK_BACK_5, ICON_VOLUME, ICON_VOLUME_HIGH, ICON_SEEK_FORWARD_5, ICON_SEEK_BACK_10, ICON_SEEK_FORWARD_10, ICON_VOLUME_MUTE } from './assets';
+import { ICON_PAUSE, ICON_PLAY, ICON_SEEK_BACK_5, ICON_VOLUME, ICON_VOLUME_HIGH, ICON_SEEK_FORWARD, ICON_SEEK_FORWARD_5, ICON_SEEK_BACK_10, ICON_SEEK_FORWARD_10, ICON_VOLUME_MUTE } from './assets';
 import { BufferComponent } from './chrome/BufferComponent';
 import { ISubtitle } from 'crunchyroll-lib/models/ISubtitle';
 import { SubtitleToAss } from '../../converter/SubtitleToAss';
@@ -357,11 +357,54 @@ export class Player extends Component<IPlayerProps, {}> {
           api.unmute();
         }
         break;
+      // N
+      case 78:
+        if (e.shiftKey) {
+          api.playNextVideo();
+          break;
+        }
+      // S
+      case 83:
+        this._playSvgBezel(ICON_SEEK_FORWARD);
+        api.seekTo(Math.min(api.getCurrentTime() + 85, api.getDuration()));
+        break;
       // ,
       case 188:
         break;
       // .
       case 190:
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+  }
+
+  private _onDocumentKeyDown(e: BrowserEvent) {
+    const element = e.target as HTMLElement;
+    if (element) {
+      if (element.tagName === 'INPUT' || element.tagName === 'SELECT' || element.tagName === 'TEXTAREA' || element.isContentEditable)
+        return;
+      if (this.base.contains(element))
+        return;
+    }
+
+    const api = this.getApi();
+    switch (e.keyCode) {
+      // F
+      case 70:
+        api.toggleFullscreen();
+        break;
+      // K
+      case 75:
+        var playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
+        if (playing) {
+          this._playSvgBezel(ICON_PAUSE);
+          api.pauseVideo();
+        } else {
+          this._playSvgBezel(ICON_PLAY);
+          api.playVideo();
+        }
         break;
       default:
         return;
@@ -647,6 +690,7 @@ export class Player extends Component<IPlayerProps, {}> {
       .listen(this.base, 'mousemove', this._onMouseMouse, false)
       .listen(this.base, 'mouseleave', this._onMouseLeave, false)
       .listen(this.base, 'keydown', this._onKeyDown, false)
+      .listen(document, 'keydown', this._onDocumentKeyDown, false)
       .listen(this._actionElement, 'mousedown', this._onActionMouseDown, false)
       .listen(this._actionElement, 'click', this._onActionClick, false)
       .listen(this._actionElement, 'dblclick', this._onActionDoubleClick, false)
