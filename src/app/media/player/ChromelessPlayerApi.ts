@@ -1,4 +1,4 @@
-import { IPlayerApi, PlaybackState, IVideoDetail } from './IPlayerApi';
+import { IPlayerApi, PlaybackState, IVideoDetail, NextVideoEvent } from './IPlayerApi';
 import { EventTarget } from '../../libs/events/EventTarget';
 import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
 import { ChromelessPlayer } from './ChromelessPlayer';
@@ -78,6 +78,13 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   seekBy(seconds: number): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.seekBy(seconds);
+  }
+
+  playNextVideo(): void {
+    const detail = this.getNextVideoDetail();
+    if (!detail) return;
+    const event = new NextVideoEvent(detail);
+    this.dispatchEvent(event);
   }
 
   getDuration(): number {
