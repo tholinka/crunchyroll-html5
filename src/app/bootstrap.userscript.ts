@@ -4,7 +4,7 @@ import { run } from './bootstrap';
 import { setCrossHttpClient } from "./config";
 import { GreasemonkeyHttpClient } from "./http/GreasemonkeyHttpClient";
 import { setPlaylistLoader } from "./playlistLoader";
-import { ProxyLoaderGreasemonkey } from "./libs/greasemonkey/ProxyLoaderGreasemonkey";
+import { ProxyLoaderGreasemonkey } from "./libs/http/greasemonkey/ProxyLoaderGreasemonkey";
 import container from "../config/inversify.config";
 import { IMechanism, IMechanismSymbol } from "./storage/mechanism/IMechanism";
 import { GreasemonkeyMechanism } from "./storage/mechanism/GreasemonkeyMechanism";

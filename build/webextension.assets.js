@@ -21,13 +21,6 @@ const generateManifest = () => {
       '96': 'assets/icon96.png',
       '128': 'assets/icon128.png'
     },
-    'background': {
-      'scripts': [
-        'vendor/browser-polyfill.min.js',
-        'background.js'
-      ],
-      'persistent': true
-    },
     'content_scripts': [
       {
         'matches': [

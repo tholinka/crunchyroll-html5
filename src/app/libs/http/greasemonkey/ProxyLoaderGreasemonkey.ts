@@ -1,4 +1,4 @@
-import { Event } from '../events/Event';
+import { Event } from '../../events/Event';
 import { CrossXMLHttpRequest } from "./CrossXMLHttpRequest";
 
 export interface LoaderStats extends Hls.LoaderStats {

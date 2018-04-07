@@ -4,7 +4,7 @@ import { run } from './bootstrap';
 import { BackgroundHttpClient } from "./http/BackgroundHttpClient";
 import { setCrossHttpClient } from "./config";
 import { GreasemonkeyHttpClient } from "./http/GreasemonkeyHttpClient";
-import { ProxyLoaderGreasemonkey } from "./libs/greasemonkey/ProxyLoaderGreasemonkey";
+import { ProxyLoaderGreasemonkey } from "./libs/http/greasemonkey/ProxyLoaderGreasemonkey";
 import { setPlaylistLoader } from "./playlistLoader";
 import { LocalStorageMechanism } from "./storage/mechanism/LocalStorageMechanism";
 import { IMechanismSymbol, IMechanism } from "./storage/mechanism/IMechanism";

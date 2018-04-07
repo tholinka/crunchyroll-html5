@@ -60,7 +60,27 @@ limitations under the License.
       throw new TypeError('Not enough arguments');
     }
     try {
-      return new Worker_(scriptURL);
+      var w = new Worker_(scriptURL);
+      try {
+        if (typeof cloneInto === "function") {
+          var _addEventListener = w.addEventListener;
+          w.addEventListener = function(event, listener, options) {
+            if (event === "message") {
+              var _listener = listener;
+              listener = function(e) {
+                var evt = {};
+                evt.data = cloneInto(e.data, evt);
+                evt.type = e.type;;
+
+                return _listener.call(this, evt);
+              };
+            }
+
+            _addEventListener.call(this, event, listener, options);
+          };
+        }
+      } catch (e) {}
+      return w;
     } catch (e) {
       if (e.code === 18/*DOMException.SECURITY_ERR*/) {
         return new WorkerXHR(scriptURL);

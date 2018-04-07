@@ -1,4 +1,4 @@
-import { Event } from '../events/Event';
+import { Event } from '../../events/Event';
 
 enum State {
   Closed,
@@ -82,15 +82,15 @@ export class CrossXMLHttpRequest {
     this.loader.abort();
   }
 
-  open(method: string, url: string, async = true, user?: string, password?: string): void {
+  open(method: string, url: string, async: boolean = true, user?: string | null, password?: string | null): void {
     if (this._state !== State.Closed) throw new Error("XMLHttpRequest has already been opened.");
     this._state = State.Opened;
 
     this._method = method;
     this._url = url;
     this._async = async;
-    this._user = user;
-    this._password = password;
+    this._user = user === null ? undefined : user;
+    this._password = password === null ? undefined : password;
   }
 
   send(body?: BodyInit): void {
