@@ -9,6 +9,7 @@ const streamReplace = require('stream-replace');
 mkdirp(path.join(__dirname, '../dist/firefox'), (err) => {
   if (err) {
     console.error(err);
+    process.exit(1);
     return;
   }
   ncp(path.join(__dirname, '../src/firefox-legacy'), path.join(__dirname, '../dist/firefox'), {
@@ -26,6 +27,7 @@ mkdirp(path.join(__dirname, '../dist/firefox'), (err) => {
   }, (err) => {
     if (err) {
       console.error(err);
+      process.exit(1);
     }
   });
 });
