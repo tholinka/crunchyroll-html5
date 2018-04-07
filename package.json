@@ -22,6 +22,10 @@
   "license": "MIT",
   "scripts": {
     "clean": "shx rm -rf dist",
+    "package": "npm run package:webextension && npm run package:firefox",
+    "package:firefox": "node build/package.firefox.js",
+    "package:webextension": "node build/package.webextension.js",
+    "sign:webextension": "node build/sign.webextension.js",
     "build": "npm run clean && npm run build:userscript && npm run build:webextension && npm run build:firefox",
     "build:userscript": "webpack --config config/userscript.prod.config.js",
     "build:webextension": "npm run build:webextension:content && npm run build:webextension:assets",
@@ -49,6 +53,7 @@
     "@types/lodash": "^4.14.78",
     "@types/node": "^8.0.17",
     "@types/url-parse": "^1.1.0",
+    "archiver": "^2.1.1",
     "cssnano": "^3.10.0",
     "file-loader": "^1.1.11",
     "fs-extra": "^5.0.0",
@@ -60,6 +65,7 @@
     "postcss-loader": "^2.0.8",
     "sass-loader": "^6.0.6",
     "shx": "^0.2.2",
+    "sign-addon": "^0.3.0",
     "stream-replace": "^1.0.0",
     "to-string-loader": "^1.1.5",
     "ts-loader": "^4.1.0",
@@ -69,7 +75,8 @@
     "webpack": "^4.3.0",
     "webpack-cli": "^2.0.13",
     "webpack-merge": "^4.1.0",
-    "wrapper-webpack-plugin": "^1.0.0"
+    "wrapper-webpack-plugin": "^1.0.0",
+    "yargs": "^11.0.0"
   },
   "dependencies": {
     "binary-loader": "^0.0.1",

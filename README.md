@@ -43,11 +43,33 @@ each browser or userscript.
 
 Before building make sure that you have installed [Node.js](https://nodejs.org/)
 and [Yarn](https://yarnpkg.com/) (optional). After that you're required to
-install the project dependencies through either Yarn or NPM.
+install the project dependencies through either Yarn.
 
 Building is done by running the script `build`:
 ```
-npm run build
+$ yarn build
+```
+
+## Packaging
+You can package the legacy Firefox addon as `firefox.xpi` (unsigned as it's not
+possible anymore) and the Web Extension as `webextension.zip` (signable see
+below).
+
+```
+$ yarn package:firefox
+$ yarn package:webextension
+```
+
+### Firefox Signing
+You're able to sign the Web Extension. However, you need an API key and an API
+secret to be able to sign the Web Extension (you can get one
+[here](https://addons.mozilla.org/en-US/developers/addon/api/key/)).
+If you leave the ID of the extension empty a new one will be generated. You can
+use the generated ID in the future to update the extension instead of creating
+new extensions every update.
+
+```
+$ yarn sign:webextension --key <API KEY> --secret <API SECRET> --id <ID>
 ```
 
 ## TODO
