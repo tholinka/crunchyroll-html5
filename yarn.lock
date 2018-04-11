@@ -1675,9 +1675,9 @@ cross-spawn@^6.0.5:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
-crunchyroll-lib@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/crunchyroll-lib/-/crunchyroll-lib-1.1.1.tgz#a527f989b3fcf95df8736f2b83552aa042fc09b8"
+crunchyroll-lib@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/crunchyroll-lib/-/crunchyroll-lib-1.1.2.tgz#f5cd944d7ccdf2b0a40ea5a8eb1ef0e270bd5f3f"
   dependencies:
     aes-js "^3.1.0"
     base64-js "^1.2.3"
