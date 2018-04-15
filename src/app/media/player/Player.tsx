@@ -349,7 +349,7 @@ export class Player extends Component<IPlayerProps, {}> {
         break;
       // M
       case 77:
-        if (api.isMuted()) {
+        if (!api.isMuted()) {
           this._playSvgBezel(ICON_VOLUME_MUTE);
           api.mute();
         } else {
