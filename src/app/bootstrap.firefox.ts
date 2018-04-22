@@ -1,7 +1,6 @@
 import { binaryToBlob } from "./utils/blob";
 import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
 import { run } from './bootstrap';
-import { BackgroundHttpClient } from "./http/BackgroundHttpClient";
 import { setCrossHttpClient } from "./config";
 import { GreasemonkeyHttpClient } from "./http/GreasemonkeyHttpClient";
 import { ProxyLoaderGreasemonkey } from "./libs/http/greasemonkey/ProxyLoaderGreasemonkey";

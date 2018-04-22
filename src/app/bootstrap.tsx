@@ -5,7 +5,6 @@ import { getMediaId, getSelectedQuality, getStartTime, getAutoPlay } from './pla
 import { parseUrlFragments } from './player/AffiliatePlayer';
 import { Formats, FORMAT_IDS } from 'crunchyroll-lib/media';
 import container from 'crunchyroll-lib/config';
-import { BackgroundHttpClient } from './http/BackgroundHttpClient';
 import { bindCrossHttpClientAsDefault } from './config';
 
 const css = require('../styles/bootstrap.scss');
