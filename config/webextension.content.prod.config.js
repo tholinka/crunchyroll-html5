@@ -6,4 +6,6 @@ common.plugins = [
   new UglifyJSPlugin()
 ];
 
+common.mode = 'production';
+
 module.exports = common;

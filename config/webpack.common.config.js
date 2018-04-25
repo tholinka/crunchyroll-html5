@@ -8,6 +8,7 @@ module.exports = {
   optimization: {
     minimize: false
   },
+  devtool: "cheap-source-map",
   module: {
     rules: [
       {

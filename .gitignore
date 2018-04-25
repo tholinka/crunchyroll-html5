@@ -60,5 +60,9 @@ typings/
 # next.js build output
 .next
 
+# VS Code directory
+.vs
+.vscode
+
 # Distribution
 dist
