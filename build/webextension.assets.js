@@ -56,9 +56,13 @@ const generateManifest = () => {
       'fonts/*'
     ],
     'permissions': [
+      "storage",
       "*://www.crunchyroll.com/*",
-      "*://*.vrv.co/*", // AJAX perms to VRV
-      "storage"
+
+      // Allow the player to access these sites as otherwise it will have some
+      // trouble loading the video.
+      "*://*.vrv.co/*",
+      "*://*.dlvr1.net/*"
     ]
   }, null, 2);
 };
