@@ -20,7 +20,7 @@
     "type": "git",
     "url": "https://github.com/YePpHa/crunchyroll-html5.git"
   },
-  "version": "0.10.1",
+  "version": "0.10.2",
   "main": "dist/crunchyroll-html5.user.js",
   "license": "MIT",
   "scripts": {
