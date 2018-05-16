@@ -13,7 +13,7 @@ function getURL(path: string): string {
   } else if (browser && browser.extension && typeof browser.extension.getURL === "function") {
     return browser.extension.getURL(path);
   } else {
-    throw new Error("Browser doesn't browser or chrome (see https://developer.mozilla.org/en-US/Add-ons/WebExtensions).");
+    throw new Error("Browser doesn't support the `browser` or the `chrome` namespace (see https://developer.mozilla.org/en-US/Add-ons/WebExtensions).");
   }
 }
 
