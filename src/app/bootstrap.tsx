@@ -6,71 +6,46 @@ import { parseUrlFragments } from './player/AffiliatePlayer';
 import { Formats, FORMAT_IDS } from 'crunchyroll-lib/media';
 import container from 'crunchyroll-lib/config';
 import { bindCrossHttpClientAsDefault } from './config';
+import { ReadyStateChange, ReadyStateChangeEvent, ReadyState } from './libs/ReadyStateChange';
+import { EventHandler } from './libs/events/EventHandler';
 
 const css = require('../styles/bootstrap.scss');
 
-// Values indicate order of execution
-const enum DocumentLoadState {
-  NotRun = 0,
-  Loading = 1,
-  Interactive = 2,
-  Complete = 3
-}
-const DocumentLoadStateMap: {[key: string]: DocumentLoadState} = 
-  {
-    "loading": DocumentLoadState.Loading, 
-    "interactive": DocumentLoadState.Interactive,
-    "complete": DocumentLoadState.Complete
-  };
+const eventHandler = new EventHandler();
+let timer: number|undefined;
 
-export function run() {
-  async function readyState() {
-    let state = DocumentLoadStateMap[document.readyState];
-    await ensureStateRun(state);
-    if (state !== DocumentLoadState.Complete) { // not complete
-      // register event handler
-      document.addEventListener("readystatechange", readyState, false);
-    } else {
-      // delete event handler
-      document.removeEventListener("readystatechange", readyState, false);
-    }
+const readyStateChange = new ReadyStateChange(document);
+readyStateChange.listen('readystatechange', (e: ReadyStateChangeEvent) => {
+  switch (e.readyState) {
+    case ReadyState.Interactive:
+      _runOnInteractive();
+
+      // Dispose event handler and interval
+      eventHandler.dispose();
+      window.clearInterval(timer);
+
+      break;
   }
-  
-  readyState();
-}
+}, false);
 
-let bootstrapper: Bootstrap;
+export function runBootstrap() {
+  // Update ready state change
+  readyStateChange.tick();
 
-let hightestRunState: DocumentLoadState = DocumentLoadState.NotRun;
-async function ensureStateRun(state: DocumentLoadState) { // Ensure at any given stage some subset of the initializers have run
-  async function runState(state: DocumentLoadState) {
-    switch (state) {
-      case DocumentLoadState.Loading: // a.k.a document_start
-        // here we can do something like start looking up the show in MAL or other tracker/databases
-        break;
-      case DocumentLoadState.Interactive: // a.k.a document_end
-        await updateQualitySettings();
-        bootstrapper = new Bootstrap();
-        break;
-      case DocumentLoadState.Complete: // a.k.a document_idle
-        _run();
-        break;
-    }
-  }
-  
-  let statenum = state as number;
-  let hightestStatenum = hightestRunState as number;
-  if (statenum > hightestStatenum) { // numbers still needed to ensure order
-    for (let i = hightestStatenum+1; i <= statenum; i++) {
-      await runState(i as DocumentLoadState);
-    }
-    hightestRunState = statenum;
+  // If not complete add listener and set interval to call tick again later
+  const currentReadyState = readyStateChange.getCurrentReadyState();
+  if (currentReadyState === undefined || currentReadyState < ReadyState.Interactive) {
+    eventHandler.listen(document, 'readystatechange', () => readyStateChange.tick(), false);
+    window.setInterval(() => readyStateChange.tick(), 100);
   }
 }
 
-function _run() {
+async function _runOnInteractive() {
   const url = window.location.href;
 
+  await updateQualitySettings();
+
+  // Configure the default media options
   let mediaId = getMediaId(url);
   const options = {
     sizeEnabled: true,
@@ -99,7 +74,8 @@ function _run() {
     bindCrossHttpClientAsDefault();
   }
 
-  bootstrapper.run(mediaId, options);
+  // Start the player
+  (new Bootstrap()).run(mediaId, options);
 }
 
 class Bootstrap {
@@ -116,9 +92,6 @@ class Bootstrap {
     if (!wrapper) throw new Error("Not able to find video wrapper.");
     this._wrapper = wrapper;
     this._wrapper.innerHTML = "";
-    render((
-      <div class="html5-loading-text">Loading HTML5 player...</div>
-    ), this._wrapper);
 
     importCSSByUrl("https://fonts.googleapis.com/css?family=Noto+Sans");
     importCSS(css);

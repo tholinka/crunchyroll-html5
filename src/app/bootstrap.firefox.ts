@@ -1,6 +1,6 @@
 import { binaryToBlob } from "./utils/blob";
 import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
-import { run } from './bootstrap';
+import { runBootstrap } from './bootstrap';
 import { setCrossHttpClient } from "./config";
 import { GreasemonkeyHttpClient } from "./http/GreasemonkeyHttpClient";
 import { ProxyLoaderGreasemonkey } from "./libs/http/greasemonkey/ProxyLoaderGreasemonkey";
@@ -60,7 +60,7 @@ async function main() {
     container.bind<IMechanism>(IMechanismSymbol).to(EmptyMechanism);
   }
 
-  run();
+  runBootstrap();
 }
 
 main();

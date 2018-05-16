@@ -1,6 +1,6 @@
 import { binaryToBlob } from "./utils/blob";
 import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
-import { run } from './bootstrap';
+import { runBootstrap } from './bootstrap';
 import { BackgroundHttpClient } from "./http/BackgroundHttpClient";
 import { setCrossHttpClient } from "./config";
 import container from "../config/inversify.config";
@@ -55,4 +55,4 @@ fonts.push(trebuc, trebucbd, trebucbi, trebucit);
 
 container.bind<IMechanism>(IMechanismSymbol).to(WebExtensionMechanism);
 
-run();
+runBootstrap();
