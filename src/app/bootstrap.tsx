@@ -110,7 +110,7 @@ class Bootstrap {
     if (!wrapper) {
       wrapper = document.querySelector("#showmedia_video_box_wide");
     }
-    if (!wrapper) {
+    if (!wrapper && document.querySelector("#content > #the_embedded_player")) {
       wrapper = document.querySelector("#content");
     }
     if (!wrapper) throw new Error("Not able to find video wrapper.");
