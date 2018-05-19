@@ -52,8 +52,8 @@ $ yarn build
 
 ## Packaging
 You can package the legacy Firefox addon as `firefox.xpi` (unsigned as it's not
-possible anymore) and the Web Extension as `webextension.zip` (signable see
-below).
+possible to sign it anymore) and the Web Extension as `webextension.zip`
+(signable see below).
 
 ```
 $ yarn package:firefox
