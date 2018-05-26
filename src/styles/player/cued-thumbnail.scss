@@ -1,3 +1,5 @@
+@import '../theme';
+
 .html5-video-cued-thumbnail-overlay {
   position: absolute;
   width: 100%;
@@ -59,6 +61,6 @@
 
 .html5-video-cued-thumbnail-overlay:hover .chrome-large-play-button-bg {
   transition: fill .1s cubic-bezier(0.0,0.0,0.2,1),fill-opacity .1s cubic-bezier(0.0,0.0,0.2,1);
-  fill: #f00;
+  @include var(fill, primary-color);
   fill-opacity: 1;
 }

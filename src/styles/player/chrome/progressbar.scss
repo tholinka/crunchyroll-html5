@@ -1,3 +1,5 @@
+@import '../../theme';
+
 .chrome-progress-bar-container {
   display: block;
   position: absolute;
@@ -108,7 +110,7 @@
 }
 
 .chrome-swatch-background-color {
-  background-color: #f00;
+  @include var(background-color, primary-color);
 }
 
 .chrome-progress-bar-padding {

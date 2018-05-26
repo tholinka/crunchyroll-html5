@@ -1,0 +1,8 @@
+$theme: (
+  primary-color: #f78b24
+);
+
+@mixin var($property, $varName) {
+  #{$property}: map-get($theme, $varName);
+  #{$property}: var(--#{$varName});
+}
