@@ -11,7 +11,8 @@
       "name": "Adrian Stutz",
       "url": "https://github.com/sttz",
       "email": "adrian@sttz.ch"
-    }, {
+    },
+    {
       "name": "Anairkoen Schno",
       "url": "https://github.com/nike4613"
     }
@@ -85,7 +86,7 @@
   },
   "dependencies": {
     "binary-loader": "^0.0.1",
-    "crunchyroll-lib": "^1.1.2",
+    "crunchyroll-lib": "^1.1.4",
     "css-loader": "^0.28.4",
     "hls.js": "^0.9.1",
     "imports-loader": "^0.7.1",
