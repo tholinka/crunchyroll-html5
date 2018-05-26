@@ -50,7 +50,7 @@ export async function updateQualitySettings(): Promise<void> {
     const token = fmtElements[i].getAttribute("token");
     if (!token) continue;
 
-    quality = token.match(/^showmedia\.(\d{2,3}0p)$/)![1]; // regex match, first capture (2-3 digits followed by 0p)
+    quality = parseToken(token);
   }
   
   // get the quality from the URL
@@ -77,22 +77,43 @@ export async function updateQualitySettings(): Promise<void> {
     quality = qualityOverride;
   
   // update quality selector buttons
-  let cselEl = document.querySelector("a.selected[token^=showmedia\\.]")!;
-  let targetEl = document.querySelector("a[token^=showmedia\\." + quality + "]")!;
-  
-  if (cselEl != targetEl) {
-    cselEl.classList.replace('dark-button','default-button');
-    cselEl.classList.remove('selected');
-    targetEl.classList.replace('default-button','dark-button');
-    targetEl.classList.add('selected');
+  let selectedQualityElement = document.querySelector("a.selected[token^=showmedia\\.]");
+  let targetQualityElement = document.querySelector("a[token^=showmedia\\." + quality + "]");
+
+  if (selectedQualityElement && targetQualityElement) {
+    if (selectedQualityElement !== targetQualityElement) {
+      selectedQualityElement.classList.replace('dark-button','default-button');
+      selectedQualityElement.classList.remove('selected');
+
+      targetQualityElement.classList.replace('default-button','dark-button');
+      targetQualityElement.classList.add('selected');
+    }
+    
+    storedQuality = quality;
+  } else if (selectedQualityElement) {
+    var token = selectedQualityElement.getAttribute("token");
+
+    if (token) {
+      storedQuality = parseToken(token);
+    } else {
+      storedQuality = "360p";
+    }
+  } else {
+    storedQuality = "360p";
   }
-  
-  storedQuality = quality;
 }
 
 export function getSelectedQuality(): string|undefined {
   if (storedQuality === "") 
-    throw "Quality must be updated first!";
+    throw new Error("Quality must be updated first!");
   
   return storedQuality;
+}
+
+function parseToken(token: string) {
+  // regex match, first capture (2-3 digits followed by 0p)
+  const m = token.match(/^showmedia\.(\d{2,3}0p)$/);
+  if (!m) throw new Error("Unable to parse token.");
+
+  return m[1];
 }
