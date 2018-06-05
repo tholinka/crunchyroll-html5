@@ -21,6 +21,17 @@ export class SubtitleToAss {
     output += "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n";
     const styles = model.styles;
     for (let i = 0; i < styles.length; i++) {
+      // Sometimes Crunchyroll sets the scaleX and scaleY to 0, which makes no
+      // sense.
+      var scaleX = styles[i].scaleX;
+      var scaleY = styles[i].scaleY;
+      if (scaleX === "0") {
+        scaleX = "100";
+      }
+      if (scaleY === "0") {
+        scaleY = "100";
+      }
+
       output += "Style: " + styles[i].name;
       output += ", " + styles[i].fontName;
       output += ", " + styles[i].fontSize;
@@ -32,8 +43,8 @@ export class SubtitleToAss {
       output += ", " + styles[i].italic;
       output += ", " + styles[i].underline;
       output += ", " + styles[i].strikeout;
-      output += ", " + styles[i].scaleX;
-      output += ", " + styles[i].scaleY;
+      output += ", " + scaleX;
+      output += ", " + scaleY;
       output += ", " + styles[i].spacing;
       output += ", " + styles[i].angle;
       output += ", " + styles[i].borderStyle;
