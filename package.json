@@ -26,6 +26,7 @@
   "license": "MIT",
   "scripts": {
     "clean": "shx rm -rf dist",
+    "test": "npm run build",
     "package": "npm run package:webextension && npm run package:firefox",
     "package:firefox": "node build/package.firefox.js",
     "package:webextension": "node build/package.webextension.js",
