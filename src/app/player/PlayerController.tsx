@@ -139,6 +139,11 @@ export class PlayerController {
       thumbnailUrl: metadata.getEpisodeImageUrl()
     } as IPlayerConfig;
 
+    // Change the file URL to https if current page is also https
+    if (window.location.href.indexOf("https://") === 0 && videoConfig.url && videoConfig.url.indexOf("http://") === 0) {
+      videoConfig.url = videoConfig.url.replace("http://", "https://");
+    }
+
     const storage = container.get<IStorage>(IStorageSymbol);
 
     const volumeData = await storage.get<IVolumeData>('volume');
