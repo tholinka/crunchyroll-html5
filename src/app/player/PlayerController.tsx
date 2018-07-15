@@ -2,7 +2,7 @@ import { h, render } from 'preact';
 import { Player, IPlayerConfig } from '../media/player/Player';
 import { getMediaByUrl, Formats, getMedia } from 'crunchyroll-lib/media';
 import { NextVideo } from '../media/nextvideo';
-import { NextVideoEvent, PlaybackState, VolumeChangeEvent } from '../media/player/IPlayerApi';
+import { NextVideoEvent, PlaybackState, VolumeChangeEvent, PlaybackStateChangeEvent, IVideoDetail } from '../media/player/IPlayerApi';
 import parse = require('url-parse');
 import { IMedia } from 'crunchyroll-lib/models/IMedia';
 import { VideoTracker } from './Tracking';
@@ -195,7 +195,11 @@ export class PlayerController {
       return;
     }
 
-    const detail = e.detail;
+    await this._playNextVideo(e.detail);
+  }
+
+  private async _playNextVideo(detail: IVideoDetail): Promise<void> {
+    if (!this._player) return;
 
     this._url = detail.url;
     this._changedMedia = true;
@@ -237,6 +241,7 @@ export class PlayerController {
     api.listen('fullscreenchange', () => this._onFullscreenChange());
     api.listen('nextvideo', (e: NextVideoEvent) => this._onNextVideo(e));
     api.listen('volumechange', (e: VolumeChangeEvent) => this._onVolumeChange(e));
+    api.listen('playbackstatechange', (e: PlaybackStateChangeEvent) => this._onPlaybackStateChange(e));
 
     let media: IMedia;
 
@@ -253,6 +258,20 @@ export class PlayerController {
     }
 
     await this._loadMedia(media);
+  }
+
+  private async _onPlaybackStateChange(e: PlaybackStateChangeEvent): Promise<void> {
+    if (e.state !== PlaybackState.ENDED || !this._player) return;
+
+    const detail = this._player.getApi().getNextVideoDetail();
+    if (!detail) return;
+
+    if (!this._player.getApi().isFullscreen()) {
+      window.location.href = detail.url;
+      return;
+    }
+
+    await this._playNextVideo(detail);
   }
 
   private _onSizeChange(large: boolean): void {
