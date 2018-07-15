@@ -1,6 +1,6 @@
 # HTML5 player for Crunchyroll
 
-[![Latest release](https://img.shields.io/github/release/YePpHa/crunchyroll-html5/all.svg)](https://github.com/YePpHa/crunchyroll-html5/releases/latest)
+[![Latest release](https://img.shields.io/github/release/YePpHa/crunchyroll-html5/all.svg)](https://github.com/YePpHa/crunchyroll-html5/releases/latest) [![Greenkeeper badge](https://badges.greenkeeper.io/YePpHa/crunchyroll-html5.svg)](https://greenkeeper.io/)
 
 We really don't like flash and want it killed ASAP. However, there's currently
 no HTML5 player available for Crunchyroll without having a subscription. So this
