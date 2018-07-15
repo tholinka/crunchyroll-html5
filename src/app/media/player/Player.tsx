@@ -19,6 +19,9 @@ import { ICON_PAUSE, ICON_PLAY, ICON_SEEK_BACK_5, ICON_VOLUME, ICON_VOLUME_HIGH,
 import { BufferComponent } from './chrome/BufferComponent';
 import { ISubtitle } from 'crunchyroll-lib/models/ISubtitle';
 import { SubtitleToAss } from '../../converter/SubtitleToAss';
+import { IActionable } from '../../libs/actions/IActionable';
+import { IAction } from '../../libs/actions/IAction';
+import { PlayerAction } from './PlayerAction';
 
 export interface IPlayerProps {
   config?: IPlayerConfig;
@@ -40,7 +43,7 @@ export interface IPlayerConfig {
   muted?: boolean;
 }
 
-export class Player extends Component<IPlayerProps, {}> {
+export class Player extends Component<IPlayerProps, {}> implements IActionable {
   private _configCued: boolean = false;
   private _config: IPlayerConfig|undefined = undefined;
   private _actionElement: HTMLElement;
@@ -71,6 +74,8 @@ export class Player extends Component<IPlayerProps, {}> {
 
   private _bigMode: boolean = false;
 
+  private _actions?: IAction[];
+
   constructor(props: IPlayerProps) {
     super(props);
 
@@ -78,6 +83,75 @@ export class Player extends Component<IPlayerProps, {}> {
       this._config = props.config;
     }
     this._api.setLarge(!!props.large);
+  }
+
+  getActions(): IAction[] {
+    if (!this._actions) {
+      const api = this.getApi();
+      this._actions = [
+        new PlayerAction("seek_forward_85s", () => {
+          this._playSvgBezel(ICON_SEEK_FORWARD);
+          api.seekTo(Math.min(api.getCurrentTime() + 85, api.getDuration()));
+        }),
+        new PlayerAction("seek_start", () => api.seekTo(0)),
+        new PlayerAction("seek_10%", () => api.seekTo(api.getDuration()*0.1)),
+        new PlayerAction("seek_20%", () => api.seekTo(api.getDuration()*0.2)),
+        new PlayerAction("seek_30%", () => api.seekTo(api.getDuration()*0.3)),
+        new PlayerAction("seek_40%", () => api.seekTo(api.getDuration()*0.4)),
+        new PlayerAction("seek_50%", () => api.seekTo(api.getDuration()*0.5)),
+        new PlayerAction("seek_60%", () => api.seekTo(api.getDuration()*0.6)),
+        new PlayerAction("seek_70%", () => api.seekTo(api.getDuration()*0.7)),
+        new PlayerAction("seek_80%", () => api.seekTo(api.getDuration()*0.8)),
+        new PlayerAction("seek_90%", () => api.seekTo(api.getDuration()*0.9)),
+        new PlayerAction("seek_end", () => api.seekTo(api.getDuration())),
+        new PlayerAction("seek_forward_5s", () => {
+          this._playSvgBezel(ICON_SEEK_FORWARD_5);
+          api.seekTo(Math.min(api.getCurrentTime() + 5, api.getDuration()));
+        }),
+        new PlayerAction("seek_forward_10s", () => {
+          this._playSvgBezel(ICON_SEEK_FORWARD_10);
+          api.seekTo(Math.min(api.getCurrentTime() + 10, api.getDuration()));
+        }),
+        new PlayerAction("seek_backward_5s", () => {
+          this._playSvgBezel(ICON_SEEK_BACK_5);
+          api.seekTo(Math.max(api.getCurrentTime() - 5, 0));
+        }),
+        new PlayerAction("seek_backward_10s", () => {
+          this._playSvgBezel(ICON_SEEK_BACK_10);
+          api.seekTo(Math.max(api.getCurrentTime() - 10, 0));
+        }),
+        new PlayerAction("volume_up", () => {
+          this._playSvgBezel(ICON_VOLUME + " " + ICON_VOLUME_HIGH);
+          api.setVolume(Math.min(api.getVolume() + 5/100, 1));
+        }),
+        new PlayerAction("volume_down", () => {
+          this._playSvgBezel(ICON_VOLUME);
+          api.setVolume(Math.max(api.getVolume() - 5/100, 0));
+        }),
+        new PlayerAction("toggle_fullscreen", () => api.toggleFullscreen()),
+        new PlayerAction("mute_unmute", () => {
+          if (!api.isMuted()) {
+            this._playSvgBezel(ICON_VOLUME_MUTE);
+            api.mute();
+          } else {
+            this._playSvgBezel(ICON_VOLUME + " " + ICON_VOLUME_HIGH);
+            api.unmute();
+          }
+        }),
+        new PlayerAction("next_video", () => api.playNextVideo()),
+        new PlayerAction("play_pause", () => {
+          var playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
+          if (playing) {
+            this._playSvgBezel(ICON_PAUSE);
+            api.pauseVideo();
+          } else {
+            this._playSvgBezel(ICON_PLAY);
+            api.playVideo();
+          }
+        })
+      ];
+    }
+    return this._actions;
   }
 
   cueVideoByConfig(config: IPlayerConfig) {
@@ -258,158 +332,6 @@ export class Player extends Component<IPlayerProps, {}> {
 
   private _playSvgBezel(d: string): void {
     this._bezelElement.playSvgPath(d);
-  }
-
-  private _onKeyDown(e: BrowserEvent) {
-    const api = this.getApi();
-    switch (e.keyCode) {
-      case 49:
-        api.seekTo(api.getDuration()*0.1);
-        break;
-      case 50:
-        api.seekTo(api.getDuration()*0.2);
-        break;
-      case 51:
-        api.seekTo(api.getDuration()*0.3);
-        break;
-      case 52:
-        api.seekTo(api.getDuration()*0.4);
-        break;
-      case 53:
-        api.seekTo(api.getDuration()*0.5);
-        break;
-      case 54:
-        api.seekTo(api.getDuration()*0.6);
-        break;
-      case 55:
-        api.seekTo(api.getDuration()*0.7);
-        break;
-      case 56:
-        api.seekTo(api.getDuration()*0.8);
-        break;
-      case 57:
-        api.seekTo(api.getDuration()*0.9);
-        break;
-      // Space
-      // K
-      case 32:
-      case 75:
-        var playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
-        if (playing) {
-          this._playSvgBezel(ICON_PAUSE);
-          api.pauseVideo();
-        } else {
-          this._playSvgBezel(ICON_PLAY);
-          api.playVideo();
-        }
-        break;
-      // End
-      case 35:
-        api.seekTo(api.getDuration());
-        break;
-      // Home
-      // 0
-      case 36:
-      case 48:
-        api.seekTo(0);
-        break;
-      // Left arrow
-      case 37:
-        this._playSvgBezel(ICON_SEEK_BACK_5);
-        api.seekTo(Math.max(api.getCurrentTime() - 5, 0));
-        break;
-      // Up arrow
-      case 38:
-        this._playSvgBezel(ICON_VOLUME + " " + ICON_VOLUME_HIGH);
-        api.setVolume(Math.min(api.getVolume() + 5/100, 1));
-        break;
-      // Right arrow
-      case 39:
-        this._playSvgBezel(ICON_SEEK_FORWARD_5);
-        api.seekTo(Math.min(api.getCurrentTime() + 5, api.getDuration()));
-        break;
-      // Down arrow
-      case 40:
-        this._playSvgBezel(ICON_VOLUME);
-        api.setVolume(Math.max(api.getVolume() - 5/100, 0));
-        break;
-      // F
-      case 70:
-        api.toggleFullscreen();
-        break;
-      // J
-      case 74:
-        this._playSvgBezel(ICON_SEEK_BACK_10);
-        api.seekTo(Math.max(api.getCurrentTime() - 10, 0));
-        break;
-      // L
-      case 76:
-        this._playSvgBezel(ICON_SEEK_FORWARD_10);
-        api.seekTo(Math.min(api.getCurrentTime() + 10, api.getDuration()));
-        break;
-      // M
-      case 77:
-        if (!api.isMuted()) {
-          this._playSvgBezel(ICON_VOLUME_MUTE);
-          api.mute();
-        } else {
-          this._playSvgBezel(ICON_VOLUME + " " + ICON_VOLUME_HIGH);
-          api.unmute();
-        }
-        break;
-      // N
-      case 78:
-        if (e.shiftKey) {
-          api.playNextVideo();
-          break;
-        }
-      // S
-      case 83:
-        this._playSvgBezel(ICON_SEEK_FORWARD);
-        api.seekTo(Math.min(api.getCurrentTime() + 85, api.getDuration()));
-        break;
-      // ,
-      case 188:
-        break;
-      // .
-      case 190:
-        break;
-      default:
-        return;
-    }
-    e.preventDefault();
-  }
-
-  private _onDocumentKeyDown(e: BrowserEvent) {
-    const element = e.target as HTMLElement;
-    if (element) {
-      if (element.tagName === 'INPUT' || element.tagName === 'SELECT' || element.tagName === 'TEXTAREA' || element.isContentEditable)
-        return;
-      if (this.base.contains(element))
-        return;
-    }
-
-    const api = this.getApi();
-    switch (e.keyCode) {
-      // F
-      case 70:
-        api.toggleFullscreen();
-        break;
-      // K
-      case 75:
-        var playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
-        if (playing) {
-          this._playSvgBezel(ICON_PAUSE);
-          api.pauseVideo();
-        } else {
-          this._playSvgBezel(ICON_PLAY);
-          api.playVideo();
-        }
-        break;
-      default:
-        return;
-    }
-    e.preventDefault();
   }
 
   private _onPlaybackStateChange() {
@@ -689,8 +611,6 @@ export class Player extends Component<IPlayerProps, {}> {
       .listen(this.base, 'mouseenter', this._onMouseMouse, false)
       .listen(this.base, 'mousemove', this._onMouseMouse, false)
       .listen(this.base, 'mouseleave', this._onMouseLeave, false)
-      .listen(this.base, 'keydown', this._onKeyDown, false)
-      .listen(document, 'keydown', this._onDocumentKeyDown, false)
       .listen(this._actionElement, 'mousedown', this._onActionMouseDown, false)
       .listen(this._actionElement, 'click', this._onActionClick, false)
       .listen(this._actionElement, 'dblclick', this._onActionDoubleClick, false)

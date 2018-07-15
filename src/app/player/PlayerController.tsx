@@ -10,6 +10,7 @@ import { getCollectionCarouselDetail, getMediaMetadataFromDOM } from '../media/C
 import { getCollectionCarouselPage, ICollectionCarouselPage } from './crunchyroll';
 import container from "../../config/inversify.config";
 import { IStorageSymbol, IStorage } from '../storage/IStorage';
+import { StaticActionController } from './StaticActionController';
 
 export interface IPlayerControllerOptions {
   quality?: keyof Formats;
@@ -42,6 +43,7 @@ export class PlayerController {
   private _mediaQuality?: string;
 
   private _player?: Player;
+  private _playerActionController?: StaticActionController;
   private _changedMedia: boolean = false;
 
   private _tracking?: VideoTracker;
@@ -242,6 +244,13 @@ export class PlayerController {
    */
   private async _onPlayerReady(player: Player): Promise<void> {
     this._player = player;
+
+    if (this._playerActionController) {
+      this._playerActionController.dispose();
+    }
+    this._playerActionController = new StaticActionController(player.base, player.getActions());
+    this._playerActionController.enterDocument();
+
     const api = player.getApi();
     api.listen('fullscreenchange', () => this._onFullscreenChange());
     api.listen('nextvideo', (e: NextVideoEvent) => this._onNextVideo(e));
