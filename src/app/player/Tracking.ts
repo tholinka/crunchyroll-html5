@@ -15,12 +15,15 @@ export class VideoTracker extends Disposable {
   private _intervals: number[];
   private _callCount: number = 0;
 
-  constructor(media: IMedia, api: IPlayerApi) {
+  private _affiliateCode?: string;
+
+  constructor(media: IMedia, api: IPlayerApi, affiliateCode?: string) {
     super();
 
     this._media = media;
     this._api = api;
     this._intervals = media.getPingIntervals();
+    this._affiliateCode = affiliateCode;
 
     this._handler
       .listen(api, 'playbackstatechange', this._onPlaybackStateChange, false)
@@ -38,7 +41,7 @@ export class VideoTracker extends Disposable {
     this._elapsedTime = 0;
     this._callCount++;
 
-    trackProgress(this._media, time, interval, this._callCount);
+    trackProgress(this._media, time, interval, this._callCount, this._affiliateCode);
   }
 
   private _getInterval() {

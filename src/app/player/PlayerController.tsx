@@ -183,7 +183,7 @@ export class PlayerController {
       }
     }
 
-    this._tracking = new VideoTracker(media, this._player.getApi());
+    this._tracking = new VideoTracker(media, this._player.getApi(), this._affiliateId);
 
     if (videoConfig.autoplay) {
       this._player.loadVideoByConfig(videoConfig);

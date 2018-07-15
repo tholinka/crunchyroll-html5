@@ -3,12 +3,25 @@ import container from 'crunchyroll-lib/config';
 import { IHttpClient } from 'crunchyroll-lib/models/http/IHttpClient';
 import { buildQuery } from '../utils/url';
 
-export async function trackProgress(media: IMedia, currentTime: number, elapsedTime: number, callCount: number) {
+interface IVideoViewBody {
+  req: string;
+  video_encode_id: string;
+  media_id: string;
+  media_type: number;
+  cbcallcount: number;
+  cbelapsed: number;
+  playhead: number;
+  h: string;
+  ht: string;
+  affiliate_code?: string;
+};
+
+export async function trackProgress(media: IMedia, currentTime: number, elapsedTime: number, callCount: number, affiliateCode?: string) {
   const httpClient = container.get<IHttpClient>("IHttpClient");
 
   const stream = media.getStream();
 
-  const response = await httpClient.post('http://www.crunchyroll.com/ajax/', {
+  let body: IVideoViewBody = {
     cbcallcount: callCount,
     h: '',
     cbelapsed: elapsedTime,
@@ -18,7 +31,11 @@ export async function trackProgress(media: IMedia, currentTime: number, elapsedT
     ht: '0',
     playhead: currentTime,
     media_id: media.getId()
-  }, {
+  };
+  if (affiliateCode) {
+    body.affiliate_code = affiliateCode;
+  }
+  await httpClient.post('http://www.crunchyroll.com/ajax/', body as any, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
