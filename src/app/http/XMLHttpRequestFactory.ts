@@ -12,8 +12,7 @@ export class XMLHttpRequestFactory implements IXMLHttpRequestFactory {
   create(): XMLHttpRequest {
     try {
       return XPCNativeWrapper<XMLHttpRequest>(new window.wrappedJSObject.XMLHttpRequest());
-    }
-    catch(evt){
+    } catch (e) {
       return new XMLHttpRequest();
     }
   }
