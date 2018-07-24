@@ -51,6 +51,8 @@ export class LibAss extends EventTarget {
 
   private ready: boolean = false;
 
+  private _updateable: boolean = true;
+
   constructor(
     private fonts: string[] = [],
     private availableFonts: {[key: string]: string} = {}
@@ -87,9 +89,12 @@ export class LibAss extends EventTarget {
     this.video = video;
 
     this.videoHandler
-      .listen(video, 'playing', () => this.setIsPaused(false, video.currentTime + this.getOffsetTime()))
+      .listen(video, 'playing', () => {
+        this._updateable = true;
+        this.setIsPaused(false, video.currentTime + this.getOffsetTime());
+      })
       .listen(video, 'pause', () => this.setIsPaused(true, video.currentTime + this.getOffsetTime()))
-      .listen(video, 'seeking', () => this.setCurrentTime(video.currentTime + this.getOffsetTime()))
+      .listen(video, 'seeking', () => this._updateable = false)
       .listen(video, 'ratechange', () => this.setRate(video.playbackRate))
       .listen(video, 'timeupdate', () => this.setCurrentTime(video.currentTime + this.getOffsetTime()))
       .listen(video, 'waiting', () => this.setIsPaused(true, video.currentTime + this.getOffsetTime()))
@@ -210,6 +215,7 @@ export class LibAss extends EventTarget {
   }
 
   private setIsPaused(paused: boolean, currentTime: number) {
+    if (!this._updateable) return;
     if (!this.worker) throw new Error("Worker is not available.");
     this.worker.postMessage({
       target: 'video',
@@ -219,6 +225,7 @@ export class LibAss extends EventTarget {
   }
 
   private setCurrentTime(currentTime: number) {
+    if (!this._updateable) return;
     if (!this.worker) throw new Error("Worker is not available.");
     this.worker.postMessage({
       target: 'video',
