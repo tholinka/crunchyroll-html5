@@ -13,6 +13,10 @@
   z-index: 14;
 }
 
+.html5-video-cued-thumbnail-overlay--actionable {
+  z-index: 16;
+}
+
 .html5-video-cued-thumbnail-overlay[aria-hidden=true] {
   opacity: 0;
   -moz-transition: opacity .25s cubic-bezier(0.4,0.0,1,1);

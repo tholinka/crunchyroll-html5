@@ -36,6 +36,11 @@ export class CuedThumbnailComponent extends Component<ICuedThumbnailComponentPro
 
   setButtonVisible(visible: boolean): void {
     this._buttonElement.style.display = visible ? "" : "none";
+    if (visible) {
+      this.base.classList.add("html5-video-cued-thumbnail-overlay--actionable")
+    } else {
+      this.base.classList.remove("html5-video-cued-thumbnail-overlay--actionable")
+    }
   }
 
   setVisible(visible: boolean): void {
