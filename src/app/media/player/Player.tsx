@@ -66,6 +66,7 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   private _autoHideDelay: number = 200;
   private _autoHideMoveDelay: number = 3000;
   private _preview: boolean = false;
+  private _forceHide: boolean = false;
 
   private _actionClickTimer: number|undefined = undefined;
   private _actionClickExecuted: boolean = false;
@@ -148,7 +149,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
             this._playSvgBezel(ICON_PLAY);
             api.playVideo();
           }
-        })
+        }),
+        new PlayerAction("toggle_hide", () => this.setForceHide(!this.isForceHide()))
       ];
     }
     return this._actions;
@@ -263,6 +265,15 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
     this.updateInternalAutoHide();
   }
 
+  setForceHide(hide: boolean): void {
+    this._forceHide = hide;
+    this.updateInternalAutoHide();
+  }
+
+  isForceHide(): boolean {
+    return this._forceHide;
+  }
+
   updateInternalAutoHide(): void {
     let hide = this._autoHide;
 
@@ -274,16 +285,33 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
     if (state !== PlaybackState.PLAYING) {
       hide = false;
     }
-    if (this._preview) {
-      hide = true;
+
+    const forceHide = this.isForceHide();
+    let requireResizeCalculations = false;
+
+    if (forceHide) {
+      this.base.classList.add('html5-video-player--autohide--force');
+    } else {
+      requireResizeCalculations = this.base.classList.contains("html5-video-player--autohide--force");
+      this.base.classList.remove('html5-video-player--autohide--force');
     }
 
-    if (hide) {
+    if (hide || this._preview || forceHide) {
       this.base.classList.add('html5-video-player--autohide');
       this._bottomComponent.setInternalVisibility(false);
+
+      if (!this._preview && hide) {
+        this.base.classList.add('html5-video-player--autohide--hide-cursor');
+      } else {
+        this.base.classList.remove('html5-video-player--autohide--hide-cursor');
+      }
     } else {
       this.base.classList.remove('html5-video-player--autohide');
       this._bottomComponent.setInternalVisibility(true);
+    }
+
+    if (requireResizeCalculations) {
+      this.resize();
     }
   }
 

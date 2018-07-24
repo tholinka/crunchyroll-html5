@@ -28,7 +28,8 @@ export class StaticActionController extends Disposable {
     "toggle_fullscreen": [{ key: 70 /* F */ }, { key: 70 /* F */, global: true }],
     "mute_unmute": [{ key: 77 /* M */ }],
     "next_video": [{ key: 78 /* N */ , modifiers: { shift: true } }],
-    "play_pause": [{ key: 32 /* SPACE */ }, { key: 75 /* K */ }, { key: 75 /* K */, global: true }]
+    "play_pause": [{ key: 32 /* SPACE */ }, { key: 75 /* K */ }, { key: 75 /* K */, global: true }],
+    "toggle_hide": [{ key: 85 /* U */, modifiers: { ctrl: true, shift: true } }]
   };
 
   private _baseElement: Element;
