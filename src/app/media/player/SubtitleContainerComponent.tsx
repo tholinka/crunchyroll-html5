@@ -15,7 +15,9 @@ export class SubtitleContainerComponent extends Component<ISubtitleContainerProp
   }
   
   render(props: ISubtitleContainerProps): JSX.Element {
-    const ref = (element: HTMLElement) => {
+    const ref = (element?: Element) => {
+      if (!element) return;
+      
       element.appendChild(props.engine.getElement());
     };
     return (

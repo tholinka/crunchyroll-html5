@@ -8,8 +8,8 @@ export interface ITimeDisplayProps {
 }
 
 export class TimeDisplay extends Component<ITimeDisplayProps, {}> {
-  private _currentTimeElement: HTMLElement;
-  private _durationTimeElement: HTMLElement;
+  private _currentTimeElement?: Element;
+  private _durationTimeElement?: Element;
 
   private _handler: EventHandler = new EventHandler(this);
 
@@ -27,6 +27,8 @@ export class TimeDisplay extends Component<ITimeDisplayProps, {}> {
   }
 
   private _updateState() {
+    if (!this._currentTimeElement || !this._durationTimeElement) return;
+
     const currentTime = this._currentTime;
     const duration = this._duration;
 
@@ -53,8 +55,8 @@ export class TimeDisplay extends Component<ITimeDisplayProps, {}> {
   }
 
   render(props: ITimeDisplayProps): JSX.Element {
-    const currentRef = (el: HTMLElement) => this._currentTimeElement = el;
-    const durationRef = (el: HTMLElement) => this._durationTimeElement = el;
+    const currentRef = (el?: Element) => this._currentTimeElement = el;
+    const durationRef = (el?: Element) => this._durationTimeElement = el;
 
     this._currentTime = props.api.getCurrentTime();
     this._duration = props.api.getDuration();

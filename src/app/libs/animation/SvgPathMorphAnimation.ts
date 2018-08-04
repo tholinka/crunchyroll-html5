@@ -28,11 +28,11 @@ function parseSvgPath(path: string): (string|number)[]|undefined {
 export class SvgPathMorphAnimation extends Animation {
   private _pathElement: SVGPathElement;
 
-  private _fromPath: string;
-  private _toPath: string;
+  private _fromPath?: string;
+  private _toPath?: string;
 
-  private _parsedFromPath: (string|number)[];
-  private _parsedToPath: (string|number)[];
+  private _parsedFromPath?: (string|number)[];
+  private _parsedToPath?: (string|number)[];
 
   constructor(pathElement: SVGPathElement, duration: number) {
     super(duration);
@@ -45,6 +45,10 @@ export class SvgPathMorphAnimation extends Animation {
   }
 
   protected tickInternal(progress: number) {
+    if (!this._toPath) throw new Error("ToPath is not defined");
+    if (!this._parsedFromPath) throw new Error("ParsedFromPath is not defined");
+    if (!this._parsedToPath) throw new Error("ParsedToPath is not defined");
+
     super.tickInternal(progress);
 
     if (progress === 1) {

@@ -1,6 +1,5 @@
 import { h, Component } from "preact";
-import { SvgPathMorphAnimation } from "../../../libs/animation/SvgPathMorphAnimation";
-import { IPlayerApi, PlaybackState } from "../IPlayerApi";
+import { IPlayerApi } from "../IPlayerApi";
 import { EventHandler } from "../../../libs/events/EventHandler";
 
 const ENTER_SVG = (

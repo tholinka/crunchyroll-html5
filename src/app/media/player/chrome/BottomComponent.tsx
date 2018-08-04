@@ -25,9 +25,9 @@ export interface IChromeBottomProps {
 }
 
 export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
-  private _progressBar: ChromeProgressBarComponent;
+  private _progressBar?: ChromeProgressBarComponent;
 
-  private _volumeSlider: VolumeSliderComponent;
+  private _volumeSlider?: VolumeSliderComponent;
   
   private _volumeSliderFocus: boolean = false;
   private _volumeSliderMouse: boolean = false;
@@ -63,12 +63,14 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
   }
 
   setInternalVisibility(visiblity: boolean): void {
-    this._progressBar.setInternalVisibility(visiblity);
+    if (this._progressBar) {
+      this._progressBar.setInternalVisibility(visiblity);
+    }
   }
 
   render(props: IChromeBottomProps): JSX.Element {
-    const progressBarRef = (el: ChromeProgressBarComponent) => this._progressBar = el;
-    const volumeSliderRef = (el: VolumeSliderComponent) => this._volumeSlider = el;
+    const progressBarRef = (el?: ChromeProgressBarComponent) => this._progressBar = el;
+    const volumeSliderRef = (el?: VolumeSliderComponent) => this._volumeSlider = el;
     
     const onVolumeFocus = () => this._onVolumeFocus();
     const onVolumeBlur = () => this._onVolumeBlur();

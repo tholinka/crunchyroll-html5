@@ -1,7 +1,6 @@
 import { IHttpClient, BodyType } from 'crunchyroll-lib/models/http/IHttpClient';
 import { IOptions } from 'crunchyroll-lib/models/http/IOptions';
 import { IResponse } from 'crunchyroll-lib/models/http/IResponse';
-import { IBrowserMessage } from '../IBrowserMessage';
 
 export class GreasemonkeyHttpClient implements IHttpClient {
   async method(method: 'GET'|'HEAD'|'POST'|'PUT'|'DELETE'|'CONNECT'|'OPTIONS'|'PATCH', url: string, body?: BodyType, options?: IOptions): Promise<IResponse<string>> {

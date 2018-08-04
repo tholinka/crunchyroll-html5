@@ -12,12 +12,12 @@ export interface IChromeProgressBarProps {
 }
 
 export class ChromeProgressBarComponent extends Component<IChromeProgressBarProps, {}> {
-  private _containerElement: HTMLElement;
-  private _progressBarElement: HTMLElement;
-  private _scrubberElement: HTMLElement;
-  private _playElement: HTMLElement;
-  private _loadElement: HTMLElement;
-  private _hoverElement: HTMLElement;
+  private _containerElement?: Element;
+  private _progressBarElement?: Element;
+  private _scrubberElement?: Element;
+  private _playElement?: Element;
+  private _loadElement?: Element;
+  private _hoverElement?: Element;
 
   private _width: number = 0;
   private _left: number = 0;
@@ -50,9 +50,11 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
   }
 
   private _onResize() {
-    const rect = this._containerElement.getBoundingClientRect();
-    this._width = rect.width;
-    this._left = rect.left;
+    if (this._containerElement) {
+      const rect = this._containerElement.getBoundingClientRect();
+      this._width = rect.width;
+      this._left = rect.left;
+    }
   }
   
   private _onMouseDown(e: BrowserEvent) {
@@ -64,7 +66,7 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
   }
   
   private _onMouseMove(e: BrowserEvent) {
-    if (!this._dragging && e.target !== this._containerElement && !this._containerElement.contains(e.target as Node)) return;
+    if (!this._containerElement || !this._dragging && e.target !== this._containerElement && !this._containerElement.contains(e.target as Node)) return;
 
     const left = Math.max(Math.min(e.clientX - this._left, this._width), 0);
 
@@ -90,7 +92,7 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
 
     this.props.api.setForcePaused(false);
 
-    if (e.target !== this._containerElement && !this._containerElement.contains(e.target as Node)) {
+    if (!this._containerElement || e.target !== this._containerElement && !this._containerElement.contains(e.target as Node)) {
       this.props.onEndHover();
     }
   }
@@ -126,18 +128,29 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
     const hoverStyle = "left: " + this._width*playPercentage + "px;"
       + vendorPrefix('transform', 'scaleX(' + Math.max(hoverPercentage - playPercentage, 0) + ')');
 
-    this._scrubberElement.setAttribute("style", scrubberStyle);
-    this._playElement.setAttribute("style", playStyle);
-    this._loadElement.setAttribute("style", loadStyle);
-    this._hoverElement.setAttribute("style", hoverStyle);
+    if (this._scrubberElement) {
+      this._scrubberElement.setAttribute("style", scrubberStyle);
+    }
+    if (this._playElement) {
+      this._playElement.setAttribute("style", playStyle);
+    }
+    if (this._loadElement) {
+      this._loadElement.setAttribute("style", loadStyle);
+    }
+    if (this._hoverElement) {
+      this._hoverElement.setAttribute("style", hoverStyle);
+    }
 
-    this._progressBarElement.setAttribute("aria-valuemin", "0");
-    this._progressBarElement.setAttribute("aria-valuemax", this._duration + '');
-    this._progressBarElement.setAttribute("aria-valuenow", this._playTime + '');
-    this._progressBarElement.setAttribute("aria-valuetext", parseAndFormatTime(this._playTime) + " of " + parseAndFormatTime(this._duration));
+    if (this._progressBarElement) {
+      this._progressBarElement.setAttribute("aria-valuemin", "0");
+      this._progressBarElement.setAttribute("aria-valuemax", this._duration + '');
+      this._progressBarElement.setAttribute("aria-valuenow", this._playTime + '');
+      this._progressBarElement.setAttribute("aria-valuetext", parseAndFormatTime(this._playTime) + " of " + parseAndFormatTime(this._duration));
+    }
   }
 
   componentDidMount() {
+    if (!this._containerElement) return;
     const rect = this._containerElement.getBoundingClientRect();
     this._width = rect.width;
     this._left = rect.left;
@@ -160,12 +173,12 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
   }
 
   render(): JSX.Element {
-    const containerRef = (el: HTMLElement) => this._containerElement = el;
-    const progressBarRef = (el: HTMLElement) => this._progressBarElement = el;
-    const scrubberRef = (el: HTMLElement) => this._scrubberElement = el;
-    const playRef = (el: HTMLElement) => this._playElement = el;
-    const loadRef = (el: HTMLElement) => this._loadElement = el;
-    const hoverRef = (el: HTMLElement) => this._hoverElement = el;
+    const containerRef = (el?: Element) => this._containerElement = el;
+    const progressBarRef = (el?: Element) => this._progressBarElement = el;
+    const scrubberRef = (el?: Element) => this._scrubberElement = el;
+    const playRef = (el?: Element) => this._playElement = el;
+    const loadRef = (el?: Element) => this._loadElement = el;
+    const hoverRef = (el?: Element) => this._hoverElement = el;
 
     return (
       <div class="chrome-progress-bar-container" ref={containerRef}>

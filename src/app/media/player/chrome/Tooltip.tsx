@@ -1,5 +1,4 @@
 import { h, Component } from "preact";
-import { IRect } from "../../../utils/rect";
 import { ISize } from "../../../utils/size";
 
 export interface IChromeTooltip {
@@ -19,11 +18,11 @@ export interface IChromeTooltipImage {
 }
 
 export class ChromeTooltip extends Component<{}, {}> {
-  private _bgElement: HTMLElement;
-  private _durationElement: HTMLElement;
-  private _imageElement: HTMLElement;
-  private _titleElement: HTMLElement;
-  private _textElement: HTMLElement;
+  private _bgElement?: HTMLElement;
+  private _durationElement?: Element;
+  private _imageElement?: Element;
+  private _titleElement?: Element;
+  private _textElement?: HTMLElement;
 
   setPosition(left: number, top: number): void {
     this.base.style.left = left + "px";
@@ -31,6 +30,8 @@ export class ChromeTooltip extends Component<{}, {}> {
   }
 
   getSize(): ISize {
+    if (!this._textElement) return { width: 0, height: 0 };
+
     return {
       width: Math.max(this.base.offsetWidth, this._textElement.offsetWidth),
       height: Math.max(this.base.offsetHeight, this._textElement.offsetHeight),
@@ -39,34 +40,43 @@ export class ChromeTooltip extends Component<{}, {}> {
 
   setTooltip(tooltip: IChromeTooltip) {
     this.base.style.display = "";
-    if (tooltip.backgroundImage) {
-      this._bgElement.style.width = tooltip.backgroundImage.width + "px";
-      this._bgElement.style.height = tooltip.backgroundImage.height + "px";
-      this._bgElement.style.background = "url(" + JSON.stringify(tooltip.backgroundImage.src) + ")";
-      this._bgElement.style.backgroundSize = this._bgElement.style.width + " " + this._bgElement.style.height;
-    } else {
-      this._bgElement.style.width = "";
-      this._bgElement.style.height = "";
-      this._bgElement.style.background = "";
-      this._bgElement.style.backgroundSize = "";
+
+    if (this._bgElement) {
+      if (tooltip.backgroundImage) {
+        this._bgElement.style.width = tooltip.backgroundImage.width + "px";
+        this._bgElement.style.height = tooltip.backgroundImage.height + "px";
+        this._bgElement.style.background = "url(" + JSON.stringify(tooltip.backgroundImage.src) + ")";
+        this._bgElement.style.backgroundSize = this._bgElement.style.width + " " + this._bgElement.style.height;
+      } else {
+        this._bgElement.style.width = "";
+        this._bgElement.style.height = "";
+        this._bgElement.style.background = "";
+        this._bgElement.style.backgroundSize = "";
+      }
     }
     
-    if (tooltip.duration) {
-      this._durationElement.textContent = tooltip.duration;
-    } else {
-      this._durationElement.textContent = "";
+    if (this._durationElement) {
+      if (tooltip.duration) {
+        this._durationElement.textContent = tooltip.duration;
+      } else {
+        this._durationElement.textContent = "";
+      }
     }
     
-    if (tooltip.title) {
-      this._titleElement.textContent = tooltip.title;
-    } else {
-      this._titleElement.textContent = "";
+    if (this._titleElement) {
+      if (tooltip.title) {
+        this._titleElement.textContent = tooltip.title;
+      } else {
+        this._titleElement.textContent = "";
+      }
     }
     
-    if (tooltip.text) {
-      this._textElement.textContent = tooltip.text;
-    } else {
-      this._textElement.textContent = "";
+    if (this._textElement) {
+      if (tooltip.text) {
+        this._textElement.textContent = tooltip.text;
+      } else {
+        this._textElement.textContent = "";
+      }
     }
     
     if (tooltip.preview) {
@@ -89,11 +99,11 @@ export class ChromeTooltip extends Component<{}, {}> {
   }
 
   render(): JSX.Element {
-    const bgRef = (el: HTMLElement) => this._bgElement = el;
-    const durationRef = (el: HTMLElement) => this._durationElement = el;
-    const imageRef = (el: HTMLElement) => this._imageElement = el;
-    const titleRef = (el: HTMLElement) => this._titleElement = el;
-    const textRef = (el: HTMLElement) => this._textElement = el;
+    const bgRef = (el?: Element) => this._bgElement = el as HTMLElement;
+    const durationRef = (el?: Element) => this._durationElement = el;
+    const imageRef = (el?: Element) => this._imageElement = el;
+    const titleRef = (el?: Element) => this._titleElement = el;
+    const textRef = (el?: Element) => this._textElement = el as HTMLElement;
 
     return (
       <div class="chrome-tooltip chrome-bottom" style="display: none;">

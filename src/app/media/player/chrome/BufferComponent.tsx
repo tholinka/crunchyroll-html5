@@ -9,7 +9,7 @@ export interface IBufferComponentProps {
 export class BufferComponent extends Component<IBufferComponentProps, {}> {
   private _handler: EventHandler = new EventHandler(this);
 
-  private _timer: number;
+  private _timer?: number;
   private _visibilityDelay: number = 1000;
 
   private _onPlaybackStateChange() {

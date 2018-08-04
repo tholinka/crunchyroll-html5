@@ -11,6 +11,7 @@ import { getCollectionCarouselPage, ICollectionCarouselPage } from './crunchyrol
 import container from "../../config/inversify.config";
 import { IStorageSymbol, IStorage } from '../storage/IStorage';
 import { StaticActionController } from './StaticActionController';
+import { IMediaOptions } from '../../../node_modules/crunchyroll-lib/models/IMediaResolver';
 
 export interface IPlayerControllerOptions {
   quality?: keyof Formats;
@@ -38,7 +39,7 @@ export class PlayerController {
   private _startTime?: number;
   private _autoPlay?: boolean;
   private _affiliateId?: string;
-  private _quality: keyof Formats;
+  private _quality?: keyof Formats;
   private _mediaFormat?: string;
   private _mediaQuality?: string;
 
@@ -60,7 +61,7 @@ export class PlayerController {
       this._sizeEnabled = !!options.sizeEnabled;
       this._autoPlay = options.autoPlay;
       this._affiliateId = options.affiliateId;
-      this._quality = options.quality ? options.quality : "360p";
+      this._quality = options.quality ? options.quality : undefined;
 
       this._mediaFormat = options.mediaFormat;
       this._mediaQuality = options.mediaQuality;
@@ -223,16 +224,20 @@ export class PlayerController {
     });
 
     let media: IMedia;
+    const options = {
+      affiliateId: this._affiliateId,
+      autoPlay: this._autoPlay
+    } as IMediaOptions;
+
     if (this._mediaFormat && this._mediaQuality) {
-      media = await getMediaByUrl(detail.url, this._mediaFormat, this._mediaQuality, {
-        affiliateId: this._affiliateId,
-        autoPlay: true
-      });
+      options.streamFormat = this._mediaFormat;
+      options.streamQuality = this._mediaQuality;
+    }
+
+    if (this._quality) {
+      media = await getMediaByUrl(detail.url, this._quality, options);
     } else {
-      media = await getMediaByUrl(detail.url, this._quality, {
-        affiliateId: this._affiliateId,
-        autoPlay: true
-      });
+      media = await getMediaByUrl(detail.url, options);
     }
 
     await this._loadMedia(media);
@@ -259,16 +264,20 @@ export class PlayerController {
 
     let media: IMedia;
 
+    const options = {
+      affiliateId: this._affiliateId,
+      autoPlay: this._autoPlay
+    } as IMediaOptions;
+
     if (this._mediaFormat && this._mediaQuality) {
-      media = await getMedia(this._mediaId.toString(), this._mediaFormat, this._mediaQuality, this._url, {
-        affiliateId: this._affiliateId,
-        autoPlay: this._autoPlay
-      });
+      options.streamFormat = this._mediaFormat;
+      options.streamQuality = this._mediaQuality;
+    }
+
+    if (this._quality) {
+      media = await getMedia(this._mediaId.toString(), this._url, this._quality, options);
     } else {
-      media = await getMedia(this._mediaId.toString(), this._quality, this._url, {
-        affiliateId: this._affiliateId,
-        autoPlay: this._autoPlay
-      });
+      media = await getMedia(this._mediaId.toString(), this._url, options);
     }
 
     await this._loadMedia(media);

@@ -1,6 +1,5 @@
 import { h, Component } from "preact";
-import { SvgPathMorphAnimation } from "../../../libs/animation/SvgPathMorphAnimation";
-import { IPlayerApi, PlaybackState } from "../IPlayerApi";
+import { IPlayerApi } from "../IPlayerApi";
 import { EventHandler } from "../../../libs/events/EventHandler";
 
 const SMALL_PATH = "m 26,13 0,10 -16,0 0,-10 z m -14,2 12,0 0,6 -12,0 0,-6 z";
@@ -15,7 +14,7 @@ export interface ISizeButtonProps {
 
 export class SizeButton extends Component<ISizeButtonProps, {}> {
   private _handler = new EventHandler(this);
-  private _pathElement: SVGPathElement;
+  private _pathElement?: SVGPathElement;
 
   private _isLarge() {
     return this.props.api.isLarge();
@@ -26,6 +25,7 @@ export class SizeButton extends Component<ISizeButtonProps, {}> {
   }
 
   private _onSizeChange() {
+    if (!this._pathElement) return;
     const d: string = this._isLarge() ? SMALL_PATH : LARGE_PATH;
     this._pathElement.setAttribute("d", d);
   }
@@ -57,7 +57,7 @@ export class SizeButton extends Component<ISizeButtonProps, {}> {
     const d: string = this._isLarge() ? SMALL_PATH : LARGE_PATH;
 
     const onClick = () => this._onClick();
-    const pathRef = (element: SVGPathElement) => this._pathElement = element;
+    const pathRef = (element?: Element) => this._pathElement = element as SVGPathElement;
 
     const visible = typeof this.props.visible === "boolean" ? this.props.visible : true;
     const className = "chrome-button chrome-size-button" + (visible ? "" : " chrome-size-button--hidden");

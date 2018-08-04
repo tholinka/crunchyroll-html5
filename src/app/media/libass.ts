@@ -47,7 +47,7 @@ export class LibAss extends EventTarget {
 
   private renderFrameData: Uint8ClampedArray|undefined;
   private renderFramesData: any;
-  private frameId: number;
+  private frameId?: number;
 
   private ready: boolean = false;
 

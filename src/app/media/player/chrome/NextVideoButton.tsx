@@ -1,6 +1,5 @@
 import { h, Component } from "preact";
-import { SvgPathMorphAnimation } from "../../../libs/animation/SvgPathMorphAnimation";
-import { IPlayerApi, PlaybackState, IVideoDetail } from "../IPlayerApi";
+import { IPlayerApi, IVideoDetail } from "../IPlayerApi";
 import { EventHandler } from "../../../libs/events/EventHandler";
 
 export interface INextVideoButtonProps {

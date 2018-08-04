@@ -9,8 +9,8 @@ export class CuedThumbnailComponent extends Component<ICuedThumbnailComponentPro
   private _visible: boolean = false;
   private _url: string = "";
 
-  private _imageElement: HTMLElement;
-  private _buttonElement: HTMLElement;
+  private _imageElement?: HTMLElement;
+  private _buttonElement?: HTMLElement;
 
   private _handler = new EventHandler(this);
 
@@ -23,7 +23,9 @@ export class CuedThumbnailComponent extends Component<ICuedThumbnailComponentPro
   setThumbnailUrl(url: string): void {
     this._url = url;
 
-    this._imageElement.style.backgroundImage = "url(" + JSON.stringify(url) + ")";
+    if (this._imageElement) {
+      this._imageElement.style.backgroundImage = "url(" + JSON.stringify(url) + ")";
+    }
 
     if (this._visible && !url) {
       this.setVisible(false);
@@ -35,7 +37,9 @@ export class CuedThumbnailComponent extends Component<ICuedThumbnailComponentPro
   }
 
   setButtonVisible(visible: boolean): void {
-    this._buttonElement.style.display = visible ? "" : "none";
+    if (this._buttonElement) {
+      this._buttonElement.style.display = visible ? "" : "none";
+    }
     if (visible) {
       this.base.classList.add("html5-video-cued-thumbnail-overlay--actionable")
     } else {
@@ -69,8 +73,8 @@ export class CuedThumbnailComponent extends Component<ICuedThumbnailComponentPro
   }
 
   render(): JSX.Element {
-    const imageRef = (el: HTMLElement) => this._imageElement = el;
-    const buttonRef = (el: HTMLElement) => this._buttonElement = el;
+    const imageRef = (el?: Element) => this._imageElement = el as HTMLElement;
+    const buttonRef = (el?: Element) => this._buttonElement = el as HTMLElement;
     const onClick = () => this.props.onClick && this.props.onClick();
     return (
       <div class="html5-video-cued-thumbnail-overlay" onClick={onClick}>

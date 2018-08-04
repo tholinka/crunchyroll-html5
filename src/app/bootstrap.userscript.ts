@@ -1,5 +1,5 @@
 import { binaryToBlob } from "./utils/blob";
-import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
+import { addFile, setWorkerUrl } from "./SubtitleEngineLoader";
 import { runBootstrap } from './bootstrap';
 import { setCrossHttpClient } from "./config";
 import { GreasemonkeyHttpClient } from "./http/GreasemonkeyHttpClient";

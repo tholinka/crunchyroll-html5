@@ -18,15 +18,15 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
 
   private _minValue: number;
   private _maxValue: number;
-  private _value: number;
+  private _value?: number;
   private _muted: boolean;
 
-  private _sliderElement: HTMLElement;
-  private _handleElement: HTMLElement;
+  private _sliderElement?: Element;
+  private _handleElement?: HTMLElement;
 
-  private _sliderRect: IRect;
-  private _handleWidth: number;
-  private _sliderWidth: number;
+  private _sliderRect?: IRect;
+  private _handleWidth?: number;
+  private _sliderWidth?: number;
 
   constructor(props: IVolumeSliderComponentProps) {
     super(props);
@@ -57,7 +57,7 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
   }
 
   private _onMouseMove(e: BrowserEvent): void {
-    if (!this._dragging) return;
+    if (!this._dragging || !this._sliderRect || !this._sliderWidth) return;
     e.preventDefault();
 
     const { left } = this._sliderRect;
@@ -127,6 +127,8 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
   }
 
   private _onResize(): void {
+    if (!this._sliderElement || !this._handleElement) return;
+
     this._sliderRect = this._sliderElement.getBoundingClientRect();
     this._handleWidth = this._handleElement.offsetWidth;
 
@@ -137,6 +139,7 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
   }
 
   private _updateInternal(): void {
+    if (!this._handleElement || this._sliderWidth === undefined || this._handleWidth === undefined) return;
     let value: number = this.getValue();
     const minValue: number = this.getMinValue();
     const maxValue: number = this.getMaxValue();
@@ -158,6 +161,7 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
   }
 
   getValue(): number {
+    if (!this._value) return 0;
     return this._value;
   }
 
@@ -224,8 +228,8 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
   }
 
   render(props: IVolumeSliderComponentProps): JSX.Element {
-    const sliderRef = (el: HTMLElement) => this._sliderElement = el;
-    const handleRef = (el: HTMLElement) => this._handleElement = el;
+    const sliderRef = (el?: Element) => this._sliderElement = el;
+    const handleRef = (el?: Element) => this._handleElement = el as HTMLElement;
 
     const attributes = {
       'tabindex': '0'

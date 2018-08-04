@@ -9,12 +9,12 @@ export class HlsSource extends Disposable implements ISource {
   constructor(url: string) {
     super();
 
-    let config: Hls.OptionalConfig|undefined = undefined;
+    let config: Hls.Config|undefined = undefined;
     const loader = getPlaylistLoader();
     if (loader) {
-      config = {
+      config = Object.assign({}, Hls.DefaultConfig, {
         loader: loader
-      };
+      });
     }
 
     this._hls = new Hls(config);

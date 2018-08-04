@@ -1,4 +1,4 @@
-import { padLeft, padRight } from './string';
+import { padLeft } from './string';
 
 export function parseSeconds(seconds: number): { hours: number, minutes: number, seconds: number } {
   const hours: number = Math.floor(seconds / 3600);

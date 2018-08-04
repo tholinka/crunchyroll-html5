@@ -3,7 +3,7 @@ import { EventHandler } from "../../../libs/events/EventHandler";
 
 export class BezelComponent extends Component<{}, {}> {
   private _handler: EventHandler = new EventHandler(this);
-  private _iconElement: HTMLElement;
+  private _iconElement?: Element;
 
   private _handleAnimationEnd() {
     this.stop();
@@ -24,8 +24,10 @@ export class BezelComponent extends Component<{}, {}> {
   play(element: JSX.Element): void {
     this.stop();
 
-    this._iconElement.innerHTML = "";
-    render(element, this._iconElement);
+    if (this._iconElement) {
+      this._iconElement.innerHTML = "";
+      render(element, this._iconElement);
+    }
 
     // Trigger reflow
     void this.base.offsetWidth;
@@ -49,7 +51,7 @@ export class BezelComponent extends Component<{}, {}> {
   }
 
   render(): JSX.Element {
-    const iconRef = (el: HTMLElement) => this._iconElement = el;
+    const iconRef = (el?: Element) => this._iconElement = el;
     return (
       <div class="chrome-bezel" role="status" style="display: none">
         <div class="chrome-bezel-icon" ref={iconRef}></div>

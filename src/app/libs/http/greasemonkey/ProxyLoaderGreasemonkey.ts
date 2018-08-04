@@ -25,11 +25,11 @@ export class ProxyLoaderGreasemonkey {
   private requestTimeout?: number;
   private retryTimeout?: number;
 
-  private context: Hls.LoaderContext;
-  private config: Hls.LoaderConfig;
-  private callbacks: Hls.LoaderCallbacks;
-  private stats: IStats;
-  private retryDelay: number;
+  private context?: Hls.LoaderContext;
+  private config?: Hls.LoaderConfig;
+  private callbacks?: Hls.LoaderCallbacks;
+  private stats?: IStats;
+  private retryDelay?: number;
 
   destroy(): void {
     this.abort();
@@ -37,6 +37,8 @@ export class ProxyLoaderGreasemonkey {
   }
 
   abort(): void {
+    if (!this.stats) throw new Error("Stats is undefined");
+
     let loader = this.loader;
     if (loader && loader.readyState !== 4) {
       this.stats.aborted = true;
@@ -64,6 +66,11 @@ export class ProxyLoaderGreasemonkey {
   }
 
   loadInternal() {
+    if (!this.stats) throw new Error("Stats is undefined");
+    if (!this.context) throw new Error("Context is undefined");
+    if (!this.callbacks) throw new Error("Callbacks is undefined");
+    if (!this.config) throw new Error("Config is undefined");
+
     let xhr, context = this.context;
     if (useGreasemonkeyProxy) {
       xhr = this.loader = new CrossXMLHttpRequest();
@@ -98,6 +105,8 @@ export class ProxyLoaderGreasemonkey {
   }
 
   private _error(event: Event): void {
+    if (!this.config) throw new Error("Config is undefined");
+
     const xhr = event.currentTarget as CrossXMLHttpRequest;
     if (useGreasemonkeyProxy || xhr.status !== 0) return;
     useGreasemonkeyProxy = true;
@@ -120,6 +129,12 @@ export class ProxyLoaderGreasemonkey {
   }
 
   readystatechange(event: Event) {
+    if (!this.stats) throw new Error("Stats is undefined");
+    if (!this.context) throw new Error("Context is undefined");
+    if (!this.callbacks) throw new Error("Callbacks is undefined");
+    if (!this.config) throw new Error("Config is undefined");
+    if (this.retryDelay === undefined) throw new Error("Config is undefined");
+
     let xhr = event.currentTarget as CrossXMLHttpRequest,
       readyState = xhr.readyState,
       stats = this.stats,
@@ -178,10 +193,16 @@ export class ProxyLoaderGreasemonkey {
   }
 
   loadtimeout () {
+    if (!this.context) throw new Error("Context is undefined");
+    if (!this.callbacks) throw new Error("Callbacks is undefined");
+
     this.callbacks.onTimeout(this.stats as any as Hls.LoaderStats, this.context);
   }
 
   loadprogress(event: Event) {
+    if (!this.stats) throw new Error("Stats is undefined");
+    if (!this.callbacks) throw new Error("Callbacks is undefined");
+
     let stats = this.stats;
 
     stats.loaded = (event as any).loaded as number;

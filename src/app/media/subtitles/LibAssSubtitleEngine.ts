@@ -7,7 +7,7 @@ import { fonts } from '../../SubtitleEngineLoader';
 
 export class LibAssSubtitleEngine extends EventTarget implements ISubtitleEngine {
   private libass = new LibAss(fonts);
-  private track: ISubtitleTrack;
+  private track?: ISubtitleTrack;
   private handler: EventHandler = new EventHandler(this);
 
   private initialized: boolean = false;

@@ -1,10 +1,8 @@
 import { importCSS, importCSSByUrl } from './utils/css';
-import { h, render } from 'preact';
 import { PlayerController, IPlayerControllerOptions } from './player/PlayerController';
 import { getMediaId, getSelectedQuality, getStartTime, getAutoPlay, updateQualitySettings } from './player/StandardPlayer';
 import { parseUrlFragments } from './player/AffiliatePlayer';
 import { Formats, FORMAT_IDS } from 'crunchyroll-lib/media';
-import container from 'crunchyroll-lib/config';
 import { bindCrossHttpClientAsDefault } from './config';
 import { ReadyStateChange, ReadyStateChangeEvent, ReadyState } from './libs/ReadyStateChange';
 import { EventHandler } from './libs/events/EventHandler';

@@ -1,4 +1,3 @@
-import { binaryToBlob } from "./utils/blob";
 import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
 import { runBootstrap } from './bootstrap';
 import { setCrossHttpClient } from "./config";

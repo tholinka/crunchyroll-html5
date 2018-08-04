@@ -46,23 +46,23 @@ export interface IPlayerConfig {
 export class Player extends Component<IPlayerProps, {}> implements IActionable {
   private _configCued: boolean = false;
   private _config: IPlayerConfig|undefined = undefined;
-  private _actionElement: HTMLElement;
-  private _chromelessPlayer: ChromelessPlayer;
-  private _cuedThumbnailComponent: CuedThumbnailComponent;
-  private _bottomComponent: ChromeBottomComponent;
-  private _tooltipComponent: ChromeTooltip;
-  private _bezelElement: BezelComponent;
+  private _actionElement?: Element;
+  private _chromelessPlayer?: ChromelessPlayer;
+  private _cuedThumbnailComponent?: CuedThumbnailComponent;
+  private _bottomComponent?: ChromeBottomComponent;
+  private _tooltipComponent?: ChromeTooltip;
+  private _bezelElement?: BezelComponent;
   private _api: IPlayerApi = new ChromelessPlayerApi();
   private _handler: EventHandler = new EventHandler(this);
 
-  private _tooltipBottomRect: IRect;
-  private _nextVideoButtonRect: IRect;
-  private _sizeButtonRect: IRect;
-  private _fullscreenButtonRect: IRect;
-  private _volumeMuteButtonRect: IRect;
+  private _tooltipBottomRect?: IRect;
+  private _nextVideoButtonRect?: IRect;
+  private _sizeButtonRect?: IRect;
+  private _fullscreenButtonRect?: IRect;
+  private _volumeMuteButtonRect?: IRect;
 
   private _autoHide: boolean = true;
-  private _autoHideTimer: number;
+  private _autoHideTimer?: number;
   private _autoHideDelay: number = 200;
   private _autoHideMoveDelay: number = 3000;
   private _preview: boolean = false;
@@ -157,6 +157,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   cueVideoByConfig(config: IPlayerConfig) {
+    if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
+
     this._config = config;
     this._configCued = true;
     if (config.thumbnailUrl) {
@@ -172,6 +174,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   loadVideoByConfig(config: IPlayerConfig) {
+    if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
+
     this._config = config;
     this._updateChromelessPlayer(config);
     if (config.thumbnailUrl && !config.url) {
@@ -189,6 +193,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   private async _updateChromelessPlayer(config: IPlayerConfig) {
+    if (!this._chromelessPlayer) throw new Error("ChromelessPlayer is undefined");
+
     this._configCued = false;
     if (config.subtitles) {
       const tracks: ISubtitleTrack[] = [];
@@ -243,6 +249,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   setPreview(preview: boolean): void {
+    if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
+
     this._preview = preview;
 
     if (preview) {
@@ -275,6 +283,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   updateInternalAutoHide(): void {
+    if (!this._bottomComponent) throw new Error("BottomComponent is undefined");
+
     let hide = this._autoHide;
 
     if (this._mouseDown) {
@@ -320,6 +330,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   private _onSizeChange(): void {
+    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+
     const large = this._api.isLarge();
     if (large) {
       this.base.classList.add("html5-video-player--large");
@@ -337,6 +349,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   private _onMouseMouse(e: BrowserEvent) {
+    if (!this._bottomComponent) throw new Error("BottomComponent is undefined");
+
     window.clearTimeout(this._autoHideTimer);
     this.setAutoHide(false);
 
@@ -359,6 +373,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   private _playSvgBezel(d: string): void {
+    if (!this._bezelElement) throw new Error("Bezel element is undefined");
+
     this._bezelElement.playSvgPath(d);
   }
 
@@ -406,6 +422,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   private _onFullscreenChange() {
+    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+
     const fullscreen = this._api.isFullscreen();
     this.setBigMode(fullscreen);
     if (fullscreen) {
@@ -419,6 +437,9 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   private _setTooltip(tooltip: IChromeTooltip, left: number) {
+    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+    if (!this._tooltipBottomRect) throw new Error("Tooltip bottom rect is undefined");
+
     if (this.isPreview()) {
       this._tooltipComponent.base.style.display = "none";
       return;
@@ -436,6 +457,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   private _onProgressHover(time: number, percentage: number) {
+    if (!this._tooltipBottomRect) throw new Error("TooltipBottomRect is undefined");
+
     this.base.classList.add('chrome-progress-bar-hover');
 
     const rect = this._tooltipBottomRect;
@@ -445,11 +468,15 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   private _onProgressEndHover() {
+    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+
     this.base.classList.remove('chrome-progress-bar-hover');
     this._tooltipComponent.base.style.display = "none";
   }
   
   private _onNextVideoHover(detail: IVideoDetail) {
+    if (!this._nextVideoButtonRect) throw new Error("NextVideoButtonRect is undefined");
+
     const bigMode = this.isBigMode();
     const tooltip: IChromeTooltip = {
       textDetail: true,
@@ -470,10 +497,14 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
   
   private _onNextVideoEndHover() {
+    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+
     this._tooltipComponent.base.style.display = "none";
   }
   
   private _onSizeButtonHover() {
+    if (!this._sizeButtonRect) throw new Error("SizeButtonRect is undefined");
+
     const btnRect = this._sizeButtonRect;
     this._setTooltip({
       text: this._api.isLarge() ? 'Small' : 'Large'
@@ -481,10 +512,14 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
   
   private _onSizeButtonEndHover() {
+    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+
     this._tooltipComponent.base.style.display = "none";
   }
   
   private _onFullscreenButtonHover() {
+    if (!this._fullscreenButtonRect) throw new Error("FullscreenButtonRect is undefined");
+
     const btnRect = this._fullscreenButtonRect;
     this._setTooltip({
       text: this._api.isFullscreen() ? 'Exit full screen' : 'Full screen'
@@ -492,10 +527,14 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
   
   private _onFullscreenButtonEndHover() {
+    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+
     this._tooltipComponent.base.style.display = "none";
   }
   
   private _onVolumeMuteButtonHover() {
+    if (!this._volumeMuteButtonRect) throw new Error("VolumeMuteButtonRect is undefined");
+
     const btnRect = this._volumeMuteButtonRect;
     this._setTooltip({
       text: (this._api.isMuted() || this._api.getVolume() === 0) ? 'Unmute' : 'Mute'
@@ -503,6 +542,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
   
   private _onVolumeMuteButtonEndHover() {
+    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+
     this._tooltipComponent.base.style.display = "none";
   }
 
@@ -544,6 +585,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
   
   private _onActionDoubleClick(e: BrowserEvent) {
+    if (!this._bezelElement) throw new Error("BezelELement is undefined");
+
     this._bezelElement.stop();
     const api = this._api;
     if (this._actionClickExecuted) {
@@ -575,6 +618,9 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   resize() {
+    if (!this._chromelessPlayer) throw new Error("ChromelessPlayer is undefined");
+    if (!this._bottomComponent) throw new Error("BottomComponent is undefined");
+
     this._chromelessPlayer.resize();
 
     const rect = this.base.getBoundingClientRect();
@@ -623,6 +669,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   }
 
   componentDidMount() {
+    if (!this._actionElement) throw new Error("ActionElement is undefined");
+
     if (this._chromelessPlayer) {
       this._chromelessPlayer.setFullscreenElement(this.base);
     }
@@ -663,7 +711,7 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
     const bottomRef = (el: ChromeBottomComponent) => this._bottomComponent = el;
     const cuedThumbnailRef = (el: CuedThumbnailComponent) => this._cuedThumbnailComponent = el;
     const tooltipRef = (el: ChromeTooltip) => this._tooltipComponent = el;
-    const actionRef = (el: HTMLElement) => this._actionElement = el;
+    const actionRef = (el?: Element) => this._actionElement = el;
     const bezelRef = (el: BezelComponent) => this._bezelElement = el;
 
     const onProgressHover = (time: number, percentage: number) => this._onProgressHover(time, percentage);
@@ -677,6 +725,7 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
     const onVolumeMuteButtonHover = () => this._onVolumeMuteButtonHover();
     const onVolumeMuteButtonEndHover = () => this._onVolumeMuteButtonEndHover();
     const onCuedThumbnailClick = () => {
+      if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
       if (this._config && this._configCued) {
         this._updateChromelessPlayer(this._config);
 

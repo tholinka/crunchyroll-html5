@@ -2,7 +2,6 @@ import { h, Component } from 'preact';
 import { ISource } from './ISource';
 import { EventHandler } from '../../libs/events/EventHandler';
 import { BrowserEvent } from '../../libs/events/BrowserEvent';
-import { ISubtitleEngine } from '../subtitles/ISubtitleEngine';
 import { SubtitleContainerComponent } from './SubtitleContainerComponent';
 import { LibAssSubtitleEngine } from '../subtitles/LibAssSubtitleEngine';
 import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
@@ -18,8 +17,8 @@ export interface IChromelessPlayerProps {
 }
 
 export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
-  private _containerElement: HTMLElement;
-  private _videoElement: HTMLVideoElement;
+  private _containerElement?: HTMLElement;
+  private _videoElement?: HTMLVideoElement;
 
   private _source: ISource|undefined = undefined;
   private _subtitleEngine = new LibAssSubtitleEngine();
@@ -34,7 +33,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
   private _fullscreenElement: HTMLElement|undefined;
 
-  private _api: IPlayerApi;
+  private _api?: IPlayerApi;
 
   private _subtitleLoading: boolean = false;
   private _lastFullscreenState: boolean = false;
@@ -54,6 +53,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   setForcePaused(force: boolean): void {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     this._forcedPause = force;
     if (this._forcedPause) {
       this._videoElement.pause();
@@ -63,6 +64,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   private _play() {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     this._videoElement.play()
     .then(null, (err: Error) => {
       const name = err.name;
@@ -78,12 +81,16 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   private _updateState(state: PlaybackState) {
+    if (!this._api) throw new Error("API is undefined");
+
     this._state = state;
 
     this._api.dispatchEvent(new PlaybackStateChangeEvent(state));
   }
   
   private _onPlaying(e: BrowserEvent) {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     if (this._subtitleLoading) {
       this._videoElement.pause();
       return;
@@ -124,6 +131,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   private _onCanplay() {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     if (this._subtitleLoading) {
       this._videoElement.pause();
       return;
@@ -140,6 +149,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   private _isBuffering(): boolean {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     const video = this._videoElement;
     return video.readyState < video.HAVE_FUTURE_DATA;
   }
@@ -159,28 +170,40 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   private _onLoadedMetadata() {
+    if (!this._api) throw new Error("API is undefined");
+
     this.resize();
 
     this._api.dispatchEvent('loadedmetadata');
   }
 
   private _onTimeUpdate() {
+    if (!this._api) throw new Error("API is undefined");
+
     this._api.dispatchEvent(new TimeUpdateEvent(this.getCurrentTime()));
   }
 
   private _onVolumeChange() {
+    if (!this._api) throw new Error("API is undefined");
+
     this._api.dispatchEvent(new VolumeChangeEvent(this.getVolume(), this.isMuted()));
   }
   
   private _onProgress() {
+    if (!this._api) throw new Error("API is undefined");
+
     this._api.dispatchEvent('progress');
   }
 
   private _onDurationChange() {
+    if (!this._api) throw new Error("API is undefined");
+
     this._api.dispatchEvent(new DurationChangeEvent(this.getDuration()));
   }
 
   private _onSeeked() {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     if (this._forcedPause) {
       this._videoElement.pause();
     } else {
@@ -189,6 +212,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   private _onFullscreenChange() {
+    if (!this._api) throw new Error("API is undefined");
+
     const fullscreen = this.isFullscreen();
     if (this._lastFullscreenState === fullscreen) return;
     this._lastFullscreenState = fullscreen;
@@ -197,6 +222,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   private resizeVideo() {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     const video = this._videoElement;
 
     const rect = this.getVideoRect();
@@ -231,6 +258,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   getApi(): IPlayerApi {
+    if (!this._api) throw new Error("API is undefined");
+
     return this._api;
   }
 
@@ -246,6 +275,9 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
   
   getVideoRect(): IRect {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+    if (!this._containerElement) throw new Error("Container element is undefined");
+
     const video = this._videoElement;
     
     const videoWidth: number = video.videoWidth;
@@ -278,6 +310,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
   
   resize() {
+    if (!this._api) throw new Error("API is undefined");
+
     this.resizeVideo();
     this.resizeSubtitle();
 
@@ -285,10 +319,15 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   getVideoElement(): HTMLVideoElement {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     return this._videoElement;
   }
 
   playVideo() {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+    if (!this._api) throw new Error("API is undefined");
+
     this._preferedState = PlaybackState.PLAYING;
     switch (this._forcedPause ? undefined : this._state) {
       case PlaybackState.ENDED:
@@ -316,6 +355,9 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   pauseVideo() {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+    if (!this._api) throw new Error("API is undefined");
+
     this._preferedState = PlaybackState.PAUSED;
     switch (this._state) {
       case PlaybackState.PAUSED:
@@ -337,12 +379,18 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   seekTo(time: number): void {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+    if (!this._api) throw new Error("API is undefined");
+
     this._videoElement.currentTime = time;
     this._api.dispatchEvent(new SeekEvent(time));
     this._api.dispatchEvent(new TimeUpdateEvent(time));
   }
 
   seekBy(seconds: number): void {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+    if (!this._api) throw new Error("API is undefined");
+
     const time = this._videoElement.currentTime + seconds;
     this._videoElement.currentTime = time;
     this._api.dispatchEvent(new SeekEvent(time));
@@ -350,6 +398,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   getDuration(): number {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     let duration = this._videoElement.duration;
     if (isNaN(duration)) {
       return Math.floor(this._duration);
@@ -358,16 +408,22 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   setDuration(duration: number) {
+    if (!this._api) throw new Error("API is undefined");
+
     this._duration = duration;
 
     this._api.dispatchEvent(new DurationChangeEvent(this.getDuration()));
   }
 
   getCurrentTime(): number {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     return this._videoElement.currentTime;
   }
 
   getBufferedTime(): number {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     let value: number = 0;
 
     for (let i = 0; i < this._videoElement.buffered.length; i++) {
@@ -378,6 +434,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   setVolume(volume: number): void {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     this._videoElement.volume = volume;
 
     if (!this._source) {
@@ -386,10 +444,14 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   getVolume(): number {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     return this._videoElement.volume;
   }
 
   setMuted(muted: boolean): void {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     this._videoElement.muted = muted;
 
     if (!this._source) {
@@ -406,6 +468,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
   
   isMuted(): boolean {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     return this._videoElement.muted;
   }
 
@@ -419,6 +483,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   enterFullscreen(): void {
+    if (!this._containerElement) throw new Error("Container element is undefined");
+
     if (this.isFullscreen()) return;
 
     const element = this._fullscreenElement || this._containerElement;
@@ -445,6 +511,9 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
    * @param source the video source.
    */
   setVideoSource(source: ISource, startTime: number = 0): void {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+    if (!this._api) throw new Error("API is undefined");
+
     if (this._source) {
       this._source.detach();
     }
@@ -465,6 +534,9 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   async setSubtitleTrack(index: number): Promise<any> {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+    if (!this._api) throw new Error("API is undefined");
+
     this._currentSubtitleTrack = index;
     if (index === -1) {
       this._subtitleLoading = false;
@@ -489,6 +561,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   setSubtitleTracks(tracks: ISubtitleTrack[]): void {
+    if (!this._api) throw new Error("API is undefined");
+
     this._subtitleTracks = tracks;
     this._currentSubtitleTrack = -1;
 
@@ -508,6 +582,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   }
 
   componentDidMount() {
+    if (!this._videoElement) throw new Error("Video element is undefined");
+
     this._handler
       .listen(this._videoElement, 'playing', this._onPlaying, false)
       .listen(this._videoElement, 'pause', this._onPause, false)
@@ -547,11 +623,11 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     const attributes: {[key: string]: string} = {
       'controlslist': 'nodownload'
     };
-    const videoRef = (element: HTMLVideoElement) => {
-      this._videoElement = element;
+    const videoRef = (element?: Element) => {
+      this._videoElement = element as HTMLVideoElement;
     };
-    const containerRef = (element: HTMLVideoElement) => {
-      this._containerElement = element;
+    const containerRef = (element?: Element) => {
+      this._containerElement = element as HTMLVideoElement;
     };
     return (
       <div class="html5-video-container" ref={ containerRef }>

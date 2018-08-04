@@ -28,7 +28,7 @@ export const requestAnimationFrame: (callback: Function) => number = (() => {
   };
 })();
 
-export const cancelAnimationFrame: (id: number) => void = (() => {
+export const cancelAnimationFrame: (id?: number) => void = (() => {
   const win = window as VendorWindow;
   if (typeof win.cancelAnimationFrame === "function") {
     return win.cancelAnimationFrame.bind(win);
@@ -42,7 +42,7 @@ export const cancelAnimationFrame: (id: number) => void = (() => {
     return win.msCancelAnimationFrame.bind(win);
   }
 
-  return (id: number) => {
+  return (id?: number) => {
     return window.clearTimeout(id);
   };
 })();

@@ -5,7 +5,6 @@ import { PASSIVE_EVENTS } from './BrowserFeature';
 import { Listener } from './Listener';
 import { EventLike } from './Event';
 import { BrowserEvent } from './BrowserEvent';
-import { EventTarget as EventTarget2 } from './EventTarget';
 
 export declare interface ProxyFunction extends Function {
   src?: EventTarget;

@@ -11,10 +11,8 @@ export interface IPlayPauseButtonProps {
 }
 
 export class PlayPauseButton extends Component<IPlayPauseButtonProps, {}> {
-  private _toggled: boolean = false;
-
   private _animation: SvgPathMorphAnimation|undefined;
-  private _pathElement: SVGPathElement;
+  private _pathElement?: SVGPathElement;
 
   private _handler = new EventHandler(this);
 
@@ -39,7 +37,7 @@ export class PlayPauseButton extends Component<IPlayPauseButtonProps, {}> {
   }
 
   private _animate(path: string) {
-    if (!this._animation) return;
+    if (!this._animation || !this._pathElement) return;
     this._animation.stop();
 
     var currentPath = this._pathElement.getAttribute("d");
@@ -54,7 +52,9 @@ export class PlayPauseButton extends Component<IPlayPauseButtonProps, {}> {
   }
 
   componentDidMount() {
-    this._animation = new SvgPathMorphAnimation(this._pathElement, 200);
+    if (this._pathElement) {
+      this._animation = new SvgPathMorphAnimation(this._pathElement, 200);
+    }
     
     this._handler
       .listen(this.props.api, 'playbackstatechange', this._onPlaybackStateChange, false);
@@ -73,7 +73,7 @@ export class PlayPauseButton extends Component<IPlayPauseButtonProps, {}> {
     const d: string = this._isPlaying() ? PAUSE_PATH : PLAY_PATH;
 
     const onClick = () => this._onClick();
-    const pathRef = (element: SVGPathElement) => this._pathElement = element;
+    const pathRef = (element?: Element) => this._pathElement = element as SVGPathElement;
 
     return (
       <button class="chrome-button chrome-play-button" onClick={onClick}>

@@ -27,7 +27,7 @@ export class BrowserEvent extends MyEvent {
   platformModifierKey: boolean = false;
   detail: any = undefined;
 
-  private _event: Event;
+  private _event?: Event;
 
   constructor(event?: Event, currentTarget?: EventTarget) {
     super(event ? event.type : '');
@@ -46,7 +46,7 @@ export class BrowserEvent extends MyEvent {
     let touchEvent = event as TouchEvent;
     let relevantTouch: Touch|undefined = (touchEvent.changedTouches ? touchEvent.changedTouches[0] : undefined);
     
-    this.target = event.target || event.srcElement;
+    this.target = event.target || event.srcElement || undefined;
   
     this.currentTarget = currentTarget;
   
@@ -103,6 +103,8 @@ export class BrowserEvent extends MyEvent {
   }
   
   stopPropagation() {
+    if (!this._event) throw new Error("BrowserEvent is undefined");
+
     super.stopPropagation();
 
     if (this._event.stopPropagation) {
@@ -113,6 +115,8 @@ export class BrowserEvent extends MyEvent {
   }
   
   preventDefault() {
+    if (!this._event) throw new Error("BrowserEvent is undefined");
+
     super.preventDefault();
 
     if (!this._event.preventDefault) {
@@ -147,6 +151,7 @@ export class BrowserEvent extends MyEvent {
   }
 
   getBrowserEvent(): Event {
+    if (!this._event) throw new Error("BrowserEvent is undefined");
     return this._event;
   }
 }

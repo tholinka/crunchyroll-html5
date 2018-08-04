@@ -4,8 +4,8 @@ import { requestAnimationFrame, cancelAnimationFrame } from '../../utils/animati
 
 export class Animation extends EventTarget implements IAnimation {
   private _running: boolean = false;
-  private _startTime: number;
-  private _frameId: number;
+  private _startTime?: number;
+  private _frameId?: number;
 
   constructor(
     public duration: number
@@ -14,6 +14,8 @@ export class Animation extends EventTarget implements IAnimation {
   }
 
   private _tick() {
+    if (this._startTime === undefined) throw new Error("StartTime is not set");
+
     const now = window.performance.now();
     const dt = now - this._startTime;
     const progress = Math.max(Math.min(dt/this.duration, 1), 0);
