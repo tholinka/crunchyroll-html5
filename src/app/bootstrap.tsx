@@ -52,8 +52,9 @@ async function _runOnInteractive() {
 
   if (mediaId) {
     const quality = getSelectedQuality();
-    if (!quality || !(quality in FORMAT_IDS)) return;
-    options.quality = quality as keyof Formats;
+    if (quality && quality in FORMAT_IDS) {
+      options.quality = quality as keyof Formats;
+    }
     options.startTime = getStartTime(url);
     options.autoPlay = getAutoPlay(url);
   } else {

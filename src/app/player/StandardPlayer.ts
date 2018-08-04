@@ -96,10 +96,10 @@ export async function updateQualitySettings(): Promise<void> {
     if (token) {
       storedQuality = parseToken(token);
     } else {
-      storedQuality = "360p";
+      storedQuality = undefined;
     }
   } else {
-    storedQuality = "360p";
+    storedQuality = undefined;
   }
 }
 
