@@ -1,4 +1,7 @@
-import { cancelAnimationFrame, requestAnimationFrame } from '../../utils/animation';
+import {
+  cancelAnimationFrame,
+  requestAnimationFrame
+} from '../../utils/animation';
 import { EventTarget } from '../events/EventTarget';
 import { IAnimation } from './IAnimation';
 
@@ -7,9 +10,7 @@ export class Animation extends EventTarget implements IAnimation {
   private _startTime?: number;
   private _frameId?: number;
 
-  constructor(
-    public duration: number
-  ) {
+  constructor(public duration: number) {
     super();
   }
 
@@ -23,7 +24,7 @@ export class Animation extends EventTarget implements IAnimation {
 
   public stop(): void {
     if (!this.isRunning()) return;
-    
+
     cancelAnimationFrame(this._frameId);
     this._running = false;
   }
@@ -38,16 +39,14 @@ export class Animation extends EventTarget implements IAnimation {
     this.stop();
   }
 
-  protected tickInternal(progress: number) {
-
-  }
+  protected tickInternal(progress: number) {}
 
   private _tick() {
-    if (this._startTime === undefined) throw new Error("StartTime is not set");
+    if (this._startTime === undefined) throw new Error('StartTime is not set');
 
     const now = window.performance.now();
     const dt = now - this._startTime;
-    const progress = Math.max(Math.min(dt/this.duration, 1), 0);
+    const progress = Math.max(Math.min(dt / this.duration, 1), 0);
 
     this.tickInternal(progress);
 

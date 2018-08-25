@@ -1,5 +1,5 @@
 function toHex(word: number): string {
-  let hex = "";
+  let hex = '';
   for (let i = 28; i >= 0; i -= 4) {
     hex += ((word >> i) & 0xf).toString(16);
   }
@@ -8,10 +8,10 @@ function toHex(word: number): string {
 
 export class SHA1 {
   private _h0 = 0x67452301;
-  private _h1 = 0xEFCDAB89;
-  private _h2 = 0x98BADCFE;
+  private _h1 = 0xefcdab89;
+  private _h2 = 0x98badcfe;
   private _h3 = 0x10325476;
-  private _h4 = 0xC3D2E1F0;
+  private _h4 = 0xc3d2e1f0;
 
   private _length: number = 0;
   private _offset: number = 0;
@@ -30,18 +30,22 @@ export class SHA1 {
     // 64-bit length big-endian
     this._write(0x00); // numbers this big aren't accurate in javascript anyway
     this._write(0x00); // ..So just hard-code to zero.
-    this._write(this._length > 0xffffffffff ? this._length / 0x10000000000 : 0x00);
+    this._write(
+      this._length > 0xffffffffff ? this._length / 0x10000000000 : 0x00
+    );
     this._write(this._length > 0xffffffff ? this._length / 0x100000000 : 0x00);
     for (let s = 24; s >= 0; s -= 8) {
       this._write(this._length >> s);
     }
 
     // At this point one last processBlock() should trigger and we can pull out the result.
-    return toHex(this._h0) +
-           toHex(this._h1) +
-           toHex(this._h2) +
-           toHex(this._h3) +
-           toHex(this._h4);
+    return (
+      toHex(this._h0) +
+      toHex(this._h1) +
+      toHex(this._h2) +
+      toHex(this._h3) +
+      toHex(this._h4)
+    );
   }
 
   public update(chunk: ArrayLike<number>): void {
@@ -56,8 +60,7 @@ export class SHA1 {
     this._block[this._offset] |= (byte & 0xff) << this._shift;
     if (this._shift) {
       this._shift -= 8;
-    }
-    else {
+    } else {
       this._offset++;
       this._shift = 24;
     }
@@ -67,7 +70,11 @@ export class SHA1 {
   private _processBlock() {
     // Extend the sixteen 32-bit words into eighty 32-bit words:
     for (let i = 16; i < 80; i++) {
-      const w = this._block[i - 3] ^ this._block[i - 8] ^ this._block[i - 14] ^ this._block[i - 16];
+      const w =
+        this._block[i - 3] ^
+        this._block[i - 8] ^
+        this._block[i - 14] ^
+        this._block[i - 16];
       this._block[i] = (w << 1) | (w >>> 31);
     }
 
@@ -84,24 +91,21 @@ export class SHA1 {
     for (let i = 0; i < 80; i++) {
       if (i < 20) {
         f = d ^ (b & (c ^ d));
-        k = 0x5A827999;
-      }
-      else if (i < 40) {
+        k = 0x5a827999;
+      } else if (i < 40) {
         f = b ^ c ^ d;
-        k = 0x6ED9EBA1;
-      }
-      else if (i < 60) {
+        k = 0x6ed9eba1;
+      } else if (i < 60) {
         f = (b & c) | (d & (b | c));
-        k = 0x8F1BBCDC;
-      }
-      else {
+        k = 0x8f1bbcdc;
+      } else {
         f = b ^ c ^ d;
-        k = 0xCA62C1D6;
+        k = 0xca62c1d6;
       }
-      const temp = (a << 5 | a >>> 27) + f + e + k + (this._block[i]|0);
+      const temp = ((a << 5) | (a >>> 27)) + f + e + k + (this._block[i] | 0);
       e = d;
       d = c;
-      c = (b << 30 | b >>> 2);
+      c = (b << 30) | (b >>> 2);
       b = a;
       a = temp;
     }

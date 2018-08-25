@@ -3,17 +3,15 @@ import { isFullscreenEnabled } from '../../utils/fullscreen';
 import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
 import { ChromelessPlayer } from './ChromelessPlayer';
 import { IPlayerApi, IVideoDetail, PlaybackState } from './IPlayerApi';
-import { NextVideoEvent } from "./NextVideoEvent";
+import { NextVideoEvent } from './NextVideoEvent';
 
 export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
-  private _player: ChromelessPlayer|undefined;
-  private _nextVideo: IVideoDetail|undefined = undefined;
+  private _player: ChromelessPlayer | undefined;
+  private _nextVideo: IVideoDetail | undefined = undefined;
   private _large: boolean = false;
   private _settingsOpen: boolean = false;
 
-  constructor(
-    player?: ChromelessPlayer
-  ) {
+  constructor(player?: ChromelessPlayer) {
     super();
 
     this._player = player;
@@ -28,12 +26,12 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   public isLarge(): boolean {
     return this._large;
   }
-  
-  public getNextVideoDetail(): IVideoDetail|undefined {
+
+  public getNextVideoDetail(): IVideoDetail | undefined {
     return this._nextVideo;
   }
-  
-  public setNextVideoDetail(nextVideo: IVideoDetail|undefined): void {
+
+  public setNextVideoDetail(nextVideo: IVideoDetail | undefined): void {
     this._nextVideo = nextVideo;
 
     this.dispatchEvent('nextvideochange');
@@ -42,24 +40,24 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   public setChromelessPlayer(player: ChromelessPlayer) {
     this._player = player;
   }
-  
+
   public setForcePaused(force: boolean): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.setForcePaused(force);
   }
 
   public getPlaybackState(): PlaybackState {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     return this._player.getPlaybackState();
   }
 
   public getPreferredPlaybackState(): PlaybackState {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     return this._player.getPreferredPlaybackState();
   }
 
   public playVideo(force: boolean = false): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     if (force) {
       this._player.getVideoElement().play();
     } else {
@@ -68,17 +66,17 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   }
 
   public pauseVideo(): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.pauseVideo();
   }
 
   public seekTo(time: number): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.seekTo(time);
   }
 
   public seekBy(seconds: number): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.seekBy(seconds);
   }
 
@@ -90,47 +88,47 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   }
 
   public getDuration(): number {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     return this._player.getDuration();
   }
 
   public getCurrentTime(): number {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     return this._player.getCurrentTime();
   }
 
   public getBufferedTime(): number {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     return this._player.getBufferedTime();
   }
 
   public setVolume(volume: number): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.setVolume(volume);
   }
 
   public getVolume(): number {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     return this._player.getVolume();
   }
 
   public mute(): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.mute();
   }
 
   public unmute(): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.unmute();
   }
 
   public setMuted(muted: boolean): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.setMuted(muted);
   }
 
   public isMuted(): boolean {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     return this._player.isMuted();
   }
 
@@ -139,37 +137,37 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   }
 
   public enterFullscreen(): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.enterFullscreen();
   }
 
   public exitFullscreen(): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.exitFullscreen();
   }
 
   public toggleFullscreen(): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.toggleFullscreen();
   }
 
   public isFullscreen(): boolean {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     return this._player.isFullscreen();
   }
 
   public getSubtitlesTracks(): ISubtitleTrack[] {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     return this._player.getSubtitleTracks();
   }
 
   public getSubtitleTrack(): number {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     return this._player.getCurrentSubtitleTrack();
   }
 
   public setSubtitleTrack(index: number): void {
-    if (!this._player) throw new Error("Not initialized");
+    if (!this._player) throw new Error('Not initialized');
     this._player.setSubtitleTrack(index);
   }
 

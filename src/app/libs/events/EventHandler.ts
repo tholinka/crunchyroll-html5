@@ -1,12 +1,18 @@
 import { Disposable } from '../disposable/Disposable';
-import { Event as MyEvent} from './Event';
+import { Event as MyEvent } from './Event';
 import { ListneableFunction } from './IListenable';
 import { IListenableKey } from './IListenableKey';
-import { getListener, listen, ListenableType, listenOnce, unlistenByKey } from './index';
+import {
+  getListener,
+  listen,
+  ListenableType,
+  listenOnce,
+  unlistenByKey
+} from './index';
 
 export class EventHandler extends Disposable {
   private _scope: any;
-  private _keys: {[key: string]: IListenableKey} = {};
+  private _keys: { [key: string]: IListenableKey } = {};
 
   constructor(scope?: any) {
     super();
@@ -14,8 +20,20 @@ export class EventHandler extends Disposable {
     this._scope = scope;
   }
 
-  public listen(src: ListenableType, type: string, fn?: ListneableFunction, options: boolean|AddEventListenerOptions = false, scope?: any): EventHandler {
-    const listenerObj = listen(src, type, fn || this.handleEvent, options, scope || this._scope || this);
+  public listen(
+    src: ListenableType,
+    type: string,
+    fn?: ListneableFunction,
+    options: boolean | AddEventListenerOptions = false,
+    scope?: any
+  ): EventHandler {
+    const listenerObj = listen(
+      src,
+      type,
+      fn || this.handleEvent,
+      options,
+      scope || this._scope || this
+    );
 
     if (!listenerObj) {
       return this;
@@ -23,27 +41,50 @@ export class EventHandler extends Disposable {
 
     const key = listenerObj.key;
     this._keys[key] = listenerObj;
-  
+
     return this;
   }
 
-  public listenOnce(src: ListenableType, type: string, fn?: ListneableFunction, options: boolean|AddEventListenerOptions = false, scope?: any): EventHandler {
-    const listenerObj = listenOnce(src, type, fn || this.handleEvent, options, scope || this._scope || this);
-    
+  public listenOnce(
+    src: ListenableType,
+    type: string,
+    fn?: ListneableFunction,
+    options: boolean | AddEventListenerOptions = false,
+    scope?: any
+  ): EventHandler {
+    const listenerObj = listenOnce(
+      src,
+      type,
+      fn || this.handleEvent,
+      options,
+      scope || this._scope || this
+    );
+
     if (!listenerObj) {
       return this;
     }
 
     const key = listenerObj.key;
     this._keys[key] = listenerObj;
-  
+
     return this;
   }
 
-  public unlisten(src: ListenableType, type: string, fn?: ListneableFunction, options: boolean|AddEventListenerOptions = false, scope?: any) {
+  public unlisten(
+    src: ListenableType,
+    type: string,
+    fn?: ListneableFunction,
+    options: boolean | AddEventListenerOptions = false,
+    scope?: any
+  ) {
     const capture = typeof options === 'object' ? !!options.capture : !!options;
-    const listener = getListener(src, type, fn || this.handleEvent, capture,
-        scope || this._scope || this);
+    const listener = getListener(
+      src,
+      type,
+      fn || this.handleEvent,
+      capture,
+      scope || this._scope || this
+    );
 
     if (listener) {
       unlistenByKey(listener);
@@ -59,7 +100,7 @@ export class EventHandler extends Disposable {
         unlistenByKey(this._keys[key]);
       }
     }
-  
+
     this._keys = {};
   }
 
@@ -73,7 +114,7 @@ export class EventHandler extends Disposable {
     return count;
   }
 
-  public handleEvent(event: MyEvent): boolean|void {
+  public handleEvent(event: MyEvent): boolean | void {
     throw new Error('EventHandler.handleEvent not implemented');
   }
 

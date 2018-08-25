@@ -1,11 +1,11 @@
-import { Component, h } from "preact";
-import { BrowserEvent } from "../../../libs/events/BrowserEvent";
-import { EventHandler } from "../../../libs/events/EventHandler";
-import { vendorPrefix } from "../../../utils/style";
-import { parseAndFormatTime } from "../../../utils/time";
-import { DurationChangeEvent } from "../DurationChangeEvent";
-import { IPlayerApi } from "../IPlayerApi";
-import { TimeUpdateEvent } from "../TimeUpdateEvent";
+import { Component, h } from 'preact';
+import { BrowserEvent } from '../../../libs/events/BrowserEvent';
+import { EventHandler } from '../../../libs/events/EventHandler';
+import { vendorPrefix } from '../../../utils/style';
+import { parseAndFormatTime } from '../../../utils/time';
+import { DurationChangeEvent } from '../DurationChangeEvent';
+import { IPlayerApi } from '../IPlayerApi';
+import { TimeUpdateEvent } from '../TimeUpdateEvent';
 
 export interface IChromeProgressBarProps {
   api: IPlayerApi;
@@ -13,7 +13,10 @@ export interface IChromeProgressBarProps {
   onEndHover: () => void;
 }
 
-export class ChromeProgressBarComponent extends Component<IChromeProgressBarProps, {}> {
+export class ChromeProgressBarComponent extends Component<
+  IChromeProgressBarProps,
+  {}
+> {
   private _containerElement?: Element;
   private _progressBarElement?: Element;
   private _scrubberElement?: Element;
@@ -51,26 +54,30 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
       .listen(this._containerElement, 'mousedown', this._onMouseDown, false)
       .listen(document, 'mousemove', this._onMouseMove, { passive: true })
       .listen(document, 'mouseup', this._onMouseUp, false)
-      .listen(this._containerElement, 'mouseenter', this._onMouseEnter, { passive: true })
-      .listen(this._containerElement, 'mouseleave', this._onMouseLeave, { passive: true })
+      .listen(this._containerElement, 'mouseenter', this._onMouseEnter, {
+        passive: true
+      })
+      .listen(this._containerElement, 'mouseleave', this._onMouseLeave, {
+        passive: true
+      })
       .listen(this.props.api, 'durationchange', this._onDurationChange, false)
       .listen(this.props.api, 'timeupdate', this._onTimeUpdate, false)
       .listen(this.props.api, 'progress', this._onProgress, false)
       .listen(this.props.api, 'resize', this._onResize, false);
     this._updateState();
   }
-  
+
   public componentWillUnmount() {
     this._handler.removeAll();
   }
 
   public render(): JSX.Element {
-    const containerRef = (el?: Element) => this._containerElement = el;
-    const progressBarRef = (el?: Element) => this._progressBarElement = el;
-    const scrubberRef = (el?: Element) => this._scrubberElement = el;
-    const playRef = (el?: Element) => this._playElement = el;
-    const loadRef = (el?: Element) => this._loadElement = el;
-    const hoverRef = (el?: Element) => this._hoverElement = el;
+    const containerRef = (el?: Element) => (this._containerElement = el);
+    const progressBarRef = (el?: Element) => (this._progressBarElement = el);
+    const scrubberRef = (el?: Element) => (this._scrubberElement = el);
+    const playRef = (el?: Element) => (this._playElement = el);
+    const loadRef = (el?: Element) => (this._loadElement = el);
+    const hoverRef = (el?: Element) => (this._hoverElement = el);
 
     return (
       <div class="chrome-progress-bar-container" ref={containerRef}>
@@ -82,14 +89,23 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
           aria-valuemin={0}
           aria-valuemax={this._duration}
           aria-valuenow={this._playTime}
-          aria-valuetext={parseAndFormatTime(this._playTime) + " of " + parseAndFormatTime(this._duration)}
-          draggable={true}
-        >
+          aria-valuetext={
+            parseAndFormatTime(this._playTime) +
+            ' of ' +
+            parseAndFormatTime(this._duration)
+          }
+          draggable={true}>
           <div class="chrome-progress-bar-padding" />
           <div class="chrome-progress-list">
-            <div class="chrome-play-progress chrome-swatch-background-color" ref={playRef} />
+            <div
+              class="chrome-play-progress chrome-swatch-background-color"
+              ref={playRef}
+            />
             <div class="chrome-load-progress" ref={loadRef} />
-            <div class="chrome-hover-progress chrome-hover-progress--light" ref={hoverRef} />
+            <div
+              class="chrome-hover-progress chrome-hover-progress--light"
+              ref={hoverRef}
+            />
           </div>
           <div class="chrome-scrubber-container" ref={scrubberRef}>
             <div class="chrome-scrubber-button chrome-swatch-background-color">
@@ -118,7 +134,7 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
       this._left = rect.left;
     }
   }
-  
+
   private _onMouseDown(e: BrowserEvent) {
     if (e.button !== 0 || this._dragging) return;
     e.preventDefault();
@@ -126,15 +142,21 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
 
     this._onMouseMove(e);
   }
-  
+
   private _onMouseMove(e: BrowserEvent) {
-    if (!this._containerElement || !this._dragging && e.target !== this._containerElement && !this._containerElement.contains(e.target as Node)) return;
+    if (
+      !this._containerElement ||
+      (!this._dragging &&
+        e.target !== this._containerElement &&
+        !this._containerElement.contains(e.target as Node))
+    )
+      return;
 
     const left = Math.max(Math.min(e.clientX - this._left, this._width), 0);
 
-    const percentage = left/this._width;
+    const percentage = left / this._width;
 
-    const time = percentage*this._duration;
+    const time = percentage * this._duration;
 
     this.props.onHover(time, percentage);
 
@@ -147,22 +169,26 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
     }
     this._updateState();
   }
-  
+
   private _onMouseUp(e: BrowserEvent) {
     if (e.button !== 0 || !this._dragging) return;
     this._dragging = false;
 
     this.props.api.setForcePaused(false);
 
-    if (!this._containerElement || e.target !== this._containerElement && !this._containerElement.contains(e.target as Node)) {
+    if (
+      !this._containerElement ||
+      (e.target !== this._containerElement &&
+        !this._containerElement.contains(e.target as Node))
+    ) {
       this.props.onEndHover();
     }
   }
 
   private _onMouseEnter(e: BrowserEvent) {
     const left = Math.max(Math.min(e.clientX - this._left, this._width), 0);
-    const percentage = left/this._width;
-    const time = percentage*this._duration;
+    const percentage = left / this._width;
+    const time = percentage * this._duration;
 
     this.props.onHover(time, left);
   }
@@ -177,37 +203,62 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
     this._loadTime = this.props.api.getBufferedTime();
     this._updateState();
   }
-  
+
   private _updateState() {
     if (!this._visibility) return;
-    const playPercentage = this._duration === 0 ? 0 : this._playTime/this._duration;
-    const loadPercentage = this._duration === 0 ? 0 : this._loadTime/this._duration;
-    const hoverPercentage = this._duration === 0 ? 0 : this._hoverTime/this._duration;
+    const playPercentage =
+      this._duration === 0 ? 0 : this._playTime / this._duration;
+    const loadPercentage =
+      this._duration === 0 ? 0 : this._loadTime / this._duration;
+    const hoverPercentage =
+      this._duration === 0 ? 0 : this._hoverTime / this._duration;
 
-    const scrubberStyle = vendorPrefix('transform', 'translateX(' + this._width*playPercentage + 'px)');
-    const playStyle = "left: 0;" + vendorPrefix('transform', 'scaleX(' + playPercentage + ')');
-    const loadStyle = "left: 0;" + vendorPrefix('transform', 'scaleX(' + loadPercentage + ')');
-    const hoverStyle = "left: " + this._width*playPercentage + "px;"
-      + vendorPrefix('transform', 'scaleX(' + Math.max(hoverPercentage - playPercentage, 0) + ')');
+    const scrubberStyle = vendorPrefix(
+      'transform',
+      'translateX(' + this._width * playPercentage + 'px)'
+    );
+    const playStyle =
+      'left: 0;' + vendorPrefix('transform', 'scaleX(' + playPercentage + ')');
+    const loadStyle =
+      'left: 0;' + vendorPrefix('transform', 'scaleX(' + loadPercentage + ')');
+    const hoverStyle =
+      'left: ' +
+      this._width * playPercentage +
+      'px;' +
+      vendorPrefix(
+        'transform',
+        'scaleX(' + Math.max(hoverPercentage - playPercentage, 0) + ')'
+      );
 
     if (this._scrubberElement) {
-      this._scrubberElement.setAttribute("style", scrubberStyle);
+      this._scrubberElement.setAttribute('style', scrubberStyle);
     }
     if (this._playElement) {
-      this._playElement.setAttribute("style", playStyle);
+      this._playElement.setAttribute('style', playStyle);
     }
     if (this._loadElement) {
-      this._loadElement.setAttribute("style", loadStyle);
+      this._loadElement.setAttribute('style', loadStyle);
     }
     if (this._hoverElement) {
-      this._hoverElement.setAttribute("style", hoverStyle);
+      this._hoverElement.setAttribute('style', hoverStyle);
     }
 
     if (this._progressBarElement) {
-      this._progressBarElement.setAttribute("aria-valuemin", "0");
-      this._progressBarElement.setAttribute("aria-valuemax", this._duration + '');
-      this._progressBarElement.setAttribute("aria-valuenow", this._playTime + '');
-      this._progressBarElement.setAttribute("aria-valuetext", parseAndFormatTime(this._playTime) + " of " + parseAndFormatTime(this._duration));
+      this._progressBarElement.setAttribute('aria-valuemin', '0');
+      this._progressBarElement.setAttribute(
+        'aria-valuemax',
+        this._duration + ''
+      );
+      this._progressBarElement.setAttribute(
+        'aria-valuenow',
+        this._playTime + ''
+      );
+      this._progressBarElement.setAttribute(
+        'aria-valuetext',
+        parseAndFormatTime(this._playTime) +
+          ' of ' +
+          parseAndFormatTime(this._duration)
+      );
     }
   }
 }

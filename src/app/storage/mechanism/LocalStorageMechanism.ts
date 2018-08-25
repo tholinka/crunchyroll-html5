@@ -1,10 +1,9 @@
-import { injectable } from "inversify";
-import { StorageError } from "../StorageError";
-import { IMechanism, StorageTestAvailabilityKey } from "./IMechanism";
+import { injectable } from 'inversify';
+import { StorageError } from '../StorageError';
+import { IMechanism, StorageTestAvailabilityKey } from './IMechanism';
 
 @injectable()
 export class LocalStorageMechanism implements IMechanism {
-
   public static async isAvailable(): Promise<boolean> {
     try {
       const storage = window.localStorage;
@@ -38,7 +37,7 @@ export class LocalStorageMechanism implements IMechanism {
     const value = this._storage.getItem(key);
 
     // Check whether the retrieved value is valid.
-    if (typeof value !== "string" && value !== null) {
+    if (typeof value !== 'string' && value !== null) {
       throw StorageError.InvalidValue;
     }
 

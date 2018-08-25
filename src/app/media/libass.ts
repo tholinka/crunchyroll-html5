@@ -4,18 +4,18 @@ import { getFiles, getWorkerUrl } from '../SubtitleEngineLoader';
 import { CustomEvent } from './CustomEvent';
 
 export interface IVideoRect {
-  width: number,
-  height: number,
-  x: number,
-  y: number
+  width: number;
+  height: number;
+  x: number;
+  y: number;
 }
 
 interface IEvent {
-  data: IEventData
+  data: IEventData;
 }
 
 export interface IEventData {
-  [key: string]: any
+  [key: string]: any;
 }
 
 export interface ILibAssOptions {
@@ -26,18 +26,20 @@ export interface ILibAssOptions {
 export class LibAss extends EventTarget {
   private lastRenderTime: number = 0;
   private pixelRatio: number = window.devicePixelRatio || 1;
-  private video: HTMLVideoElement|undefined;
+  private video: HTMLVideoElement | undefined;
 
   private offsetTime: number = 0;
 
-  private worker: Worker|undefined;
+  private worker: Worker | undefined;
   private videoHandler = new EventHandler(this);
-  private canvas: HTMLCanvasElement = document.createElement("canvas");
-  private ctx: CanvasRenderingContext2D = this.canvas.getContext("2d")!;
-  private bufferCanvas: HTMLCanvasElement = document.createElement("canvas");
-  private bufferCanvasCtx: CanvasRenderingContext2D = this.bufferCanvas.getContext("2d")!;
+  private canvas: HTMLCanvasElement = document.createElement('canvas');
+  private ctx: CanvasRenderingContext2D = this.canvas.getContext('2d')!;
+  private bufferCanvas: HTMLCanvasElement = document.createElement('canvas');
+  private bufferCanvasCtx: CanvasRenderingContext2D = this.bufferCanvas.getContext(
+    '2d'
+  )!;
 
-  private renderFrameData: Uint8ClampedArray|undefined;
+  private renderFrameData: Uint8ClampedArray | undefined;
   private renderFramesData: any;
   private frameId?: number;
 
@@ -47,7 +49,7 @@ export class LibAss extends EventTarget {
 
   constructor(
     private fonts: string[] = [],
-    private availableFonts: {[key: string]: string} = {}
+    private availableFonts: { [key: string]: string } = {}
   ) {
     super();
   }
@@ -59,7 +61,7 @@ export class LibAss extends EventTarget {
   public init(content?: string, url?: string) {
     this.terminateWorker();
     this.createWorker();
-    if (!this.worker) throw new Error("Worker is not available.");
+    if (!this.worker) throw new Error('Worker is not available.');
 
     this.worker.postMessage({
       target: 'worker-init',
@@ -75,7 +77,7 @@ export class LibAss extends EventTarget {
       files: getFiles()
     });
   }
-  
+
   public attach(video: HTMLVideoElement) {
     this.videoHandler.removeAll();
     this.video = video;
@@ -85,11 +87,17 @@ export class LibAss extends EventTarget {
         this._updateable = true;
         this.setIsPaused(false, video.currentTime + this.getOffsetTime());
       })
-      .listen(video, 'pause', () => this.setIsPaused(true, video.currentTime + this.getOffsetTime()))
-      .listen(video, 'seeking', () => this._updateable = false)
+      .listen(video, 'pause', () =>
+        this.setIsPaused(true, video.currentTime + this.getOffsetTime())
+      )
+      .listen(video, 'seeking', () => (this._updateable = false))
       .listen(video, 'ratechange', () => this.setRate(video.playbackRate))
-      .listen(video, 'timeupdate', () => this.setCurrentTime(video.currentTime + this.getOffsetTime()))
-      .listen(video, 'waiting', () => this.setIsPaused(true, video.currentTime + this.getOffsetTime()))
+      .listen(video, 'timeupdate', () =>
+        this.setCurrentTime(video.currentTime + this.getOffsetTime())
+      )
+      .listen(video, 'waiting', () =>
+        this.setIsPaused(true, video.currentTime + this.getOffsetTime())
+      )
       .listen(video, 'loadedmetadata', () => this.resize())
       .listen(document, 'fullscreenchange', () => this.delayedResize())
       .listen(document, 'mozfullscreenchange', () => this.delayedResize())
@@ -106,7 +114,7 @@ export class LibAss extends EventTarget {
   }
 
   public setTrack(content: string) {
-    if (!this.worker) throw new Error("Worker is not available.");
+    if (!this.worker) throw new Error('Worker is not available.');
     this.worker.postMessage({
       target: 'set-track',
       content
@@ -114,7 +122,7 @@ export class LibAss extends EventTarget {
   }
 
   public setTrackByUrl(url: string) {
-    if (!this.worker) throw new Error("Worker is not available.");
+    if (!this.worker) throw new Error('Worker is not available.');
     this.worker.postMessage({
       target: 'set-track-by-url',
       url
@@ -197,7 +205,15 @@ export class LibAss extends EventTarget {
 
   private renderFrame() {
     if (!this.renderFrameData) return;
-    this.ctx.putImageData(new ImageData(this.renderFrameData, this.canvas.width, this.canvas.height), 0, 0);
+    this.ctx.putImageData(
+      new ImageData(
+        this.renderFrameData,
+        this.canvas.width,
+        this.canvas.height
+      ),
+      0,
+      0
+    );
     this.renderFrameData = undefined;
   }
 
@@ -207,14 +223,18 @@ export class LibAss extends EventTarget {
     for (const image of data.canvases) {
       this.bufferCanvas.width = image.w;
       this.bufferCanvas.height = image.h;
-      this.bufferCanvasCtx.putImageData(new ImageData(new Uint8ClampedArray(image.buffer), image.w, image.h), 0, 0);
+      this.bufferCanvasCtx.putImageData(
+        new ImageData(new Uint8ClampedArray(image.buffer), image.w, image.h),
+        0,
+        0
+      );
       this.ctx.drawImage(this.bufferCanvas, image.x, image.y);
     }
   }
 
   private setIsPaused(paused: boolean, currentTime: number) {
     if (!this._updateable) return;
-    if (!this.worker) throw new Error("Worker is not available.");
+    if (!this.worker) throw new Error('Worker is not available.');
     this.worker.postMessage({
       target: 'video',
       isPaused: paused,
@@ -224,7 +244,7 @@ export class LibAss extends EventTarget {
 
   private setCurrentTime(currentTime: number) {
     if (!this._updateable) return;
-    if (!this.worker) throw new Error("Worker is not available.");
+    if (!this.worker) throw new Error('Worker is not available.');
     this.worker.postMessage({
       target: 'video',
       currentTime
@@ -232,7 +252,7 @@ export class LibAss extends EventTarget {
   }
 
   private setRate(rate: number) {
-    if (!this.worker) throw new Error("Worker is not available.");
+    if (!this.worker) throw new Error('Worker is not available.');
     this.worker.postMessage({
       target: 'video',
       rate
@@ -240,7 +260,7 @@ export class LibAss extends EventTarget {
   }
 
   private customMessage(data: any, options: any = {}) {
-    if (!this.worker) throw new Error("Worker is not available.");
+    if (!this.worker) throw new Error('Worker is not available.');
     this.worker.postMessage({
       target: 'custom',
       userData: data,
@@ -279,7 +299,10 @@ export class LibAss extends EventTarget {
       case 'canvas':
         switch (data.op) {
           case 'getContext':
-            this.ctx = this.canvas.getContext(data.type, data.attributes) as CanvasRenderingContext2D;
+            this.ctx = this.canvas.getContext(
+              data.type,
+              data.attributes
+            ) as CanvasRenderingContext2D;
             break;
           case 'resize':
             this.resize(data.width, data.height);
@@ -307,7 +330,7 @@ export class LibAss extends EventTarget {
         break;
       case 'tick':
         this.frameId = data.id;
-        if (!this.worker) throw new Error("Worker is not available.");
+        if (!this.worker) throw new Error('Worker is not available.');
         this.worker.postMessage({
           target: 'tock',
           id: this.frameId
@@ -324,7 +347,7 @@ export class LibAss extends EventTarget {
           const ctx = canvas.getContext('2d')!;
           ctx.drawImage(img, 0, 0);
           const imageData = ctx.getImageData(0, 0, img.width, img.height);
-          if (!this.worker) throw new Error("Worker is not available.");
+          if (!this.worker) throw new Error('Worker is not available.');
           this.worker.postMessage({
             target: 'Image',
             method: 'onload',
@@ -336,7 +359,7 @@ export class LibAss extends EventTarget {
           });
         };
         img.onerror = () => {
-          if (!this.worker) throw new Error("Worker is not available.");
+          if (!this.worker) throw new Error('Worker is not available.');
           this.worker.postMessage({
             target: 'Image',
             method: 'onerror',
@@ -350,7 +373,7 @@ export class LibAss extends EventTarget {
         this.dispatchEvent(new CustomEvent(data));
         break;
       case 'setimmediate':
-        if (!this.worker) throw new Error("Worker is not available.");
+        if (!this.worker) throw new Error('Worker is not available.');
         this.worker.postMessage({
           target: 'setimmediate'
         });

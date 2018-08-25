@@ -1,9 +1,14 @@
-import { Component, h, render } from "preact";
-import { SvgTranslateAnimation } from "../../../libs/animation/SvgTranslateAnimation";
-import { EventHandler } from "../../../libs/events/EventHandler";
-import { ICON_VOLUME, ICON_VOLUME_HIGH, ICON_VOLUME_LOW, ICON_VOLUME_MUTE } from "../assets";
-import { IPlayerApi } from "../IPlayerApi";
-import { VolumeChangeEvent } from "../VolumeChangeEvent";
+import { Component, h, render } from 'preact';
+import { SvgTranslateAnimation } from '../../../libs/animation/SvgTranslateAnimation';
+import { EventHandler } from '../../../libs/events/EventHandler';
+import {
+  ICON_VOLUME,
+  ICON_VOLUME_HIGH,
+  ICON_VOLUME_LOW,
+  ICON_VOLUME_MUTE
+} from '../assets';
+import { IPlayerApi } from '../IPlayerApi';
+import { VolumeChangeEvent } from '../VolumeChangeEvent';
 
 export interface IVolumeMuteButtonProps {
   api: IPlayerApi;
@@ -19,7 +24,7 @@ enum VolumeMuteState {
 
 export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
   private _handler: EventHandler = new EventHandler(this);
-  
+
   private _svgElement?: SVGElement;
   private _defsElement?: SVGDefsElement;
   private _speakerPathElement?: SVGPathElement;
@@ -35,15 +40,23 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
   private _mouseover: boolean = false;
 
   public componentDidMount() {
-    if (!this._speakerPathElement || !this._maskPathElement || !this._slashMaskPathElement) return;
-    this._animation = new SvgTranslateAnimation(this._speakerPathElement, [this._maskPathElement, this._slashMaskPathElement]);
+    if (
+      !this._speakerPathElement ||
+      !this._maskPathElement ||
+      !this._slashMaskPathElement
+    )
+      return;
+    this._animation = new SvgTranslateAnimation(this._speakerPathElement, [
+      this._maskPathElement,
+      this._slashMaskPathElement
+    ]);
 
     this._handler
       .listen(this.base, 'mouseover', this._onMouseOver, { passive: true })
       .listen(this.base, 'mouseout', this._onMouseOut, { passive: true })
       .listen(this._animation, 'animationend', this._onAnimationEnd, false)
       .listen(this.props.api, 'volumechange', this._onVolumeChange, false);
-    
+
     this._onVolumeData(this.props.api.getVolume(), this.props.api.isMuted());
   }
 
@@ -53,37 +66,39 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
 
   public render(): JSX.Element {
     const onClick = () => this._onClick();
-    const svgRef = (el?: Element) => this._svgElement = el as SVGElement;
-    const defsRef = (el?: Element) => this._defsElement = el as SVGDefsElement;
-    const maskRef = (el?: Element) => this._maskPathElement = el as SVGPathElement;
-    const slashMaskRef = (el?: Element) => this._slashMaskPathElement = el as SVGPathElement;
-    const speakerRef = (el?: Element) => this._speakerPathElement = el as SVGPathElement;
-    const hiderRef = (el?: Element) => this._hiderPathElement = el as SVGPathElement;
+    const svgRef = (el?: Element) => (this._svgElement = el as SVGElement);
+    const defsRef = (el?: Element) =>
+      (this._defsElement = el as SVGDefsElement);
+    const maskRef = (el?: Element) =>
+      (this._maskPathElement = el as SVGPathElement);
+    const slashMaskRef = (el?: Element) =>
+      (this._slashMaskPathElement = el as SVGPathElement);
+    const speakerRef = (el?: Element) =>
+      (this._speakerPathElement = el as SVGPathElement);
+    const hiderRef = (el?: Element) =>
+      (this._hiderPathElement = el as SVGPathElement);
     const muteRef = (el?: Element) => {
-      if (el && el.parentNode && typeof el.parentNode.removeChild === 'function') {
+      if (
+        el &&
+        el.parentNode &&
+        typeof el.parentNode.removeChild === 'function'
+      ) {
         el.parentNode.removeChild(el);
       }
-      
+
       this._mutePathElement = el as SVGPathElement;
     };
 
-    const hiddenSpace = document.createElement("div");
+    const hiddenSpace = document.createElement('div');
     render(
-      (
-        <svg width="100%" height="100%" version="1.1" viewBox="0 0 36 36">
-          <path
-            ref={muteRef}
-            d={ICON_VOLUME_MUTE}
-            fill="#ffffff" />
-        </svg>
-      ),
+      <svg width="100%" height="100%" version="1.1" viewBox="0 0 36 36">
+        <path ref={muteRef} d={ICON_VOLUME_MUTE} fill="#ffffff" />
+      </svg>,
       hiddenSpace
     );
 
     return (
-      <button
-        class="chrome-mute-button chrome-button"
-        onClick={onClick}>
+      <button class="chrome-mute-button chrome-button" onClick={onClick}>
         <svg
           ref={svgRef}
           width="100%"
@@ -98,27 +113,31 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
                 ref={maskRef}
                 class="chrome-svg-volume-animation-mover"
                 d="M 9.09,5.20 6.47,7.88 26.82,28.77 29.66,25.99 z"
-                transform="translate(0,0)" />
+                transform="translate(0,0)"
+              />
             </clipPath>
             <clipPath id="chrome-svg-volume-animation-slash-mask">
               <path
                 ref={slashMaskRef}
                 class="chrome-svg-volume-animation-mover"
                 d="m -11.45,-15.55 -4.44,4.51 20.45,20.94 4.55,-4.66 z"
-                transform="translate(0,0)" />
+                transform="translate(0,0)"
+              />
             </clipPath>
           </defs>
           <path
             ref={speakerRef}
-            d={ICON_VOLUME + " " + ICON_VOLUME_HIGH}
+            d={ICON_VOLUME + ' ' + ICON_VOLUME_HIGH}
             fill="#ffffff"
-            clip-path="url(#chrome-svg-volume-animation-mask)" />
+            clip-path="url(#chrome-svg-volume-animation-mask)"
+          />
           <path
             ref={hiderRef}
             d="M 9.25,9 7.98,10.27 24.71,27 l 1.27,-1.27 Z"
             fill="#ffffff"
             clip-path="url(#chrome-svg-volume-animation-slash-mask)"
-            style="display: none;" />
+            style="display: none;"
+          />
         </svg>
       </button>
     );
@@ -163,18 +182,18 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
       this._state = state;
       this._animation.stop();
 
-      let path: string = ICON_VOLUME + " " + ICON_VOLUME_HIGH;
+      let path: string = ICON_VOLUME + ' ' + ICON_VOLUME_HIGH;
       switch (state) {
         case VolumeMuteState.HIGH:
           this._animation.setTranslateTo(0, 0);
           break;
         case VolumeMuteState.LOW:
           this._animation.setTranslateTo(0, 0);
-          path = ICON_VOLUME + " " + ICON_VOLUME_LOW;
+          path = ICON_VOLUME + ' ' + ICON_VOLUME_LOW;
           break;
         case VolumeMuteState.MUTED:
           if (this._hiderPathElement) {
-            this._hiderPathElement.style.display = "";
+            this._hiderPathElement.style.display = '';
           }
           this._animation.setTranslateTo(16, 16);
           break;
@@ -185,8 +204,8 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
       this._animation.stop();
       this._state = state;
 
-      let path: string = ICON_VOLUME + " " + ICON_VOLUME_HIGH;
-      let translate: string = "translate(0,0)";
+      let path: string = ICON_VOLUME + ' ' + ICON_VOLUME_HIGH;
+      let translate: string = 'translate(0,0)';
       switch (state) {
         case VolumeMuteState.HIGH:
           break;
@@ -195,9 +214,9 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
           break;
         case VolumeMuteState.MUTED:
           if (this._hiderPathElement) {
-            this._hiderPathElement.style.display = "";
+            this._hiderPathElement.style.display = '';
           }
-          translate = "translate(16,16)";
+          translate = 'translate(16,16)';
           break;
       }
 
@@ -217,8 +236,15 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
 
   private _setMuteView(muted: boolean): void {
     const el = this._svgElement;
-    if (!el || !this._mutePathElement || !this._defsElement || !this._speakerPathElement || !this._hiderPathElement) return;
-    el.innerHTML = "";
+    if (
+      !el ||
+      !this._mutePathElement ||
+      !this._defsElement ||
+      !this._speakerPathElement ||
+      !this._hiderPathElement
+    )
+      return;
+    el.innerHTML = '';
     if (muted) {
       el.appendChild(this._mutePathElement);
     } else {
@@ -229,33 +255,46 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
   }
 
   private _onAnimationEnd(): void {
-    if (!this._slashMaskPathElement || !this._maskPathElement || !this._speakerPathElement || !this._hiderPathElement) return;
+    if (
+      !this._slashMaskPathElement ||
+      !this._maskPathElement ||
+      !this._speakerPathElement ||
+      !this._hiderPathElement
+    )
+      return;
 
     switch (this._state) {
       case VolumeMuteState.HIGH:
-        this._speakerPathElement.setAttribute("d", ICON_VOLUME + ' ' + ICON_VOLUME_HIGH);
-        this._hiderPathElement.style.display = "none";
-        this._maskPathElement.setAttribute("transform", "translate(0,0)");
-        this._slashMaskPathElement.setAttribute("transform", "translate(0,0)");
+        this._speakerPathElement.setAttribute(
+          'd',
+          ICON_VOLUME + ' ' + ICON_VOLUME_HIGH
+        );
+        this._hiderPathElement.style.display = 'none';
+        this._maskPathElement.setAttribute('transform', 'translate(0,0)');
+        this._slashMaskPathElement.setAttribute('transform', 'translate(0,0)');
         break;
       case VolumeMuteState.LOW:
-        this._speakerPathElement.setAttribute("d", ICON_VOLUME);
-        this._hiderPathElement.style.display = "none";
-        this._maskPathElement.setAttribute("transform", "translate(0,0)");
-        this._slashMaskPathElement.setAttribute("transform", "translate(0,0)");
+        this._speakerPathElement.setAttribute('d', ICON_VOLUME);
+        this._hiderPathElement.style.display = 'none';
+        this._maskPathElement.setAttribute('transform', 'translate(0,0)');
+        this._slashMaskPathElement.setAttribute('transform', 'translate(0,0)');
         break;
       case VolumeMuteState.MUTED:
-        this._speakerPathElement.setAttribute("d", ICON_VOLUME_MUTE);
-        this._hiderPathElement.style.display = "";
-        this._maskPathElement.setAttribute("transform", "translate(16,16)");
-        this._slashMaskPathElement.setAttribute("transform", "translate(16,16)");
+        this._speakerPathElement.setAttribute('d', ICON_VOLUME_MUTE);
+        this._hiderPathElement.style.display = '';
+        this._maskPathElement.setAttribute('transform', 'translate(16,16)');
+        this._slashMaskPathElement.setAttribute(
+          'transform',
+          'translate(16,16)'
+        );
         break;
     }
     this._setMuteView(this.state === VolumeMuteState.MUTED);
   }
 
   private _updateAnimationOrigin() {
-    if (!this._speakerPathElement || !this._animation || !this._maskPathElement) return;
+    if (!this._speakerPathElement || !this._animation || !this._maskPathElement)
+      return;
     let path = this._speakerPathElement.getAttribute('d');
     if (!this._animation.isRunning()) {
       switch (this._state) {
@@ -270,13 +309,15 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
     }
     if (!path) path = ICON_VOLUME + ' ' + ICON_VOLUME_HIGH;
     this._animation.setFromPath(path);
-    
+
     const transform = this._maskPathElement.getAttribute('transform');
     let x = 0;
     let y = 0;
 
     if (transform) {
-      const m = transform.match(/translate\((\-?[0-9]+(?:\.[0-9]+)?)\s*,\s*(\-?[0-9]+(?:\.[0-9]+)?)\)/);
+      const m = transform.match(
+        /translate\((\-?[0-9]+(?:\.[0-9]+)?)\s*,\s*(\-?[0-9]+(?:\.[0-9]+)?)\)/
+      );
       if (m) {
         x = parseFloat(m[1]);
         y = parseFloat(m[2]);
@@ -284,14 +325,14 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
     }
     this._animation.setTranslateFrom(x, y);
   }
-  
+
   private _onMouseOver() {
     this._mouseover = true;
     if (this.props.onHover) {
       this.props.onHover();
     }
   }
-  
+
   private _onMouseOut() {
     this._mouseover = false;
     if (this.props.onEndHover) {

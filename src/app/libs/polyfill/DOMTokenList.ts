@@ -6,10 +6,15 @@ declare global {
   }
 }
 
-DOMTokenList.prototype.replace = DOMTokenList.prototype.replace || 
+DOMTokenList.prototype.replace =
+  DOMTokenList.prototype.replace ||
   // replace preserving order
-  function replace(this: DOMTokenList, oldClass: string, newClass: string): void {
-    const list =  Array.from(this).map(x => x === oldClass ? newClass : x);
+  function replace(
+    this: DOMTokenList,
+    oldClass: string,
+    newClass: string
+  ): void {
+    const list = Array.from(this).map(x => (x === oldClass ? newClass : x));
     this.empty();
     this.add(...list);
   };
@@ -19,7 +24,7 @@ DOMTokenList.prototype.empty = function empty(this: DOMTokenList) {
       this.remove(el);
     }
   }
-}
+};
 
 // needed so typescript recognises this as a module
 export default undefined;

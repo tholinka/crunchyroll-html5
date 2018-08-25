@@ -1,5 +1,5 @@
 import { EventTarget } from '../../libs/events/EventTarget';
-import { ISubtitleTrack } from "../subtitles/ISubtitleTrack";
+import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
 
 export enum PlaybackState {
   UNSTARTED,
@@ -30,7 +30,7 @@ export interface IPlayerApi extends EventTarget {
   seekTo(time: number): void;
   seekBy(seconds: number): void;
   playNextVideo(): void;
-  
+
   getDuration(): number;
   getCurrentTime(): number;
   getBufferedTime(): number;
@@ -50,7 +50,7 @@ export interface IPlayerApi extends EventTarget {
 
   getSubtitlesTracks(): ISubtitleTrack[];
   getSubtitleTrack(): number;
-  
+
   /**
    * Set the subtitle track by its index.
    * If set to -1 it will not display subtitles.
@@ -58,8 +58,8 @@ export interface IPlayerApi extends EventTarget {
    */
   setSubtitleTrack(index: number): void;
 
-  getNextVideoDetail(): IVideoDetail|undefined;
-  setNextVideoDetail(nextVideo: IVideoDetail|undefined): void;
+  getNextVideoDetail(): IVideoDetail | undefined;
+  setNextVideoDetail(nextVideo: IVideoDetail | undefined): void;
 
   isSettingsOpen(): boolean;
   openSettings(): void;

@@ -1,35 +1,39 @@
-import { IAction } from "../libs/actions/IAction";
-import { Disposable } from "../libs/disposable/Disposable";
-import { BrowserEvent } from "../libs/events/BrowserEvent";
-import { Event } from "../libs/events/Event";
-import { EventHandler } from "../libs/events/EventHandler";
-import { IActionKey } from "./IActionKey";
+import { IAction } from '../libs/actions/IAction';
+import { Disposable } from '../libs/disposable/Disposable';
+import { BrowserEvent } from '../libs/events/BrowserEvent';
+import { Event } from '../libs/events/Event';
+import { EventHandler } from '../libs/events/EventHandler';
+import { IActionKey } from './IActionKey';
 
 export class StaticActionController extends Disposable {
-  private _keyMapping: {[key: string]: IActionKey[]} = {
-    "seek_forward_85s": [{ key: 83 /* S */ }],
-    "seek_start": [{ key: 36 /* HOME */ }, { key: 48 /* 0 */ }],
-    "seek_10%": [{ key: 49 /* 1 */ }],
-    "seek_20%": [{ key: 50 /* 2 */ }],
-    "seek_30%": [{ key: 51 /* 3 */ }],
-    "seek_40%": [{ key: 52 /* 4 */ }],
-    "seek_50%": [{ key: 53 /* 5 */ }],
-    "seek_60%": [{ key: 54 /* 6 */ }],
-    "seek_70%": [{ key: 55 /* 7 */ }],
-    "seek_80%": [{ key: 56 /* 8 */ }],
-    "seek_90%": [{ key: 57 /* 9 */ }],
-    "seek_end": [{ key: 35 /* END */ }],
-    "seek_forward_5s": [{ key: 39 /* Arrow Right */ }],
-    "seek_forward_10s": [{ key: 76 /* L */ }],
-    "seek_backward_5s": [{ key: 37 /* Arrow Left */ }],
-    "seek_backward_10s": [{ key: 74 /* J */ }],
-    "volume_up": [{ key: 38 /* Arrow Up */ }],
-    "volume_down": [{ key: 40 /* Arrow Down */ }],
-    "toggle_fullscreen": [{ key: 70 /* F */ }, { key: 70 /* F */, global: true }],
-    "mute_unmute": [{ key: 77 /* M */ }],
-    "next_video": [{ key: 78 /* N */ , modifiers: { shift: true } }],
-    "play_pause": [{ key: 32 /* SPACE */ }, { key: 75 /* K */ }, { key: 75 /* K */, global: true }],
-    "toggle_hide": [{ key: 85 /* U */, modifiers: { ctrl: true, shift: true } }]
+  private _keyMapping: { [key: string]: IActionKey[] } = {
+    seek_forward_85s: [{ key: 83 /* S */ }],
+    seek_start: [{ key: 36 /* HOME */ }, { key: 48 /* 0 */ }],
+    'seek_10%': [{ key: 49 /* 1 */ }],
+    'seek_20%': [{ key: 50 /* 2 */ }],
+    'seek_30%': [{ key: 51 /* 3 */ }],
+    'seek_40%': [{ key: 52 /* 4 */ }],
+    'seek_50%': [{ key: 53 /* 5 */ }],
+    'seek_60%': [{ key: 54 /* 6 */ }],
+    'seek_70%': [{ key: 55 /* 7 */ }],
+    'seek_80%': [{ key: 56 /* 8 */ }],
+    'seek_90%': [{ key: 57 /* 9 */ }],
+    seek_end: [{ key: 35 /* END */ }],
+    seek_forward_5s: [{ key: 39 /* Arrow Right */ }],
+    seek_forward_10s: [{ key: 76 /* L */ }],
+    seek_backward_5s: [{ key: 37 /* Arrow Left */ }],
+    seek_backward_10s: [{ key: 74 /* J */ }],
+    volume_up: [{ key: 38 /* Arrow Up */ }],
+    volume_down: [{ key: 40 /* Arrow Down */ }],
+    toggle_fullscreen: [{ key: 70 /* F */ }, { key: 70 /* F */, global: true }],
+    mute_unmute: [{ key: 77 /* M */ }],
+    next_video: [{ key: 78 /* N */, modifiers: { shift: true } }],
+    play_pause: [
+      { key: 32 /* SPACE */ },
+      { key: 75 /* K */ },
+      { key: 75 /* K */, global: true }
+    ],
+    toggle_hide: [{ key: 85 /* U */, modifiers: { ctrl: true, shift: true } }]
   };
 
   private _baseElement: Element;
@@ -45,8 +49,7 @@ export class StaticActionController extends Disposable {
   }
 
   public getKeyMappingById(id: string): IActionKey[] {
-    if (!this._keyMapping.hasOwnProperty(id))
-      return [];
+    if (!this._keyMapping.hasOwnProperty(id)) return [];
     return this._keyMapping[id];
   }
 
@@ -60,7 +63,6 @@ export class StaticActionController extends Disposable {
 
   public enterDocument(): void {
     for (const action of this._actions) {
-
       const keyMappings = this.getKeyMappingById(action.id);
       for (const keyMapping of keyMappings) {
         if (keyMapping.global) {
@@ -88,7 +90,7 @@ export class StaticActionController extends Disposable {
 
   protected _isKeyActive(mapping: IActionKey, e: BrowserEvent): boolean {
     if (e.keyCode !== mapping.key) return false;
-      
+
     let ctrlKey = false;
     let shiftKey = false;
     let altKey = false;
@@ -110,31 +112,45 @@ export class StaticActionController extends Disposable {
 
   protected _listenGlobal(action: IAction, mapping: IActionKey): void {
     const handler = this.getHandler();
-    handler.listen(document, "keydown", (e: BrowserEvent) => {
-      const element = e.target as HTMLElement;
-      if (element) {
-        if (element.tagName === 'INPUT' || element.tagName === 'SELECT' || element.tagName === 'TEXTAREA' || element.isContentEditable)
-          return;
-        if (this._baseElement.contains(element))
-          return;
-      }
+    handler.listen(
+      document,
+      'keydown',
+      (e: BrowserEvent) => {
+        const element = e.target as HTMLElement;
+        if (element) {
+          if (
+            element.tagName === 'INPUT' ||
+            element.tagName === 'SELECT' ||
+            element.tagName === 'TEXTAREA' ||
+            element.isContentEditable
+          )
+            return;
+          if (this._baseElement.contains(element)) return;
+        }
 
-      if (!this._isKeyActive(mapping, e)) return;
+        if (!this._isKeyActive(mapping, e)) return;
 
-      action.execute();
+        action.execute();
 
-      e.preventDefault();
-    }, false);
+        e.preventDefault();
+      },
+      false
+    );
   }
 
   protected _listenLocal(action: IAction, mapping: IActionKey): void {
     const handler = this.getHandler();
-    handler.listen(this._baseElement, "keydown", (e: BrowserEvent) => {
-      if (!this._isKeyActive(mapping, e)) return;
+    handler.listen(
+      this._baseElement,
+      'keydown',
+      (e: BrowserEvent) => {
+        if (!this._isKeyActive(mapping, e)) return;
 
-      action.execute();
+        action.execute();
 
-      e.preventDefault();
-    }, false);
+        e.preventDefault();
+      },
+      false
+    );
   }
 }

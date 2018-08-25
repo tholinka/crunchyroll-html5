@@ -1,17 +1,18 @@
-import { Component, h } from "preact";
-import { SvgPathMorphAnimation } from "../../../libs/animation/SvgPathMorphAnimation";
-import { EventHandler } from "../../../libs/events/EventHandler";
-import { IPlayerApi, PlaybackState } from "../IPlayerApi";
+import { Component, h } from 'preact';
+import { SvgPathMorphAnimation } from '../../../libs/animation/SvgPathMorphAnimation';
+import { EventHandler } from '../../../libs/events/EventHandler';
+import { IPlayerApi, PlaybackState } from '../IPlayerApi';
 
-const PLAY_PATH = "M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z";
-const PAUSE_PATH = "M 12,26 16,26 16,10 12,10 z M 21,26 25,26 25,10 21,10 z";
+const PLAY_PATH =
+  'M 12,26 18.5,22 18.5,14 12,10 z M 18.5,22 25,18 25,18 18.5,14 z';
+const PAUSE_PATH = 'M 12,26 16,26 16,10 12,10 z M 21,26 25,26 25,10 21,10 z';
 
 export interface IPlayPauseButtonProps {
-  api: IPlayerApi
+  api: IPlayerApi;
 }
 
 export class PlayPauseButton extends Component<IPlayPauseButtonProps, {}> {
-  private _animation: SvgPathMorphAnimation|undefined;
+  private _animation: SvgPathMorphAnimation | undefined;
   private _pathElement?: SVGPathElement;
 
   private _handler = new EventHandler(this);
@@ -20,9 +21,13 @@ export class PlayPauseButton extends Component<IPlayPauseButtonProps, {}> {
     if (this._pathElement) {
       this._animation = new SvgPathMorphAnimation(this._pathElement, 200);
     }
-    
-    this._handler
-      .listen(this.props.api, 'playbackstatechange', this._onPlaybackStateChange, false);
+
+    this._handler.listen(
+      this.props.api,
+      'playbackstatechange',
+      this._onPlaybackStateChange,
+      false
+    );
   }
 
   public componentWillUnmount() {
@@ -38,7 +43,8 @@ export class PlayPauseButton extends Component<IPlayPauseButtonProps, {}> {
     const d: string = this._isPlaying() ? PAUSE_PATH : PLAY_PATH;
 
     const onClick = () => this._onClick();
-    const pathRef = (element?: Element) => this._pathElement = element as SVGPathElement;
+    const pathRef = (element?: Element) =>
+      (this._pathElement = element as SVGPathElement);
 
     return (
       <button class="chrome-button chrome-play-button" onClick={onClick}>
@@ -73,14 +79,14 @@ export class PlayPauseButton extends Component<IPlayPauseButtonProps, {}> {
     if (!this._animation || !this._pathElement) return;
     this._animation.stop();
 
-    const currentPath = this._pathElement.getAttribute("d");
+    const currentPath = this._pathElement.getAttribute('d');
     if (currentPath && currentPath !== path) {
       this._animation.setFromPath(currentPath);
       this._animation.setToPath(path);
-      
+
       this._animation.start();
     } else {
-      this._pathElement.setAttribute("d", path);
+      this._pathElement.setAttribute('d', path);
     }
   }
 }

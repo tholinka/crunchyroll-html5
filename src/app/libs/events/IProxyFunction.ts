@@ -1,4 +1,4 @@
-import { IListenableKey } from "./IListenableKey";
+import { IListenableKey } from './IListenableKey';
 
 export interface IProxyFunction extends Function {
   src?: EventTarget;

@@ -1,5 +1,9 @@
 import { EventTarget as MyEventTarget } from './EventTarget';
-import { addImplementation, IListenable, ListneableFunction } from './IListenable';
+import {
+  addImplementation,
+  IListenable,
+  ListneableFunction
+} from './IListenable';
 import { IListenableKey, reserveKey } from './IListenableKey';
 import { IProxyFunction } from './IProxyFunction';
 
@@ -10,7 +14,7 @@ export class Listener implements IListenableKey {
    * Whether the listener has been removed.
    */
   public removed: boolean = false;
-  
+
   /**
    * Whether to remove the listener after it has been called.
    */
@@ -18,8 +22,8 @@ export class Listener implements IListenableKey {
 
   constructor(
     public listener: ListneableFunction,
-    public proxy: IProxyFunction|undefined,
-    public src: IListenable|MyEventTarget|EventTarget|undefined,
+    public proxy: IProxyFunction | undefined,
+    public src: IListenable | MyEventTarget | EventTarget | undefined,
     public type: string,
     public capture: boolean,
     public handler?: any

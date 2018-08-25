@@ -1,6 +1,6 @@
-import { Component, h } from "preact";
-import { EventHandler } from "../../../libs/events/EventHandler";
-import { IPlayerApi } from "../IPlayerApi";
+import { Component, h } from 'preact';
+import { EventHandler } from '../../../libs/events/EventHandler';
+import { IPlayerApi } from '../IPlayerApi';
 
 const ENTER_SVG = (
   <svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%">
@@ -45,12 +45,15 @@ export interface IFullscreenButtonState {
   fullscreen?: boolean;
 }
 
-export class FullscreenButton extends Component<IFullscreenButtonProps, IFullscreenButtonState> {
+export class FullscreenButton extends Component<
+  IFullscreenButtonProps,
+  IFullscreenButtonState
+> {
   private _handler = new EventHandler(this);
 
   constructor() {
     super();
-    
+
     this.state = {
       fullscreen: false
     };
@@ -58,7 +61,12 @@ export class FullscreenButton extends Component<IFullscreenButtonProps, IFullscr
 
   public componentDidMount() {
     this._handler
-      .listen(this.props.api, 'fullscreenchange', this._onFullscreenChange, false)
+      .listen(
+        this.props.api,
+        'fullscreenchange',
+        this._onFullscreenChange,
+        false
+      )
       .listen(this.base, 'mouseover', this._onMouseOver, { passive: true })
       .listen(this.base, 'mouseout', this._onMouseOut, { passive: true });
   }
@@ -67,20 +75,26 @@ export class FullscreenButton extends Component<IFullscreenButtonProps, IFullscr
     this._handler.removeAll();
   }
 
-  public render({}: IFullscreenButtonProps, { fullscreen = false }: IFullscreenButtonState): JSX.Element {
+  public render(
+    {  }: IFullscreenButtonProps,
+    { fullscreen = false }: IFullscreenButtonState
+  ): JSX.Element {
     const onClick = () => this._onClick();
 
     const svg = fullscreen ? EXIT_SVG : ENTER_SVG;
 
     const attributes: {
-      'aria-disabled'?: string
+      'aria-disabled'?: string;
     } = {};
     if (!this._isEnabled()) {
-      attributes['aria-disabled'] = "true";
+      attributes['aria-disabled'] = 'true';
     }
 
     return (
-      <button class="chrome-button chrome-fullscreen-button" onClick={onClick} {...attributes}>
+      <button
+        class="chrome-button chrome-fullscreen-button"
+        onClick={onClick}
+        {...attributes}>
         {svg}
       </button>
     );
@@ -105,7 +119,7 @@ export class FullscreenButton extends Component<IFullscreenButtonProps, IFullscr
   private _onFullscreenChange() {
     this.setState({ fullscreen: this._isFullscreen() });
   }
-  
+
   private _onMouseOver() {
     if (!this._isEnabled()) return;
 
@@ -113,7 +127,7 @@ export class FullscreenButton extends Component<IFullscreenButtonProps, IFullscr
       this.props.onHover();
     }
   }
-  
+
   private _onMouseOut() {
     if (!this._isEnabled()) return;
 

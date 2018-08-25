@@ -1,6 +1,6 @@
-import { EventTarget } from "./events/EventTarget";
-import { ReadyState } from "./ReadyState";
-import { ReadyStateChangeEvent } from "./ReadyStateChangeEvent";
+import { EventTarget } from './events/EventTarget';
+import { ReadyState } from './ReadyState';
+import { ReadyStateChangeEvent } from './ReadyStateChangeEvent';
 
 /**
  * Convert a DocumentReadyState to ReadyState.
@@ -8,11 +8,11 @@ import { ReadyStateChangeEvent } from "./ReadyStateChangeEvent";
  */
 const toReadyState = (readyState: DocumentReadyState) => {
   switch (readyState) {
-    case "loading":
+    case 'loading':
       return ReadyState.Loading;
-    case "interactive":
+    case 'interactive':
       return ReadyState.Interactive;
-    case "complete":
+    case 'complete':
       return ReadyState.Complete;
   }
 };
@@ -27,16 +27,16 @@ export class ReadyStateChange extends EventTarget {
     this._document = document;
   }
 
-  public getCurrentReadyState(): ReadyState|undefined {
+  public getCurrentReadyState(): ReadyState | undefined {
     return this._currentReadyState;
   }
 
   public tick() {
     const readyState = toReadyState(this._document.readyState);
-    const currentReadyStatePriority
-      = this._currentReadyState === undefined
-      ? -1
-      : this._currentReadyState as number;
+    const currentReadyStatePriority =
+      this._currentReadyState === undefined
+        ? -1
+        : (this._currentReadyState as number);
 
     for (let i = currentReadyStatePriority + 1; i <= readyState; i++) {
       this._currentReadyState = i;

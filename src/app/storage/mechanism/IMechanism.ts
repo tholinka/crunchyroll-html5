@@ -10,7 +10,7 @@ export interface IMechanism {
    * Returns the value of the key.
    * @param key The key of the value to get.
    */
-  get(key: string): Promise<string|undefined>;
+  get(key: string): Promise<string | undefined>;
 
   /**
    * Remove a value with key.
@@ -19,5 +19,5 @@ export interface IMechanism {
   remove(key: string): Promise<void>;
 }
 
-export const IMechanismSymbol = Symbol.for("IMechanismSymbol");
+export const IMechanismSymbol = Symbol.for('IMechanismSymbol');
 export const StorageTestAvailabilityKey = '__sak';

@@ -5,7 +5,8 @@ import { LibAss } from '../libass';
 import { ISubtitleEngine, ISubtitleRect } from './ISubtitleEngine';
 import { ISubtitleTrack } from './ISubtitleTrack';
 
-export class LibAssSubtitleEngine extends EventTarget implements ISubtitleEngine {
+export class LibAssSubtitleEngine extends EventTarget
+  implements ISubtitleEngine {
   private libass = new LibAss(fonts);
   private track?: ISubtitleTrack;
   private handler: EventHandler = new EventHandler(this);

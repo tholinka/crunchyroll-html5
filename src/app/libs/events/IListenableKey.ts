@@ -6,7 +6,7 @@ export interface IListenableKey {
   /**
    * The source event target.
    */
-  src: IListenable|MyEventTarget|EventTarget|undefined;
+  src: IListenable | MyEventTarget | EventTarget | undefined;
 
   /**
    * The event type the listener is listening to.
@@ -36,7 +36,7 @@ export interface IListenableKey {
   /**
    * Wrapper for the listener that patches the event.
    */
-  proxy: IProxyFunction|undefined;
+  proxy: IProxyFunction | undefined;
 }
 
 let _counter: number = 0;

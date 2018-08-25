@@ -1,11 +1,11 @@
-import { IMedia } from "crunchyroll-lib/models/IMedia";
-import { Disposable } from "../libs/disposable/Disposable";
-import { EventHandler } from "../libs/events/EventHandler";
-import { IPlayerApi, PlaybackState } from "../media/player/IPlayerApi";
-import { PlaybackStateChangeEvent } from "../media/player/PlaybackStateChangeEvent";
-import { SeekEvent } from "../media/player/SeekEvent";
-import { TimeUpdateEvent } from "../media/player/TimeUpdateEvent";
-import { trackProgress } from "./crunchyroll";
+import { IMedia } from 'crunchyroll-lib/models/IMedia';
+import { Disposable } from '../libs/disposable/Disposable';
+import { EventHandler } from '../libs/events/EventHandler';
+import { IPlayerApi, PlaybackState } from '../media/player/IPlayerApi';
+import { PlaybackStateChangeEvent } from '../media/player/PlaybackStateChangeEvent';
+import { SeekEvent } from '../media/player/SeekEvent';
+import { TimeUpdateEvent } from '../media/player/TimeUpdateEvent';
+import { trackProgress } from './crunchyroll';
 
 export class VideoTracker extends Disposable {
   private _handler: EventHandler = new EventHandler(this);
@@ -44,13 +44,19 @@ export class VideoTracker extends Disposable {
     this._elapsedTime = 0;
     this._callCount++;
 
-    trackProgress(this._media, time, interval, this._callCount, this._affiliateCode);
+    trackProgress(
+      this._media,
+      time,
+      interval,
+      this._callCount,
+      this._affiliateCode
+    );
   }
 
   private _getInterval() {
     const intervalIndex = Math.min(this._callCount, this._intervals.length - 1);
 
-    return this._intervals[intervalIndex]/1000;
+    return this._intervals[intervalIndex] / 1000;
   }
 
   private _onPlaybackStateChange(e: PlaybackStateChangeEvent) {
@@ -58,11 +64,11 @@ export class VideoTracker extends Disposable {
 
     this._track(this._api.getDuration(), this._getInterval());
   }
-  
+
   private _onSeek(e: SeekEvent) {
     this._lastTime = e.time;
   }
-  
+
   private _onTimeUpdate(e: TimeUpdateEvent) {
     const dt = Math.max(e.time - this._lastTime, 0);
     this._lastTime = e.time;

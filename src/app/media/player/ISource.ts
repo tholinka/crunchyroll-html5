@@ -1,4 +1,4 @@
-import { IDisposable } from "../../libs/disposable/IDisposable";
+import { IDisposable } from '../../libs/disposable/IDisposable';
 
 export interface ISourceLevel {
   id: number;
@@ -29,7 +29,7 @@ export interface ISource extends IDisposable {
 
   /**
    * Set the audio track.
-   * 
+   *
    * @param id the audio track ID.
    */
   setAudioTrack(id: number): void;
@@ -46,7 +46,7 @@ export interface ISource extends IDisposable {
 
   /**
    * Set the current quality level.
-   * 
+   *
    * @param id the level ID.
    */
   setLevel(id: number): void;

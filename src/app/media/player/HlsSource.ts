@@ -9,7 +9,7 @@ export class HlsSource extends Disposable implements ISource {
   constructor(url: string) {
     super();
 
-    let config: Hls.Config|undefined;
+    let config: Hls.Config | undefined;
     const loader = getPlaylistLoader();
     if (loader) {
       config = Object.assign({}, Hls.DefaultConfig, {
@@ -58,7 +58,7 @@ export class HlsSource extends Disposable implements ISource {
         height: level.height,
         bitrate: level.bitrate,
         codecs: level.codecs
-      }
+      };
     });
   }
 
@@ -69,7 +69,7 @@ export class HlsSource extends Disposable implements ISource {
   public detach() {
     this._hls.detachMedia();
   }
-  
+
   protected disposeInternal() {
     this._hls.destroy();
   }

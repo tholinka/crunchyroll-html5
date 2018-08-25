@@ -41,6 +41,7 @@
     "test": "npm run tslint && npm run build",
     "tslint": "tslint -p tsconfig.json",
     "tslint:fix": "tslint -p tsconfig.json --fix",
+    "prettier:fix": "prettier --config ./.prettierrc {,src/**/*.ts,src/**/*.tsx} --write",
     "package": "npm run package:webextension && npm run package:firefox",
     "package:firefox": "node build/package.firefox.js",
     "package:webextension": "node build/package.webextension.js",

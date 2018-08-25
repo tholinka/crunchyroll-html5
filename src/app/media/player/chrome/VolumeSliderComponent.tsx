@@ -1,9 +1,9 @@
-import { Component, h } from "preact";
-import { BrowserEvent } from "../../../libs/events/BrowserEvent";
-import { EventHandler } from "../../../libs/events/EventHandler";
-import { IRect } from "../../../utils/rect";
-import { IPlayerApi } from "../IPlayerApi";
-import { VolumeChangeEvent } from "../VolumeChangeEvent";
+import { Component, h } from 'preact';
+import { BrowserEvent } from '../../../libs/events/BrowserEvent';
+import { EventHandler } from '../../../libs/events/EventHandler';
+import { IRect } from '../../../utils/rect';
+import { IPlayerApi } from '../IPlayerApi';
+import { VolumeChangeEvent } from '../VolumeChangeEvent';
 
 export interface IVolumeSliderComponentProps {
   api: IPlayerApi;
@@ -11,7 +11,10 @@ export interface IVolumeSliderComponentProps {
   onBlur: () => void;
 }
 
-export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps, {}> {
+export class VolumeSliderComponent extends Component<
+  IVolumeSliderComponentProps,
+  {}
+> {
   private _handler: EventHandler = new EventHandler(this);
 
   private _dragging: boolean = false;
@@ -57,8 +60,8 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
 
   public setValue(value: number, internal: boolean = false): void {
     if (this._value === value) return; // No need to update
-    if (value < this.getMinValue() ||value > this.getMaxValue())
-      throw new RangeError("Value is out of bounds.");
+    if (value < this.getMinValue() || value > this.getMaxValue())
+      throw new RangeError('Value is out of bounds.');
     this._value = value;
 
     this.props.api.setVolume(value);
@@ -71,24 +74,34 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
     if (this._minValue === minValue) return;
     const maxValue = this.getMaxValue();
     if (minValue >= maxValue)
-      throw new RangeError("Minimum value can't be bigger than or equal to the maximum value.");
+      throw new RangeError(
+        "Minimum value can't be bigger than or equal to the maximum value."
+      );
 
     this._minValue = minValue;
 
     // Restrain value if it's outside bounds.
-    this.setValue(Math.min(Math.max(minValue, this.getValue()), maxValue), true);
+    this.setValue(
+      Math.min(Math.max(minValue, this.getValue()), maxValue),
+      true
+    );
   }
 
   public setMaxValue(maxValue: number, internal: boolean = false): void {
     if (this._maxValue === maxValue) return;
     const minValue = this.getMinValue();
     if (maxValue <= minValue)
-      throw new RangeError("Maximum value can't be less than or equal to the minimum value.");
+      throw new RangeError(
+        "Maximum value can't be less than or equal to the minimum value."
+      );
 
     this._maxValue = maxValue;
-    
+
     // Restrain value if it's outside bounds.
-    this.setValue(Math.min(Math.max(minValue, this.getValue()), maxValue), true);
+    this.setValue(
+      Math.min(Math.max(minValue, this.getValue()), maxValue),
+      true
+    );
   }
 
   public componentDidMount() {
@@ -110,11 +123,12 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
   }
 
   public render(props: IVolumeSliderComponentProps): JSX.Element {
-    const sliderRef = (el?: Element) => this._sliderElement = el;
-    const handleRef = (el?: Element) => this._handleElement = el as HTMLElement;
+    const sliderRef = (el?: Element) => (this._sliderElement = el);
+    const handleRef = (el?: Element) =>
+      (this._handleElement = el as HTMLElement);
 
     const attributes = {
-      'tabindex': '0'
+      tabindex: '0'
     };
     return (
       <div
@@ -128,9 +142,7 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
           class="chrome-volume-slider"
           draggable={true}
           style="touchAction: none;">
-          <div
-            ref={handleRef}
-            class="chrome-volume-slider-handle" />
+          <div ref={handleRef} class="chrome-volume-slider-handle" />
         </div>
       </div>
     );
@@ -157,12 +169,12 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
 
     const { left } = this._sliderRect;
     const width = this._sliderWidth;
-    const percentage = Math.max(Math.min(e.clientX - left, width), 0)/width;
+    const percentage = Math.max(Math.min(e.clientX - left, width), 0) / width;
 
     const minValue = this.getMinValue();
     const maxValue = this.getMaxValue();
 
-    this.setValue(percentage*(maxValue - minValue) + minValue);
+    this.setValue(percentage * (maxValue - minValue) + minValue);
   }
 
   private _onMouseUp(e: BrowserEvent) {
@@ -188,9 +200,7 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
       case 37:
       case 40: {
         const value = Math.min(
-          Math.max(
-            this.getMinValue(), this.getValue() - this._incrementValue
-          ),
+          Math.max(this.getMinValue(), this.getValue() - this._incrementValue),
           this.getMaxValue()
         );
 
@@ -204,9 +214,7 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
       case 38:
       case 39: {
         const value = Math.min(
-          Math.max(
-            this.getMinValue(), this.getValue() + this._incrementValue
-          ),
+          Math.max(this.getMinValue(), this.getValue() + this._incrementValue),
           this.getMaxValue()
         );
 
@@ -234,7 +242,12 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
   }
 
   private _updateInternal(): void {
-    if (!this._handleElement || this._sliderWidth === undefined || this._handleWidth === undefined) return;
+    if (
+      !this._handleElement ||
+      this._sliderWidth === undefined ||
+      this._handleWidth === undefined
+    )
+      return;
     let value: number = this.getValue();
     const minValue: number = this.getMinValue();
     const maxValue: number = this.getMaxValue();
@@ -243,15 +256,15 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
       value = minValue;
     }
 
-    this.base.setAttribute("aria-valuemin", (minValue * 100) + '');
-    this.base.setAttribute("aria-valuemax", (maxValue * 100) + '');
+    this.base.setAttribute('aria-valuemin', minValue * 100 + '');
+    this.base.setAttribute('aria-valuemax', maxValue * 100 + '');
 
-    this.base.setAttribute("aria-valuenow", (value * 100) + '');
-    this.base.setAttribute("aria-valuetext", (value * 100) + '% volume');
+    this.base.setAttribute('aria-valuenow', value * 100 + '');
+    this.base.setAttribute('aria-valuetext', value * 100 + '% volume');
 
     const width = this._sliderWidth - this._handleWidth;
-    const percentage = (value - minValue)/(maxValue - minValue);
+    const percentage = (value - minValue) / (maxValue - minValue);
 
-    this._handleElement.style.left = (percentage * width) + 'px';
+    this._handleElement.style.left = percentage * width + 'px';
   }
 }

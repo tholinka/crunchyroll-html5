@@ -1,12 +1,15 @@
-import { IRect } from "./rect";
+import { IRect } from './rect';
 
-export function getOffsetRect(el: HTMLElement, relativeTo?: HTMLElement): IRect {
+export function getOffsetRect(
+  el: HTMLElement,
+  relativeTo?: HTMLElement
+): IRect {
   let top = 0;
   let left = 0;
 
   const width = el.offsetWidth;
   const height = el.offsetHeight;
-    
+
   while (el && el.offsetParent && el !== relativeTo) {
     top += el.offsetTop;
     left += el.offsetLeft;
@@ -21,7 +24,10 @@ export function getOffsetRect(el: HTMLElement, relativeTo?: HTMLElement): IRect 
   };
 }
 
-export function getClientRect(el: HTMLElement, relativeTo?: HTMLElement): IRect {
+export function getClientRect(
+  el: HTMLElement,
+  relativeTo?: HTMLElement
+): IRect {
   let { width, height, left, top } = el.getBoundingClientRect();
   if (relativeTo) {
     const rect2 = relativeTo.getBoundingClientRect();

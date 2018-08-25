@@ -1,4 +1,4 @@
-import { SvgPathMorphAnimation } from "./SvgPathMorphAnimation";
+import { SvgPathMorphAnimation } from './SvgPathMorphAnimation';
 
 export class SvgTranslateAnimation extends SvgPathMorphAnimation {
   private _translateToX: number = 0;
@@ -32,10 +32,17 @@ export class SvgTranslateAnimation extends SvgPathMorphAnimation {
   protected tickInternal(progress: number) {
     super.tickInternal(progress);
 
-    const x = (this._translateToX - this._translateFromX)*progress + this._translateFromX;
-    const y = (this._translateToY - this._translateFromY)*progress + this._translateFromY;
+    const x =
+      (this._translateToX - this._translateFromX) * progress +
+      this._translateFromX;
+    const y =
+      (this._translateToY - this._translateFromY) * progress +
+      this._translateFromY;
     for (const translateElement of this._translateElements) {
-      translateElement.setAttribute("transform", "translate(" + x + "," + y + ")");
+      translateElement.setAttribute(
+        'transform',
+        'translate(' + x + ',' + y + ')'
+      );
     }
   }
 }

@@ -1,18 +1,19 @@
 /**
  * Tricks Closure Compiler into believing that a function is pure. The compiler
  * assumes that any `valueOf` function is pure, without analyzing its contents.
- * @param fn 
+ * @param fn
  */
 // tslint:disable-next-line:ban-types
 function purify<T>(fn: Function): T {
-  return ({valueOf: fn}).valueOf();
+  return { valueOf: fn }.valueOf();
 }
 
 const GLOBAL = window;
 
 export const PASSIVE_EVENTS: boolean = purify(() => {
   // If we're in a web worker or other custom environment, we can't tell.
-  if (!GLOBAL.addEventListener || !Object.defineProperty) {  // IE 8
+  if (!GLOBAL.addEventListener || !Object.defineProperty) {
+    // IE 8
     return false;
   }
 

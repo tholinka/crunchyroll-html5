@@ -1,12 +1,12 @@
-import { Component, h } from "preact";
-import { EventHandler } from "../../../libs/events/EventHandler";
-import { parseAndFormatTime } from "../../../utils/time";
-import { DurationChangeEvent } from "../DurationChangeEvent";
-import { IPlayerApi } from "../IPlayerApi";
-import { TimeUpdateEvent } from "../TimeUpdateEvent";
+import { Component, h } from 'preact';
+import { EventHandler } from '../../../libs/events/EventHandler';
+import { parseAndFormatTime } from '../../../utils/time';
+import { DurationChangeEvent } from '../DurationChangeEvent';
+import { IPlayerApi } from '../IPlayerApi';
+import { TimeUpdateEvent } from '../TimeUpdateEvent';
 
 export interface ITimeDisplayProps {
-  api: IPlayerApi
+  api: IPlayerApi;
 }
 
 export interface ITimeDisplayState {
@@ -14,7 +14,10 @@ export interface ITimeDisplayState {
   durationTime: string;
 }
 
-export class TimeDisplay extends Component<ITimeDisplayProps, ITimeDisplayState> {
+export class TimeDisplay extends Component<
+  ITimeDisplayProps,
+  ITimeDisplayState
+> {
   private _handler: EventHandler = new EventHandler(this);
 
   private _currentTime: number = NaN;
@@ -39,12 +42,15 @@ export class TimeDisplay extends Component<ITimeDisplayProps, ITimeDisplayState>
     this._handler.removeAll();
   }
 
-  public render({}: ITimeDisplayProps, { currentTime, durationTime }: ITimeDisplayState): JSX.Element {
+  public render(
+    {  }: ITimeDisplayProps,
+    { currentTime, durationTime }: ITimeDisplayState
+  ): JSX.Element {
     return (
       <div class="chrome-time-display">
-        <span class="chrome-time-current">{ currentTime }</span>
+        <span class="chrome-time-current">{currentTime}</span>
         <span class="chrome-time-separator"> / </span>
-        <span class="chrome-time-duration">{ durationTime }</span>
+        <span class="chrome-time-duration">{durationTime}</span>
       </div>
     );
   }
@@ -53,7 +59,7 @@ export class TimeDisplay extends Component<ITimeDisplayProps, ITimeDisplayState>
     this._currentTime = e.time;
     this._updateState();
   }
-  
+
   private _onDurationChange(e: DurationChangeEvent) {
     this._duration = e.duration;
     this._updateState();

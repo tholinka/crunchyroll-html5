@@ -1,10 +1,9 @@
-import { injectable } from "inversify";
-import { StorageError } from "../StorageError";
-import { IMechanism, StorageTestAvailabilityKey } from "./IMechanism";
+import { injectable } from 'inversify';
+import { StorageError } from '../StorageError';
+import { IMechanism, StorageTestAvailabilityKey } from './IMechanism';
 
 @injectable()
 export class GreasemonkeyMechanism implements IMechanism {
-
   public static async isAvailable(): Promise<boolean> {
     try {
       await GM.setValue(StorageTestAvailabilityKey, '1');
@@ -20,7 +19,7 @@ export class GreasemonkeyMechanism implements IMechanism {
 
   public async get(key: string): Promise<string | undefined> {
     const value = await GM.getValue(key);
-    if (typeof value !== "string" && value !== undefined) {
+    if (typeof value !== 'string' && value !== undefined) {
       throw StorageError.InvalidValue;
     }
     return value;

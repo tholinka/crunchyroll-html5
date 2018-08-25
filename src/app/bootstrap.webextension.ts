@@ -1,26 +1,38 @@
-import container from "../config/inversify.config";
+import container from '../config/inversify.config';
 import { runBootstrap } from './bootstrap';
-import { setCrossHttpClient, setXMLHttpRequestFactory } from "./config";
-import { BackgroundHttpClient } from "./http/BackgroundHttpClient";
-import { XMLHttpRequestFactory } from "./http/XMLHttpRequestFactory";
-import { IMechanism, IMechanismSymbol } from "./storage/mechanism/IMechanism";
-import { WebExtensionMechanism } from "./storage/mechanism/WebExtensionMechanism";
-import { addFile, fonts, setWorkerUrl } from "./SubtitleEngineLoader";
+import { setCrossHttpClient, setXMLHttpRequestFactory } from './config';
+import { BackgroundHttpClient } from './http/BackgroundHttpClient';
+import { XMLHttpRequestFactory } from './http/XMLHttpRequestFactory';
+import { IMechanism, IMechanismSymbol } from './storage/mechanism/IMechanism';
+import { WebExtensionMechanism } from './storage/mechanism/WebExtensionMechanism';
+import { addFile, fonts, setWorkerUrl } from './SubtitleEngineLoader';
 
 function getURL(path: string): string {
-  if (chrome && chrome.extension && typeof chrome.extension.getURL === "function") {
+  if (
+    chrome &&
+    chrome.extension &&
+    typeof chrome.extension.getURL === 'function'
+  ) {
     return chrome.extension.getURL(path);
-  } else if (browser && browser.extension && typeof browser.extension.getURL === "function") {
+  } else if (
+    browser &&
+    browser.extension &&
+    typeof browser.extension.getURL === 'function'
+  ) {
     return browser.extension.getURL(path);
   } else {
-    throw new Error("Browser doesn't support the `browser` or the `chrome` namespace (see https://developer.mozilla.org/en-US/Add-ons/WebExtensions).");
+    throw new Error(
+      "Browser doesn't support the `browser` or the `chrome` namespace (see https://developer.mozilla.org/en-US/Add-ons/WebExtensions)."
+    );
   }
 }
 
 setCrossHttpClient(BackgroundHttpClient);
-setXMLHttpRequestFactory(XMLHttpRequestFactory)
+setXMLHttpRequestFactory(XMLHttpRequestFactory);
 
-const workerUrl = getURL('/vendor/JavascriptSubtitlesOctopus/subtitles-octopus-worker.js');
+const workerUrl = getURL(
+  '/vendor/JavascriptSubtitlesOctopus/subtitles-octopus-worker.js'
+);
 const defaultFile = getURL('/vendor/JavascriptSubtitlesOctopus/default.ttf');
 const fontFile = getURL('/vendor/JavascriptSubtitlesOctopus/fonts.conf');
 

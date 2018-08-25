@@ -1,4 +1,8 @@
-export function binaryToBlob(utf8String: string, contentType: string = '', sliceSize: number = 512): Blob {
+export function binaryToBlob(
+  utf8String: string,
+  contentType: string = '',
+  sliceSize: number = 512
+): Blob {
   const byteCharacters = utf8String;
   const byteArrays = [];
 
@@ -15,6 +19,6 @@ export function binaryToBlob(utf8String: string, contentType: string = '', slice
     byteArrays.push(byteArray);
   }
 
-  const blob = new Blob(byteArrays, { 'type': contentType });
+  const blob = new Blob(byteArrays, { type: contentType });
   return blob;
 }

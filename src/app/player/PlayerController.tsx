@@ -3,16 +3,22 @@ import { IMedia } from 'crunchyroll-lib/models/IMedia';
 import { h, render } from 'preact';
 import parse = require('url-parse');
 import { IMediaOptions } from '../../../node_modules/crunchyroll-lib/models/IMediaResolver';
-import container from "../../config/inversify.config";
-import { getCollectionCarouselDetail, getMediaMetadataFromDOM } from '../media/CollectionCarouselParser';
+import container from '../../config/inversify.config';
+import {
+  getCollectionCarouselDetail,
+  getMediaMetadataFromDOM
+} from '../media/CollectionCarouselParser';
 import { NextVideo } from '../media/nextvideo';
 import { IVideoDetail, PlaybackState } from '../media/player/IPlayerApi';
-import { NextVideoEvent } from "../media/player/NextVideoEvent";
-import { PlaybackStateChangeEvent } from "../media/player/PlaybackStateChangeEvent";
+import { NextVideoEvent } from '../media/player/NextVideoEvent';
+import { PlaybackStateChangeEvent } from '../media/player/PlaybackStateChangeEvent';
 import { IPlayerConfig, Player } from '../media/player/Player';
-import { VolumeChangeEvent } from "../media/player/VolumeChangeEvent";
+import { VolumeChangeEvent } from '../media/player/VolumeChangeEvent';
 import { IStorage, IStorageSymbol } from '../storage/IStorage';
-import { getCollectionCarouselPage, ICollectionCarouselPage } from './crunchyroll';
+import {
+  getCollectionCarouselPage,
+  ICollectionCarouselPage
+} from './crunchyroll';
 import { StaticActionController } from './StaticActionController';
 import { VideoTracker } from './Tracking';
 
@@ -33,9 +39,8 @@ declare interface IVolumeData {
 }
 
 export class PlayerController {
-
   get large(): boolean {
-    return this._element.id === "showmedia_video_box_wide";
+    return this._element.id === 'showmedia_video_box_wide';
   }
   private _element: Element;
   private _url: string;
@@ -58,7 +63,12 @@ export class PlayerController {
 
   private _cachedCarouselPage?: ICollectionCarouselPage;
 
-  constructor(element: Element, url: string, mediaId: number, options?: IPlayerControllerOptions) {
+  constructor(
+    element: Element,
+    url: string,
+    mediaId: number,
+    options?: IPlayerControllerOptions
+  ) {
     this._element = element;
     this._url = url;
     this._mediaId = mediaId;
@@ -74,7 +84,7 @@ export class PlayerController {
       this._mediaQuality = options.mediaQuality;
     }
   }
-  
+
   /**
    * Returns whether sizing is enabled.
    */
@@ -86,24 +96,28 @@ export class PlayerController {
     const onSizeChange = (large: boolean) => this._onSizeChange(large);
     const onPlayerReady = (player: Player) => this._onPlayerReady(player);
 
-    render((
+    render(
       <Player
         ref={onPlayerReady}
         onSizeChange={onSizeChange}
         large={this.large}
         sizeEnabled={this.isSizeEnabled()}
-        config={this._getDefaultConfig()} />
-    ), this._element);
+        config={this._getDefaultConfig()}
+      />,
+      this._element
+    );
   }
 
-  private _getThumbnailByMediaId(mediaId: number): string|undefined {
-    const img = document.querySelector("a.link.block-link.block[href$=\"-" + mediaId + "\"] img.mug");
+  private _getThumbnailByMediaId(mediaId: number): string | undefined {
+    const img = document.querySelector(
+      'a.link.block-link.block[href$="-' + mediaId + '"] img.mug'
+    );
     if (!img) return undefined;
 
-    const url = img.getAttribute("src");
+    const url = img.getAttribute('src');
     if (!url) return undefined;
 
-    return url.replace(/_[a-zA-Z]+(\.[a-zA-Z]+)$/, "_full$1");
+    return url.replace(/_[a-zA-Z]+(\.[a-zA-Z]+)$/, '_full$1');
   }
 
   private _getDefaultConfig(): IPlayerConfig {
@@ -156,23 +170,36 @@ export class PlayerController {
 
     const metadata = media.getMetadata();
     const stream = media.getStream();
-    
+
     // Construct a title
-    const title = metadata.getSeriesTitle() + " Episode " + metadata.getEpisodeNumber() + " – " + metadata.getEpisodeTitle();
+    const title =
+      metadata.getSeriesTitle() +
+      ' Episode ' +
+      metadata.getEpisodeNumber() +
+      ' – ' +
+      metadata.getEpisodeTitle();
 
     const videoConfig = {
       title,
       url: stream.getFile(),
       duration: stream.getDuration(),
       subtitles: media.getSubtitles(),
-      startTime: this._startTime === undefined ? media.getStartTime() || 0 : this._startTime,
-      autoplay: this._autoPlay === undefined ? media.isAutoPlay() : this._autoPlay,
+      startTime:
+        this._startTime === undefined
+          ? media.getStartTime() || 0
+          : this._startTime,
+      autoplay:
+        this._autoPlay === undefined ? media.isAutoPlay() : this._autoPlay,
       thumbnailUrl: metadata.getEpisodeImageUrl()
     } as IPlayerConfig;
 
     // Change the file URL to https if current page is also https
-    if (window.location.href.indexOf("https://") === 0 && videoConfig.url && videoConfig.url.indexOf("http://") === 0) {
-      videoConfig.url = videoConfig.url.replace("http://", "https://");
+    if (
+      window.location.href.indexOf('https://') === 0 &&
+      videoConfig.url &&
+      videoConfig.url.indexOf('http://') === 0
+    ) {
+      videoConfig.url = videoConfig.url.replace('http://', 'https://');
     }
 
     const storage = container.get<IStorage>(IStorageSymbol);
@@ -192,11 +219,28 @@ export class PlayerController {
           const detail = getCollectionCarouselDetail(nextVideoUrl);
           const mediaMetadata = getMediaMetadataFromDOM();
           if (mediaMetadata) {
-            if (!this._cachedCarouselPage || !this._cachedCarouselPage.data || !this._cachedCarouselPage.data[detail.mediaId]) {
-              this._cachedCarouselPage = await getCollectionCarouselPage(detail.mediaId, detail.groupId, mediaMetadata.collection_id, detail.index);
+            if (
+              !this._cachedCarouselPage ||
+              !this._cachedCarouselPage.data ||
+              !this._cachedCarouselPage.data[detail.mediaId]
+            ) {
+              this._cachedCarouselPage = await getCollectionCarouselPage(
+                detail.mediaId,
+                detail.groupId,
+                mediaMetadata.collection_id,
+                detail.index
+              );
             }
-            if (this._cachedCarouselPage.data && this._cachedCarouselPage.data[detail.mediaId]) {
-              const doc = (new DOMParser()).parseFromString("<html><head /><body>" + this._cachedCarouselPage.data[detail.mediaId] + "</body />", "text/html");
+            if (
+              this._cachedCarouselPage.data &&
+              this._cachedCarouselPage.data[detail.mediaId]
+            ) {
+              const doc = new DOMParser().parseFromString(
+                '<html><head /><body>' +
+                  this._cachedCarouselPage.data[detail.mediaId] +
+                  '</body />',
+                'text/html'
+              );
               nextVideo = NextVideo.fromElement(doc.body);
             }
           }
@@ -207,14 +251,19 @@ export class PlayerController {
       if (nextVideo) {
         videoConfig.nextVideo = {
           title: nextVideo.episodeNumber + ': ' + nextVideo.episodeTitle,
-          duration: typeof nextVideo.duration === 'number' ? nextVideo.duration : NaN,
+          duration:
+            typeof nextVideo.duration === 'number' ? nextVideo.duration : NaN,
           url: nextVideo.url,
           thumbnailUrl: nextVideo.thumbnailUrl
         };
       }
     }
 
-    this._tracking = new VideoTracker(media, this._player.getApi(), this._affiliateId);
+    this._tracking = new VideoTracker(
+      media,
+      this._player.getApi(),
+      this._affiliateId
+    );
 
     if (videoConfig.autoplay) {
       this._player.loadVideoByConfig(videoConfig);
@@ -281,14 +330,21 @@ export class PlayerController {
     if (this._playerActionController) {
       this._playerActionController.dispose();
     }
-    this._playerActionController = new StaticActionController(player.base, player.getActions());
+    this._playerActionController = new StaticActionController(
+      player.base,
+      player.getActions()
+    );
     this._playerActionController.enterDocument();
 
     const api = player.getApi();
     api.listen('fullscreenchange', () => this._onFullscreenChange());
     api.listen('nextvideo', (e: NextVideoEvent) => this._onNextVideo(e));
-    api.listen('volumechange', (e: VolumeChangeEvent) => this._onVolumeChange(e));
-    api.listen('playbackstatechange', (e: PlaybackStateChangeEvent) => this._onPlaybackStateChange(e));
+    api.listen('volumechange', (e: VolumeChangeEvent) =>
+      this._onVolumeChange(e)
+    );
+    api.listen('playbackstatechange', (e: PlaybackStateChangeEvent) =>
+      this._onPlaybackStateChange(e)
+    );
 
     let media: IMedia;
 
@@ -303,7 +359,12 @@ export class PlayerController {
     }
 
     if (this._quality) {
-      media = await getMedia(this._mediaId.toString(), this._url, this._quality, options);
+      media = await getMedia(
+        this._mediaId.toString(),
+        this._url,
+        this._quality,
+        options
+      );
     } else {
       media = await getMedia(this._mediaId.toString(), this._url, options);
     }
@@ -311,7 +372,9 @@ export class PlayerController {
     await this._loadMedia(media);
   }
 
-  private async _onPlaybackStateChange(e: PlaybackStateChangeEvent): Promise<void> {
+  private async _onPlaybackStateChange(
+    e: PlaybackStateChangeEvent
+  ): Promise<void> {
     if (e.state !== PlaybackState.ENDED || !this._player) return;
 
     const detail = this._player.getApi().getNextVideoDetail();
@@ -327,26 +390,26 @@ export class PlayerController {
 
   private _onSizeChange(large: boolean): void {
     if (!this._player) return;
-    const showmedia = document.querySelector("#showmedia");
-    const showmediaVideo = document.querySelector("#showmedia_video");
-    const mainMedia = document.querySelector("#main_content");
+    const showmedia = document.querySelector('#showmedia');
+    const showmediaVideo = document.querySelector('#showmedia_video');
+    const mainMedia = document.querySelector('#main_content');
     if (!showmedia || !showmediaVideo || !mainMedia) return;
 
     const api = this._player.getApi();
     const playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
     if (large) {
-      this._element.setAttribute("id", "showmedia_video_box_wide");
-      this._element.classList.remove("xsmall-margin-bottom");
-      mainMedia.classList.remove("new_layout");
-      showmedia.parentElement!.classList.add("new_layout");
-      showmedia.parentElement!.classList.add("new_layout_wide")
+      this._element.setAttribute('id', 'showmedia_video_box_wide');
+      this._element.classList.remove('xsmall-margin-bottom');
+      mainMedia.classList.remove('new_layout');
+      showmedia.parentElement!.classList.add('new_layout');
+      showmedia.parentElement!.classList.add('new_layout_wide');
       showmedia.parentNode!.insertBefore(showmediaVideo, showmedia);
     } else {
-      this._element.setAttribute("id", "showmedia_video_box");
-      this._element.classList.add("xsmall-margin-bottom");
-      showmedia.parentElement!.classList.remove("new_layout");
-      showmedia.parentElement!.classList.remove("new_layout_wide")
-      mainMedia.classList.add("new_layout");
+      this._element.setAttribute('id', 'showmedia_video_box');
+      this._element.classList.add('xsmall-margin-bottom');
+      showmedia.parentElement!.classList.remove('new_layout');
+      showmedia.parentElement!.classList.remove('new_layout_wide');
+      mainMedia.classList.add('new_layout');
       if (mainMedia.childNodes.length === 0) {
         mainMedia.appendChild(showmediaVideo);
       } else {

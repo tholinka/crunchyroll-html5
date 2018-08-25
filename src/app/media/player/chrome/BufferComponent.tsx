@@ -1,6 +1,6 @@
-import { Component, h } from "preact";
-import { EventHandler } from "../../../libs/events/EventHandler";
-import { IPlayerApi, PlaybackState } from "../IPlayerApi";
+import { Component, h } from 'preact';
+import { EventHandler } from '../../../libs/events/EventHandler';
+import { IPlayerApi, PlaybackState } from '../IPlayerApi';
 
 export interface IBufferComponentProps {
   api: IPlayerApi;
@@ -14,7 +14,10 @@ interface IChromeProps {
   style?: string;
 }
 
-export class BufferComponent extends Component<IBufferComponentProps, IBufferComponentState> {
+export class BufferComponent extends Component<
+  IBufferComponentProps,
+  IBufferComponentState
+> {
   private _handler: EventHandler = new EventHandler(this);
 
   private _timer?: number;
@@ -29,18 +32,25 @@ export class BufferComponent extends Component<IBufferComponentProps, IBufferCom
   }
 
   public componentDidMount() {
-    this._handler
-      .listen(this.props.api, 'playbackstatechange', this._onPlaybackStateChange, false);
+    this._handler.listen(
+      this.props.api,
+      'playbackstatechange',
+      this._onPlaybackStateChange,
+      false
+    );
   }
 
   public componentWillUnmount() {
     this._handler.removeAll();
   }
 
-  public render({}: IBufferComponentProps, { visible }: IBufferComponentState): JSX.Element {
+  public render(
+    {  }: IBufferComponentProps,
+    { visible }: IBufferComponentState
+  ): JSX.Element {
     const props: IChromeProps = {};
     if (!visible) {
-      props.style = "display: none";
+      props.style = 'display: none';
     }
 
     return (

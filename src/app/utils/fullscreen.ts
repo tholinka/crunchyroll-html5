@@ -17,13 +17,13 @@ declare interface IVendorDocument extends Document {
 export function isFullscreenEnabled() {
   const doc = document as IVendorDocument;
 
-  if (typeof doc.mozFullScreenEnabled === "boolean") {
+  if (typeof doc.mozFullScreenEnabled === 'boolean') {
     return doc.mozFullScreenEnabled;
-  } else if (typeof doc.fullscreenEnabled === "boolean") {
+  } else if (typeof doc.fullscreenEnabled === 'boolean') {
     return doc.fullscreenEnabled;
-  } else if (typeof doc.webkitFullscreenEnabled === "boolean") {
+  } else if (typeof doc.webkitFullscreenEnabled === 'boolean') {
     return doc.webkitFullscreenEnabled;
-  } else if (typeof doc.msFullscreenEnabled === "boolean") {
+  } else if (typeof doc.msFullscreenEnabled === 'boolean') {
     return doc.msFullscreenEnabled;
   }
 
@@ -32,31 +32,31 @@ export function isFullscreenEnabled() {
 
 export function requestFullscreen(element: Element) {
   const el = element as IVendorFullscreenElement;
-  if (typeof el.requestFullscreen === "function") {
+  if (typeof el.requestFullscreen === 'function') {
     el.requestFullscreen();
-  } else if (typeof el.mozRequestFullScreen === "function") {
+  } else if (typeof el.mozRequestFullScreen === 'function') {
     el.mozRequestFullScreen();
-  } else if (typeof el.webkitRequestFullScreen === "function") {
+  } else if (typeof el.webkitRequestFullScreen === 'function') {
     el.webkitRequestFullScreen();
-  } else if (typeof el.msRequestFullscreen === "function") {
+  } else if (typeof el.msRequestFullscreen === 'function') {
     el.msRequestFullscreen();
   }
 }
 
 export function exitFullscreen() {
   const doc = document as IVendorDocument;
-  if (typeof doc.exitFullscreen === "function") {
+  if (typeof doc.exitFullscreen === 'function') {
     doc.exitFullscreen();
-  } else if (typeof doc.webkitExitFullscreen === "function") {
+  } else if (typeof doc.webkitExitFullscreen === 'function') {
     doc.webkitExitFullscreen();
-  } else if (typeof doc.mozCancelFullScreen === "function") {
+  } else if (typeof doc.mozCancelFullScreen === 'function') {
     doc.mozCancelFullScreen();
-  } else if (typeof doc.msExitFullscreen === "function") {
+  } else if (typeof doc.msExitFullscreen === 'function') {
     doc.msExitFullscreen();
   }
 }
 
-export function getFullscreenElement(): Element|undefined {
+export function getFullscreenElement(): Element | undefined {
   const doc = document as IVendorDocument;
   if (doc.fullscreenElement) {
     return doc.fullscreenElement;

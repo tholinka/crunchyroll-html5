@@ -1,7 +1,7 @@
-import { injectable } from "inversify";
+import { injectable } from 'inversify';
 import * as browser from 'webextension-polyfill';
-import { StorageError } from "../StorageError";
-import { IMechanism } from "./IMechanism";
+import { StorageError } from '../StorageError';
+import { IMechanism } from './IMechanism';
 
 @injectable()
 export class WebExtensionMechanism implements IMechanism {
@@ -14,7 +14,7 @@ export class WebExtensionMechanism implements IMechanism {
   public async get(key: string): Promise<string> {
     const values = await browser.storage.local.get(key);
     const value = values[key];
-    if (typeof value !== "string" && value !== null) {
+    if (typeof value !== 'string' && value !== null) {
       throw StorageError.InvalidValue;
     }
     return value;

@@ -1,5 +1,5 @@
 export class Event {
-  public currentTarget: object|undefined;
+  public currentTarget: object | undefined;
   public defaultPrevented: boolean = false;
   private _propagationStopped: boolean = false;
   private _returnValue: boolean = true;
@@ -12,10 +12,7 @@ export class Event {
    *    has to implement the {@code EventTarget} interface declared at
    *    {@link http://developer.mozilla.org/en/DOM/EventTarget}.
    */
-  constructor(
-    public type: string,
-    public target?: object
-  ) {
+  constructor(public type: string, public target?: object) {
     this.currentTarget = this.target;
   }
 
@@ -46,4 +43,4 @@ export class Event {
   }
 }
 
-export type EventLike = string|object|Event;
+export type EventLike = string | object | Event;

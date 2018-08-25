@@ -1,4 +1,4 @@
-import { IAction } from "../../libs/actions/IAction";
+import { IAction } from '../../libs/actions/IAction';
 
 export class PlayerAction implements IAction {
   public id: string;

@@ -1,5 +1,5 @@
-import { Component, h, render } from "preact";
-import { EventHandler } from "../../../libs/events/EventHandler";
+import { Component, h, render } from 'preact';
+import { EventHandler } from '../../../libs/events/EventHandler';
 
 export class BezelComponent extends Component<{}, {}> {
   private _handler: EventHandler = new EventHandler(this);
@@ -28,11 +28,11 @@ export class BezelComponent extends Component<{}, {}> {
   }
 
   public stop(): void {
-    this.base.style.display = "none";
+    this.base.style.display = 'none';
   }
 
   public render(): JSX.Element {
-    const iconRef = (el?: Element) => this._iconElement = el;
+    const iconRef = (el?: Element) => (this._iconElement = el);
     return (
       <div class="chrome-bezel" role="status" style="display: none">
         <div class="chrome-bezel-icon" ref={iconRef} />
@@ -44,7 +44,7 @@ export class BezelComponent extends Component<{}, {}> {
     this.stop();
 
     if (this._iconElement) {
-      this._iconElement.innerHTML = "";
+      this._iconElement.innerHTML = '';
       render(element, this._iconElement);
     }
 
@@ -53,7 +53,7 @@ export class BezelComponent extends Component<{}, {}> {
     void this.base.offsetWidth;
 
     // Display bezel animation
-    this.base.style.display = "";
+    this.base.style.display = '';
   }
 
   private _handleAnimationEnd() {

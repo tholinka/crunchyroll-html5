@@ -1,23 +1,25 @@
-import container from "../config/inversify.config";
+import container from '../config/inversify.config';
 import { runBootstrap } from './bootstrap';
-import { setCrossHttpClient } from "./config";
-import { GreasemonkeyHttpClient } from "./http/GreasemonkeyHttpClient";
-import { ProxyLoaderGreasemonkey } from "./libs/http/greasemonkey/ProxyLoaderGreasemonkey";
-import { setPlaylistLoader } from "./playlistLoader";
-import { EmptyMechanism } from "./storage/mechanism/EmptyMechanism";
-import { IMechanism, IMechanismSymbol } from "./storage/mechanism/IMechanism";
-import { LocalStorageMechanism } from "./storage/mechanism/LocalStorageMechanism";
-import { addFile, fonts, setWorkerUrl } from "./SubtitleEngineLoader";
+import { setCrossHttpClient } from './config';
+import { GreasemonkeyHttpClient } from './http/GreasemonkeyHttpClient';
+import { ProxyLoaderGreasemonkey } from './libs/http/greasemonkey/ProxyLoaderGreasemonkey';
+import { setPlaylistLoader } from './playlistLoader';
+import { EmptyMechanism } from './storage/mechanism/EmptyMechanism';
+import { IMechanism, IMechanismSymbol } from './storage/mechanism/IMechanism';
+import { LocalStorageMechanism } from './storage/mechanism/LocalStorageMechanism';
+import { addFile, fonts, setWorkerUrl } from './SubtitleEngineLoader';
 
 function getURL(path: string): string {
-  return "chrome://crunchyroll-html5/content" + path;
+  return 'chrome://crunchyroll-html5/content' + path;
 }
 
 setCrossHttpClient(GreasemonkeyHttpClient);
 
 setPlaylistLoader(ProxyLoaderGreasemonkey);
 
-const workerUrl = getURL('/vendor/JavascriptSubtitlesOctopus/subtitles-octopus-worker.js');
+const workerUrl = getURL(
+  '/vendor/JavascriptSubtitlesOctopus/subtitles-octopus-worker.js'
+);
 const defaultFile = getURL('/vendor/JavascriptSubtitlesOctopus/default.ttf');
 const fontFile = getURL('/vendor/JavascriptSubtitlesOctopus/fonts.conf');
 

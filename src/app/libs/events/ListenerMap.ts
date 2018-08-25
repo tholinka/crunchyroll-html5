@@ -3,12 +3,20 @@ import { IListenableKey } from './IListenableKey';
 import { Listener } from './Listener';
 
 export class ListenerMap {
-  private static _findListenerIndex(listenerArray: Listener[], listener: ListneableFunction, useCapture?: boolean, scope?: any) {
+  private static _findListenerIndex(
+    listenerArray: Listener[],
+    listener: ListneableFunction,
+    useCapture?: boolean,
+    scope?: any
+  ) {
     for (let i = 0; i < listenerArray.length; ++i) {
       const listenerObj = listenerArray[i];
-      if (!listenerObj.removed && listenerObj.listener === listener &&
-          listenerObj.capture === !!useCapture &&
-          listenerObj.handler === scope) {
+      if (
+        !listenerObj.removed &&
+        listenerObj.listener === listener &&
+        listenerObj.capture === !!useCapture &&
+        listenerObj.handler === scope
+      ) {
         return i;
       }
     }
@@ -17,9 +25,7 @@ export class ListenerMap {
   public listeners: { [key: string]: Listener[] } = {};
   private _typeCount: number = 0;
 
-  constructor(
-    public src: EventTarget|IListenable|undefined
-  ) {}
+  constructor(public src: EventTarget | IListenable | undefined) {}
 
   public getTypeCount(): number {
     return this._typeCount;
@@ -35,16 +41,26 @@ export class ListenerMap {
     return count;
   }
 
-  public add(type: string, listener: ListneableFunction, callOnce: boolean, useCapture?: boolean, scope?: any): IListenableKey {
+  public add(
+    type: string,
+    listener: ListneableFunction,
+    callOnce: boolean,
+    useCapture?: boolean,
+    scope?: any
+  ): IListenableKey {
     let listenerArray = this.listeners[type];
     if (!listenerArray) {
       listenerArray = this.listeners[type] = [];
       this._typeCount++;
     }
-  
+
     let listenerObj;
     const index = ListenerMap._findListenerIndex(
-        listenerArray, listener, useCapture, scope);
+      listenerArray,
+      listener,
+      useCapture,
+      scope
+    );
     if (index > -1) {
       listenerObj = listenerArray[index];
       if (!callOnce) {
@@ -53,21 +69,37 @@ export class ListenerMap {
         listenerObj.callOnce = false;
       }
     } else {
-      listenerObj = new Listener(listener, undefined, this.src, type, !!useCapture, scope);
+      listenerObj = new Listener(
+        listener,
+        undefined,
+        this.src,
+        type,
+        !!useCapture,
+        scope
+      );
       listenerObj.callOnce = callOnce;
       listenerArray.push(listenerObj);
     }
     return listenerObj;
   }
 
-  public remove(type: string, listener: ListneableFunction, useCapture?: boolean, scope?: any): boolean {
+  public remove(
+    type: string,
+    listener: ListneableFunction,
+    useCapture?: boolean,
+    scope?: any
+  ): boolean {
     if (!(type in this.listeners)) {
       return false;
     }
-  
+
     const listenerArray = this.listeners[type];
     const index = ListenerMap._findListenerIndex(
-        listenerArray, listener, useCapture, scope);
+      listenerArray,
+      listener,
+      useCapture,
+      scope
+    );
     if (index > -1) {
       const listenerObj = listenerArray[index];
       if (listenerObj instanceof Listener) {
@@ -132,12 +164,21 @@ export class ListenerMap {
     return rv;
   }
 
-  public getListener(type: string, listener: ListneableFunction, capture: boolean, scope?: any): IListenableKey|undefined {
+  public getListener(
+    type: string,
+    listener: ListneableFunction,
+    capture: boolean,
+    scope?: any
+  ): IListenableKey | undefined {
     const listenerArray = this.listeners[type];
     let i = -1;
     if (listenerArray) {
       i = ListenerMap._findListenerIndex(
-          listenerArray, listener, capture, scope);
+        listenerArray,
+        listener,
+        capture,
+        scope
+      );
     }
     return i > -1 ? listenerArray[i] : undefined;
   }
@@ -151,8 +192,10 @@ export class ListenerMap {
       if (this.listeners.hasOwnProperty(x)) {
         const listenerArray = this.listeners[x];
         for (const listener of listenerArray) {
-          if ((!hasType || listener.type === typeStr) &&
-              (!hasCapture || listener.capture === capture)) {
+          if (
+            (!hasType || listener.type === typeStr) &&
+            (!hasCapture || listener.capture === capture)
+          ) {
             return true;
           }
         }

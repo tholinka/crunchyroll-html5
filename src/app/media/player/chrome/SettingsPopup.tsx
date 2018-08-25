@@ -1,7 +1,7 @@
-import { Component, h } from "preact";
+import { Component, h } from 'preact';
 import { BrowserEvent } from '../../../libs/events/BrowserEvent';
-import { EventHandler } from "../../../libs/events/EventHandler";
-import { IPlayerApi } from "../IPlayerApi";
+import { EventHandler } from '../../../libs/events/EventHandler';
+import { IPlayerApi } from '../IPlayerApi';
 
 export interface IBaseMenuItem {
   label: string;
@@ -32,7 +32,11 @@ export interface IRadioMenuGroup extends ISubMenu {
   items: IRadioMenuItem[];
 }
 
-export type IMenuItem = IRadioMenuItem | ICheckboxMenuItem | ISubMenu | IRadioMenuGroup;
+export type IMenuItem =
+  | IRadioMenuItem
+  | ICheckboxMenuItem
+  | ISubMenu
+  | IRadioMenuGroup;
 
 export type IMenu = IMenuItem[];
 
@@ -51,7 +55,7 @@ function _renderMenuItemContent(menuItem: IMenuItem): JSX.Element | undefined {
   let content: JSX.Element | string | undefined;
   switch (menuItem.role) {
     case 'menuitemcheckbox':
-      content =  (<div className="chrome-menuitem-toggle-checkbox"/>);
+      content = <div className="chrome-menuitem-toggle-checkbox" />;
       break;
 
     case 'menuitem':
@@ -59,63 +63,92 @@ function _renderMenuItemContent(menuItem: IMenuItem): JSX.Element | undefined {
       break;
 
     default:
-      return
+      return;
   }
 
-  return (
-    <div className="chrome-menuitem-content">
-      { content }
-    </div>
-  )
+  return <div className="chrome-menuitem-content">{content}</div>;
 }
 
-function _renderPanel(elems: Array<JSX.Element|undefined>, ref: (el?: Element) => void, level: number, title?: string, onreturn?: () => any): JSX.Element {
+function _renderPanel(
+  elems: Array<JSX.Element | undefined>,
+  ref: (el?: Element) => void,
+  level: number,
+  title?: string,
+  onreturn?: () => any
+): JSX.Element {
   const onClick = () => onreturn && onreturn();
 
   return (
-    <div className={`chrome-panel ${level > 0 ? 'chrome-panel-right' : 'chrome-panel-middle'}`} key={ title || MainMenu } ref={ ref } aria-level={ level } aria-hidden={ !!title }>
-      {
-        title && (
-          <div className="chrome-panel-header">
-            <button className="chrome-button chrome-panel-title" onClick={onClick}>{ title }</button>
-          </div>
-        )
-      }
+    <div
+      className={`chrome-panel ${
+        level > 0 ? 'chrome-panel-right' : 'chrome-panel-middle'
+      }`}
+      key={title || MainMenu}
+      ref={ref}
+      aria-level={level}
+      aria-hidden={!!title}>
+      {title && (
+        <div className="chrome-panel-header">
+          <button
+            className="chrome-button chrome-panel-title"
+            onClick={onClick}>
+            {title}
+          </button>
+        </div>
+      )}
       <div className="chrome-panel-menu" role="menu">
-        { elems }
+        {elems}
       </div>
     </div>
   );
 }
 
-function _renderMenuItem(menuItem: IMenuItem, onclick?: () => void): JSX.Element {
+function _renderMenuItem(
+  menuItem: IMenuItem,
+  onclick?: () => void
+): JSX.Element {
   const hasPopup = menuItem.role === 'menuitem';
-  const checked = (menuItem.role === 'menuitemradio' && menuItem.selected) || (menuItem.role === 'menuitemcheckbox' && menuItem.checked);
+  const checked =
+    (menuItem.role === 'menuitemradio' && menuItem.selected) ||
+    (menuItem.role === 'menuitemcheckbox' && menuItem.checked);
   return (
-    <div className="chrome-menuitem" role={menuItem.role} aria-disabled={menuItem.disabled} aria-haspopup={hasPopup} aria-checked={checked} onClick={menuItem.disabled ? undefined : onclick}>
-      <div className="chrome-menuitem-label">{ menuItem.label }</div>
-      { _renderMenuItemContent(menuItem) }
+    <div
+      className="chrome-menuitem"
+      role={menuItem.role}
+      aria-disabled={menuItem.disabled}
+      aria-haspopup={hasPopup}
+      aria-checked={checked}
+      onClick={menuItem.disabled ? undefined : onclick}>
+      <div className="chrome-menuitem-label">{menuItem.label}</div>
+      {_renderMenuItemContent(menuItem)}
     </div>
   );
 }
 
-function _renderMenu(menu: IMenuItem[], refFn: (name: string, el?: Element) => any, onnavigate: (menu?: string) => any, opts: {title?: string, onreturn?: () => any, level?: number} = {}): JSX.Element[] {
+function _renderMenu(
+  menu: IMenuItem[],
+  refFn: (name: string, el?: Element) => any,
+  onnavigate: (menu?: string) => any,
+  opts: { title?: string; onreturn?: () => any; level?: number } = {}
+): JSX.Element[] {
   const subs: JSX.Element[] = [];
   if (!menu) {
     return subs;
   }
 
   const level = opts.level || 0;
-  const items = menu.map((menuItem) => {
+  const items = menu.map(menuItem => {
     let onclick: () => any;
     switch (menuItem.role) {
       case 'menuitem':
         onclick = () => onnavigate(menuItem.label);
-        subs.push(..._renderMenu(menuItem.items, refFn, onnavigate, {
-          title: menuItem.label,
-          onreturn: () => onnavigate(opts.title),
-          level: level + 1,
-        }));
+        subs.push(
+          ..._renderMenu(menuItem.items, refFn, onnavigate, {
+            title: menuItem.label,
+            onreturn: () => onnavigate(opts.title),
+            level: level + 1
+          })
+        );
         break;
 
       case 'menuitemradio':
@@ -123,7 +156,8 @@ function _renderMenu(menu: IMenuItem[], refFn: (name: string, el?: Element) => a
         break;
 
       case 'menuitemcheckbox':
-        onclick = () => menuItem.onchange && menuItem.onchange(!menuItem.checked);
+        onclick = () =>
+          menuItem.onchange && menuItem.onchange(!menuItem.checked);
         break;
 
       default:
@@ -134,10 +168,22 @@ function _renderMenu(menu: IMenuItem[], refFn: (name: string, el?: Element) => a
     return _renderMenuItem(menuItem, onclick);
   });
 
-  return [_renderPanel(items, (elem?: Element) => refFn(opts.title || MainMenu, elem), level, opts.title, opts.onreturn), ...subs];
+  return [
+    _renderPanel(
+      items,
+      (elem?: Element) => refFn(opts.title || MainMenu, elem),
+      level,
+      opts.title,
+      opts.onreturn
+    ),
+    ...subs
+  ];
 }
 
-export class ChromeSettingsPopup extends Component<IChromeSettingsPopupProps, IChromeSettingsPopupState> {
+export class ChromeSettingsPopup extends Component<
+  IChromeSettingsPopupProps,
+  IChromeSettingsPopupState
+> {
   private _containerElement?: Element;
   private _menuElements: { [name: string]: Element | undefined } = {};
 
@@ -148,41 +194,65 @@ export class ChromeSettingsPopup extends Component<IChromeSettingsPopupProps, IC
   constructor(props: IChromeSettingsPopupProps) {
     super(props);
 
-    this.state = {menu: this._rebuildMenu()};
+    this.state = { menu: this._rebuildMenu() };
   }
 
   public componentDidMount() {
     if (!this._containerElement) return;
 
     this._handler
-      .listen(this.props.api, 'subtitletrackchange', () => this.setState({menu: this._rebuildMenu()}))
-      .listen(this.props.api, 'settingsopen', () => this._onSettingsToggle(true), false)
-      .listen(this.props.api, 'settingsclose', () => this._onSettingsToggle(false), false)
-      .listen(this.props.api, 'resize', () => this._onNavigate(this._currentMenu), false);
+      .listen(this.props.api, 'subtitletrackchange', () =>
+        this.setState({ menu: this._rebuildMenu() })
+      )
+      .listen(
+        this.props.api,
+        'settingsopen',
+        () => this._onSettingsToggle(true),
+        false
+      )
+      .listen(
+        this.props.api,
+        'settingsclose',
+        () => this._onSettingsToggle(false),
+        false
+      )
+      .listen(
+        this.props.api,
+        'resize',
+        () => this._onNavigate(this._currentMenu),
+        false
+      );
   }
 
   public componentWillUnmount() {
     this._handler.removeAll();
   }
 
-  public render({}: IChromeSettingsPopupProps, { menu }: IChromeSettingsPopupState): JSX.Element {
+  public render(
+    {  }: IChromeSettingsPopupProps,
+    { menu }: IChromeSettingsPopupState
+  ): JSX.Element {
     this._menuElements = {};
 
-    const containerRef = (el?: Element) => this._containerElement = el;
-    const menuRefs = (name: string, el?: Element) => this._menuElements[name] = el;
+    const containerRef = (el?: Element) => (this._containerElement = el);
+    const menuRefs = (name: string, el?: Element) =>
+      (this._menuElements[name] = el);
 
     const onNavigate = (label?: string) => this._onNavigate(label);
 
     return (
-      <div class="chrome-popup chrome-settings-menu" ref={containerRef} aria-hidden="true">
-        { _renderMenu(menu, menuRefs, onNavigate) }
+      <div
+        class="chrome-popup chrome-settings-menu"
+        ref={containerRef}
+        aria-hidden="true">
+        {_renderMenu(menu, menuRefs, onNavigate)}
       </div>
     );
   }
 
   private _setSubtitleTrack(track: number) {
     this.props.api.setSubtitleTrack(track);
-    this._onNavigate(this._currentMenu)
+    this._onNavigate(this._currentMenu);
   }
 
   private _onSettingsToggle(open: boolean) {
@@ -195,7 +265,9 @@ export class ChromeSettingsPopup extends Component<IChromeSettingsPopupProps, IC
 
     setImmediate(() => {
       if (open) {
-        this._handler.listen(window, 'click', this._maybeClose, {passive: true});
+        this._handler.listen(window, 'click', this._maybeClose, {
+          passive: true
+        });
       } else {
         this._handler.unlisten(window, 'click', this._maybeClose);
       }
@@ -211,12 +283,18 @@ export class ChromeSettingsPopup extends Component<IChromeSettingsPopupProps, IC
     const targetMenuElem = this._menuElements[menu || MainMenu];
     if (!targetMenuElem) return;
 
-    const targetLevel = parseInt(targetMenuElem.getAttribute('aria-level') || '0', 10);
+    const targetLevel = parseInt(
+      targetMenuElem.getAttribute('aria-level') || '0',
+      10
+    );
     Object.keys(this._menuElements).forEach((menuName: string) => {
       const menuElem = this._menuElements[menuName];
       if (!menuElem) return;
 
-      const menuLevel = parseInt(menuElem.getAttribute('aria-level') || '0', 10);
+      const menuLevel = parseInt(
+        menuElem.getAttribute('aria-level') || '0',
+        10
+      );
       if (menuLevel < targetLevel) {
         menuElem.className = 'chrome-panel chrome-panel-left';
       } else if (menuLevel > targetLevel) {
@@ -227,7 +305,13 @@ export class ChromeSettingsPopup extends Component<IChromeSettingsPopupProps, IC
     });
 
     const rect = targetMenuElem.getBoundingClientRect();
-    this._containerElement.setAttribute('style', `width:${ rect.width }px;height:${ Math.min(this.props.maxHeight, rect.height) }px;--max-popup-height:${ this.props.maxHeight }px;`);
+    this._containerElement.setAttribute(
+      'style',
+      `width:${rect.width}px;height:${Math.min(
+        this.props.maxHeight,
+        rect.height
+      )}px;--max-popup-height:${this.props.maxHeight}px;`
+    );
 
     targetMenuElem.setAttribute('aria-hidden', 'false');
 
@@ -237,23 +321,24 @@ export class ChromeSettingsPopup extends Component<IChromeSettingsPopupProps, IC
   private _rebuildMenu(): IMenuItem[] {
     const tracks = this.props.api.getSubtitlesTracks();
     const currentTrack = this.props.api.getSubtitleTrack();
-    const currentSelection = currentTrack < 0 ? 'Off' : tracks[currentTrack].label;
+    const currentSelection =
+      currentTrack < 0 ? 'Off' : tracks[currentTrack].label;
 
     return [
       {
         label: 'Subtitles',
         role: 'menuitem',
         content: currentSelection,
-        items: ['Off', ...tracks.map((track) => track.label)].map(
+        items: ['Off', ...tracks.map(track => track.label)].map(
           (track, index): IRadioMenuItem => ({
             label: track,
             selected: currentSelection === track,
             role: 'menuitemradio',
-            onselect: () => this._setSubtitleTrack(index - 1),
+            onselect: () => this._setSubtitleTrack(index - 1)
           })
-        ),
-      },
-    ]
+        )
+      }
+    ];
   }
 
   private _maybeClose(event: BrowserEvent) {
@@ -269,7 +354,7 @@ export class ChromeSettingsPopup extends Component<IChromeSettingsPopupProps, IC
     let target = event.target as Node | null;
     while (target) {
       if (target.isEqualNode(this._containerElement)) return false;
-      target = target.parentNode
+      target = target.parentNode;
     }
 
     return true;

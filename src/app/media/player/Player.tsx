@@ -9,7 +9,18 @@ import { IRect } from '../../utils/rect';
 import { parseAndFormatTime } from '../../utils/time';
 import { parseSimpleQuery } from '../../utils/url';
 import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
-import { ICON_PAUSE, ICON_PLAY, ICON_SEEK_BACK_10, ICON_SEEK_BACK_5, ICON_SEEK_FORWARD, ICON_SEEK_FORWARD_10, ICON_SEEK_FORWARD_5, ICON_VOLUME, ICON_VOLUME_HIGH, ICON_VOLUME_MUTE } from './assets';
+import {
+  ICON_PAUSE,
+  ICON_PLAY,
+  ICON_SEEK_BACK_10,
+  ICON_SEEK_BACK_5,
+  ICON_SEEK_FORWARD,
+  ICON_SEEK_FORWARD_10,
+  ICON_SEEK_FORWARD_5,
+  ICON_VOLUME,
+  ICON_VOLUME_HIGH,
+  ICON_VOLUME_MUTE
+} from './assets';
 import { BezelComponent } from './chrome/BezelComponent';
 import { ChromeBottomComponent } from './chrome/BottomComponent';
 import { BufferComponent } from './chrome/BufferComponent';
@@ -46,9 +57,10 @@ export interface IPlayerConfig {
   muted?: boolean;
 }
 
-export class Player extends Component<IPlayerProps, IPlayerState> implements IActionable {
+export class Player extends Component<IPlayerProps, IPlayerState>
+  implements IActionable {
   private _configCued: boolean = false;
-  private _config: IPlayerConfig|undefined = undefined;
+  private _config: IPlayerConfig | undefined = undefined;
   private _actionElement?: Element;
   private _chromelessPlayer?: ChromelessPlayer;
   private _cuedThumbnailComponent?: CuedThumbnailComponent;
@@ -72,7 +84,7 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
   private _preview: boolean = false;
   private _forceHide: boolean = false;
 
-  private _actionClickTimer: number|undefined = undefined;
+  private _actionClickTimer: number | undefined = undefined;
   private _actionClickExecuted: boolean = false;
 
   private _mouseDown: boolean = false;
@@ -89,7 +101,7 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     }
     this._api.setLarge(!!props.large);
     this.state = {
-      maxPopupHeight: 0,
+      maxPopupHeight: 0
     };
   }
 
@@ -97,58 +109,59 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     if (!this._actions) {
       const api = this.getApi();
       this._actions = [
-        new PlayerAction("seek_forward_85s", () => {
+        new PlayerAction('seek_forward_85s', () => {
           this._playSvgBezel(ICON_SEEK_FORWARD);
           api.seekTo(Math.min(api.getCurrentTime() + 85, api.getDuration()));
         }),
-        new PlayerAction("seek_start", () => api.seekTo(0)),
-        new PlayerAction("seek_10%", () => api.seekTo(api.getDuration()*0.1)),
-        new PlayerAction("seek_20%", () => api.seekTo(api.getDuration()*0.2)),
-        new PlayerAction("seek_30%", () => api.seekTo(api.getDuration()*0.3)),
-        new PlayerAction("seek_40%", () => api.seekTo(api.getDuration()*0.4)),
-        new PlayerAction("seek_50%", () => api.seekTo(api.getDuration()*0.5)),
-        new PlayerAction("seek_60%", () => api.seekTo(api.getDuration()*0.6)),
-        new PlayerAction("seek_70%", () => api.seekTo(api.getDuration()*0.7)),
-        new PlayerAction("seek_80%", () => api.seekTo(api.getDuration()*0.8)),
-        new PlayerAction("seek_90%", () => api.seekTo(api.getDuration()*0.9)),
-        new PlayerAction("seek_end", () => api.seekTo(api.getDuration())),
-        new PlayerAction("seek_forward_5s", () => {
+        new PlayerAction('seek_start', () => api.seekTo(0)),
+        new PlayerAction('seek_10%', () => api.seekTo(api.getDuration() * 0.1)),
+        new PlayerAction('seek_20%', () => api.seekTo(api.getDuration() * 0.2)),
+        new PlayerAction('seek_30%', () => api.seekTo(api.getDuration() * 0.3)),
+        new PlayerAction('seek_40%', () => api.seekTo(api.getDuration() * 0.4)),
+        new PlayerAction('seek_50%', () => api.seekTo(api.getDuration() * 0.5)),
+        new PlayerAction('seek_60%', () => api.seekTo(api.getDuration() * 0.6)),
+        new PlayerAction('seek_70%', () => api.seekTo(api.getDuration() * 0.7)),
+        new PlayerAction('seek_80%', () => api.seekTo(api.getDuration() * 0.8)),
+        new PlayerAction('seek_90%', () => api.seekTo(api.getDuration() * 0.9)),
+        new PlayerAction('seek_end', () => api.seekTo(api.getDuration())),
+        new PlayerAction('seek_forward_5s', () => {
           this._playSvgBezel(ICON_SEEK_FORWARD_5);
           api.seekTo(Math.min(api.getCurrentTime() + 5, api.getDuration()));
         }),
-        new PlayerAction("seek_forward_10s", () => {
+        new PlayerAction('seek_forward_10s', () => {
           this._playSvgBezel(ICON_SEEK_FORWARD_10);
           api.seekTo(Math.min(api.getCurrentTime() + 10, api.getDuration()));
         }),
-        new PlayerAction("seek_backward_5s", () => {
+        new PlayerAction('seek_backward_5s', () => {
           this._playSvgBezel(ICON_SEEK_BACK_5);
           api.seekTo(Math.max(api.getCurrentTime() - 5, 0));
         }),
-        new PlayerAction("seek_backward_10s", () => {
+        new PlayerAction('seek_backward_10s', () => {
           this._playSvgBezel(ICON_SEEK_BACK_10);
           api.seekTo(Math.max(api.getCurrentTime() - 10, 0));
         }),
-        new PlayerAction("volume_up", () => {
-          this._playSvgBezel(ICON_VOLUME + " " + ICON_VOLUME_HIGH);
-          api.setVolume(Math.min(api.getVolume() + 5/100, 1));
+        new PlayerAction('volume_up', () => {
+          this._playSvgBezel(ICON_VOLUME + ' ' + ICON_VOLUME_HIGH);
+          api.setVolume(Math.min(api.getVolume() + 5 / 100, 1));
         }),
-        new PlayerAction("volume_down", () => {
+        new PlayerAction('volume_down', () => {
           this._playSvgBezel(ICON_VOLUME);
-          api.setVolume(Math.max(api.getVolume() - 5/100, 0));
+          api.setVolume(Math.max(api.getVolume() - 5 / 100, 0));
         }),
-        new PlayerAction("toggle_fullscreen", () => api.toggleFullscreen()),
-        new PlayerAction("mute_unmute", () => {
+        new PlayerAction('toggle_fullscreen', () => api.toggleFullscreen()),
+        new PlayerAction('mute_unmute', () => {
           if (!api.isMuted()) {
             this._playSvgBezel(ICON_VOLUME_MUTE);
             api.mute();
           } else {
-            this._playSvgBezel(ICON_VOLUME + " " + ICON_VOLUME_HIGH);
+            this._playSvgBezel(ICON_VOLUME + ' ' + ICON_VOLUME_HIGH);
             api.unmute();
           }
         }),
-        new PlayerAction("next_video", () => api.playNextVideo()),
-        new PlayerAction("play_pause", () => {
-          const playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
+        new PlayerAction('next_video', () => api.playNextVideo()),
+        new PlayerAction('play_pause', () => {
+          const playing =
+            api.getPreferredPlaybackState() === PlaybackState.PLAYING;
           if (playing) {
             this._playSvgBezel(ICON_PAUSE);
             api.pauseVideo();
@@ -157,14 +170,17 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
             api.playVideo();
           }
         }),
-        new PlayerAction("toggle_hide", () => this.setForceHide(!this.isForceHide()))
+        new PlayerAction('toggle_hide', () =>
+          this.setForceHide(!this.isForceHide())
+        )
       ];
     }
     return this._actions;
   }
 
   public cueVideoByConfig(config: IPlayerConfig) {
-    if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
+    if (!this._cuedThumbnailComponent)
+      throw new Error('CuedThumbnailComponent is undefined');
 
     this._config = config;
     this._configCued = true;
@@ -181,7 +197,8 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
   }
 
   public loadVideoByConfig(config: IPlayerConfig) {
-    if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
+    if (!this._cuedThumbnailComponent)
+      throw new Error('CuedThumbnailComponent is undefined');
 
     this._config = config;
     this._updateChromelessPlayer(config);
@@ -200,13 +217,16 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
   }
 
   public setPreview(preview: boolean): void {
-    if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
+    if (!this._cuedThumbnailComponent)
+      throw new Error('CuedThumbnailComponent is undefined');
 
     this._preview = preview;
 
     if (preview) {
       this.base.classList.add('html5-video-player--preview');
-      this._cuedThumbnailComponent.setVisible(!!this._cuedThumbnailComponent.getThumbnailUrl());
+      this._cuedThumbnailComponent.setVisible(
+        !!this._cuedThumbnailComponent.getThumbnailUrl()
+      );
     } else {
       this.base.classList.remove('html5-video-player--preview');
       this._cuedThumbnailComponent.setVisible(false);
@@ -234,7 +254,7 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
   }
 
   public updateInternalAutoHide(): void {
-    if (!this._bottomComponent) throw new Error("BottomComponent is undefined");
+    if (!this._bottomComponent) throw new Error('BottomComponent is undefined');
 
     let hide = this._autoHide;
 
@@ -257,7 +277,9 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     if (forceHide) {
       this.base.classList.add('html5-video-player--autohide--force');
     } else {
-      requireResizeCalculations = this.base.classList.contains("html5-video-player--autohide--force");
+      requireResizeCalculations = this.base.classList.contains(
+        'html5-video-player--autohide--force'
+      );
       this.base.classList.remove('html5-video-player--autohide--force');
     }
 
@@ -291,38 +313,46 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
   public setBigMode(bigMode: boolean): void {
     this._bigMode = bigMode;
     if (this._bigMode) {
-      this.base.classList.add("chrome-big-mode");
+      this.base.classList.add('chrome-big-mode');
     } else {
-      this.base.classList.remove("chrome-big-mode");
+      this.base.classList.remove('chrome-big-mode');
     }
 
     this.resize();
   }
 
   public resize() {
-    if (!this._chromelessPlayer) throw new Error("ChromelessPlayer is undefined");
-    if (!this._bottomComponent) throw new Error("BottomComponent is undefined");
+    if (!this._chromelessPlayer)
+      throw new Error('ChromelessPlayer is undefined');
+    if (!this._bottomComponent) throw new Error('BottomComponent is undefined');
 
     this._chromelessPlayer.resize();
 
     const rect = this.base.getBoundingClientRect();
 
     this.setState({
-      maxPopupHeight: rect.height - 49 /* from css: .html5-video-gradient-bottom */ - 12,
+      maxPopupHeight:
+        rect.height - 49 /* from css: .html5-video-gradient-bottom */ - 12
     });
 
     const bottomRect = this._bottomComponent.base
-      .querySelector(".chrome-progress-bar-padding")!.getBoundingClientRect();
+      .querySelector('.chrome-progress-bar-padding')!
+      .getBoundingClientRect();
     const nextVideoRect = this._bottomComponent.base
-      .querySelector(".chrome-next-button")!.getBoundingClientRect();
+      .querySelector('.chrome-next-button')!
+      .getBoundingClientRect();
     const sizeButtonRect = this._bottomComponent.base
-      .querySelector(".chrome-size-button")!.getBoundingClientRect();
+      .querySelector('.chrome-size-button')!
+      .getBoundingClientRect();
     const fullscreenButtonRect = this._bottomComponent.base
-      .querySelector(".chrome-fullscreen-button")!.getBoundingClientRect();
+      .querySelector('.chrome-fullscreen-button')!
+      .getBoundingClientRect();
     const volumeMuteButtonRect = this._bottomComponent.base
-      .querySelector(".chrome-mute-button")!.getBoundingClientRect();
+      .querySelector('.chrome-mute-button')!
+      .getBoundingClientRect();
     const settingsMuteButtonRect = this._bottomComponent.base
-      .querySelector(".chrome-settings-button")!.getBoundingClientRect();
+      .querySelector('.chrome-settings-button')!
+      .getBoundingClientRect();
 
     this._tooltipBottomRect = {
       width: bottomRect.width,
@@ -363,7 +393,7 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
   }
 
   public componentDidMount() {
-    if (!this._actionElement) throw new Error("ActionElement is undefined");
+    if (!this._actionElement) throw new Error('ActionElement is undefined');
 
     if (this._chromelessPlayer) {
       this._chromelessPlayer.setFullscreenElement(this.base);
@@ -384,34 +414,46 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
       .listen(this._actionElement, 'mousedown', this._onActionMouseDown, false)
       .listen(this._actionElement, 'click', this._onActionClick, false)
       .listen(this._actionElement, 'dblclick', this._onActionDoubleClick, false)
-      .listen(this._api, 'playbackstatechange', this._onPlaybackStateChange, false)
+      .listen(
+        this._api,
+        'playbackstatechange',
+        this._onPlaybackStateChange,
+        false
+      )
       .listen(this._api, 'fullscreenchange', this._onFullscreenChange, false)
       .listen(this._api, 'sizechange', this._onSizeChange, false)
       .listen(this._api, 'loadedmetadata', this._onLoadedMetadata, false)
       .listen(this._api, 'settingsopen', this._onSettingsOpen, false)
-      .listen(window, "resize", this.resize, { 'passive': true });
+      .listen(window, 'resize', this.resize, { passive: true });
   }
 
   public componentWillUnmount() {
     this._handler.removeAll();
   }
 
-  public render({}: IPlayerProps, { maxPopupHeight }: IPlayerState): JSX.Element {
+  public render(
+    {  }: IPlayerProps,
+    { maxPopupHeight }: IPlayerState
+  ): JSX.Element {
     const chromelessRef = (el: ChromelessPlayer) => {
       this._chromelessPlayer = el;
       if (this.base) {
         this._chromelessPlayer.setFullscreenElement(this.base);
       }
     };
-    const bottomRef = (el: ChromeBottomComponent) => this._bottomComponent = el;
-    const cuedThumbnailRef = (el: CuedThumbnailComponent) => this._cuedThumbnailComponent = el;
-    const tooltipRef = (el: ChromeTooltip) => this._tooltipComponent = el;
-    const actionRef = (el?: Element) => this._actionElement = el;
-    const bezelRef = (el: BezelComponent) => this._bezelElement = el;
+    const bottomRef = (el: ChromeBottomComponent) =>
+      (this._bottomComponent = el);
+    const cuedThumbnailRef = (el: CuedThumbnailComponent) =>
+      (this._cuedThumbnailComponent = el);
+    const tooltipRef = (el: ChromeTooltip) => (this._tooltipComponent = el);
+    const actionRef = (el?: Element) => (this._actionElement = el);
+    const bezelRef = (el: BezelComponent) => (this._bezelElement = el);
 
-    const onProgressHover = (time: number, percentage: number) => this._onProgressHover(time, percentage);
+    const onProgressHover = (time: number, percentage: number) =>
+      this._onProgressHover(time, percentage);
     const onProgressEndHover = () => this._onProgressEndHover();
-    const onNextVideoHover = (detail: IVideoDetail) => this._onNextVideoHover(detail);
+    const onNextVideoHover = (detail: IVideoDetail) =>
+      this._onNextVideoHover(detail);
     const onNextVideoEndHover = () => this._onNextVideoEndHover();
     const onSizeButtonHover = () => this._onSizeButtonHover();
     const onSizeButtonEndHover = () => this._onSizeButtonEndHover();
@@ -422,7 +464,8 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     const onSettingsButtonHover = () => this._onSettingsButtonHover();
     const onSettingsButtonEndHover = () => this._onSettingsButtonEndHover();
     const onCuedThumbnailClick = () => {
-      if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
+      if (!this._cuedThumbnailComponent)
+        throw new Error('CuedThumbnailComponent is undefined');
       if (this._config && this._configCued) {
         this._updateChromelessPlayer(this._config);
 
@@ -436,27 +479,29 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     };
 
     const attributes = {
-      'tabindex': '0'
+      tabindex: '0'
     };
 
-    const className = "html5-video-player"
-      + " " + this._getStateClassName()
-      + (this._api.isLarge() ? " html5-video-player--large" : "");
+    const className =
+      'html5-video-player' +
+      ' ' +
+      this._getStateClassName() +
+      (this._api.isLarge() ? ' html5-video-player--large' : '');
     return (
       <div class={className} {...attributes}>
         <ChromelessPlayer
           ref={chromelessRef}
-          api={this.getApi() as ChromelessPlayerApi} />
+          api={this.getApi() as ChromelessPlayerApi}
+        />
         <CuedThumbnailComponent
           ref={cuedThumbnailRef}
-          onClick={onCuedThumbnailClick} />
+          onClick={onCuedThumbnailClick}
+        />
         <BufferComponent api={this.getApi()} />
         <BezelComponent ref={bezelRef} />
-        <div
-          ref={actionRef}
-          class="html5-video-action" />
+        <div ref={actionRef} class="html5-video-action" />
         <ChromeTooltip ref={tooltipRef} />
-        <ChromeSettingsPopup api={this.getApi()} maxHeight={maxPopupHeight}/>
+        <ChromeSettingsPopup api={this.getApi()} maxHeight={maxPopupHeight} />
         <div class="html5-video-gradient-bottom" />
         <ChromeBottomComponent
           ref={bottomRef}
@@ -473,13 +518,15 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
           onVolumeMuteButtonHover={onVolumeMuteButtonHover}
           onVolumeMuteButtonEndHover={onVolumeMuteButtonEndHover}
           onSettingsButtonHover={onSettingsButtonHover}
-          onSettingsButtonEndHover={onSettingsButtonEndHover} />
+          onSettingsButtonEndHover={onSettingsButtonEndHover}
+        />
       </div>
     );
   }
 
   private async _updateChromelessPlayer(config: IPlayerConfig) {
-    if (!this._chromelessPlayer) throw new Error("ChromelessPlayer is undefined");
+    if (!this._chromelessPlayer)
+      throw new Error('ChromelessPlayer is undefined');
 
     this._configCued = false;
     if (config.subtitles) {
@@ -498,7 +545,7 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
         if (useSubtitle) {
           defaultTrack = i;
         }
-        
+
         const subtitle = config.subtitles[i];
         tracks.push({
           label: subtitle.getTitle(),
@@ -521,11 +568,14 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     }
 
     if (config.url) {
-      this._chromelessPlayer.setVideoSource(new HlsSource(config.url), config.startTime);
+      this._chromelessPlayer.setVideoSource(
+        new HlsSource(config.url),
+        config.startTime
+      );
     } else {
       this._chromelessPlayer.removeVideoSource();
     }
-    
+
     if (typeof config.duration === 'number') {
       this._chromelessPlayer.setDuration(config.duration);
     } else {
@@ -534,26 +584,27 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
   }
 
   private _onSizeChange(): void {
-    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+    if (!this._tooltipComponent)
+      throw new Error('TooltipComponent is undefined');
 
     const large = this._api.isLarge();
     if (large) {
-      this.base.classList.add("html5-video-player--large");
+      this.base.classList.add('html5-video-player--large');
     } else {
-      this.base.classList.remove("html5-video-player--large");
+      this.base.classList.remove('html5-video-player--large');
     }
 
     if (this.props.onSizeChange) {
       this.props.onSizeChange(large);
     }
 
-    this._tooltipComponent.base.style.display = "none";
+    this._tooltipComponent.base.style.display = 'none';
 
     this.resize();
   }
 
   private _onMouseMouse(e: BrowserEvent) {
-    if (!this._bottomComponent) throw new Error("BottomComponent is undefined");
+    if (!this._bottomComponent) throw new Error('BottomComponent is undefined');
 
     window.clearTimeout(this._autoHideTimer);
     this.setAutoHide(false);
@@ -577,7 +628,7 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
   }
 
   private _playSvgBezel(d: string): void {
-    if (!this._bezelElement) throw new Error("Bezel element is undefined");
+    if (!this._bezelElement) throw new Error('Bezel element is undefined');
 
     this._bezelElement.playSvgPath(d);
   }
@@ -588,17 +639,17 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
       switch (state) {
         case PlaybackState.PLAYING:
         case PlaybackState.BUFFERING:
-          return "playing-mode";
+          return 'playing-mode';
         case PlaybackState.PAUSED:
-          return "paused-mode";
+          return 'paused-mode';
         case PlaybackState.ENDED:
-          return "ended-mode";
+          return 'ended-mode';
         case PlaybackState.UNSTARTED:
         default:
-          return "unstarted-mode";
+          return 'unstarted-mode';
       }
     } catch (e) {
-      return "unstarted-mode";
+      return 'unstarted-mode';
     }
   }
 
@@ -612,7 +663,12 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
 
     const unstarted = this.base.classList.contains('unstarted-mode');
 
-    this.base.classList.remove("playing-mode", "paused-mode", "ended-mode", "unstarted-mode");
+    this.base.classList.remove(
+      'playing-mode',
+      'paused-mode',
+      'ended-mode',
+      'unstarted-mode'
+    );
     this.base.classList.add(this._getStateClassName());
 
     if (unstarted) {
@@ -621,26 +677,29 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
   }
 
   private _onFullscreenChange() {
-    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+    if (!this._tooltipComponent)
+      throw new Error('TooltipComponent is undefined');
 
     const fullscreen = this._api.isFullscreen();
     this.setBigMode(fullscreen);
     if (fullscreen) {
-      this.base.classList.add("html5-video-player--fullscreen");
+      this.base.classList.add('html5-video-player--fullscreen');
     } else {
-      this.base.classList.remove("html5-video-player--fullscreen");
+      this.base.classList.remove('html5-video-player--fullscreen');
     }
-    this._tooltipComponent.base.style.display = "none";
+    this._tooltipComponent.base.style.display = 'none';
 
     this.resize();
   }
 
   private _setTooltip(tooltip: IChromeTooltip, left: number) {
-    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
-    if (!this._tooltipBottomRect) throw new Error("Tooltip bottom rect is undefined");
+    if (!this._tooltipComponent)
+      throw new Error('TooltipComponent is undefined');
+    if (!this._tooltipBottomRect)
+      throw new Error('Tooltip bottom rect is undefined');
 
     if (this.isPreview()) {
-      this._tooltipComponent.base.style.display = "none";
+      this._tooltipComponent.base.style.display = 'none';
       return;
     }
     this._tooltipComponent.setTooltip(tooltip);
@@ -649,32 +708,41 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     const rect = this._tooltipBottomRect;
     const size = this._tooltipComponent.getSize();
 
-    left = left - size.width/2;
-    left = Math.min(Math.max(left, rect.left), rect.left + rect.width - size.width);
+    left = left - size.width / 2;
+    left = Math.min(
+      Math.max(left, rect.left),
+      rect.left + rect.width - size.width
+    );
 
     this._tooltipComponent.setPosition(left, rect.top - size.height);
   }
 
   private _onProgressHover(time: number, percentage: number) {
-    if (!this._tooltipBottomRect) throw new Error("TooltipBottomRect is undefined");
+    if (!this._tooltipBottomRect)
+      throw new Error('TooltipBottomRect is undefined');
 
     this.base.classList.add('chrome-progress-bar-hover');
 
     const rect = this._tooltipBottomRect;
-    this._setTooltip({
-      text: parseAndFormatTime(time)
-    }, rect.width*percentage + rect.left);
+    this._setTooltip(
+      {
+        text: parseAndFormatTime(time)
+      },
+      rect.width * percentage + rect.left
+    );
   }
 
   private _onProgressEndHover() {
-    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+    if (!this._tooltipComponent)
+      throw new Error('TooltipComponent is undefined');
 
     this.base.classList.remove('chrome-progress-bar-hover');
-    this._tooltipComponent.base.style.display = "none";
+    this._tooltipComponent.base.style.display = 'none';
   }
-  
+
   private _onNextVideoHover(detail: IVideoDetail) {
-    if (!this._nextVideoButtonRect) throw new Error("NextVideoButtonRect is undefined");
+    if (!this._nextVideoButtonRect)
+      throw new Error('NextVideoButtonRect is undefined');
 
     const bigMode = this.isBigMode();
     const tooltip: IChromeTooltip = {
@@ -692,90 +760,111 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
       tooltip.duration = parseAndFormatTime(detail.duration);
     }
     const btnRect = this._nextVideoButtonRect;
-    this._setTooltip(tooltip, btnRect.left + btnRect.width/2);
+    this._setTooltip(tooltip, btnRect.left + btnRect.width / 2);
   }
-  
-  private _onNextVideoEndHover() {
-    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
 
-    this._tooltipComponent.base.style.display = "none";
+  private _onNextVideoEndHover() {
+    if (!this._tooltipComponent)
+      throw new Error('TooltipComponent is undefined');
+
+    this._tooltipComponent.base.style.display = 'none';
   }
-  
+
   private _onSizeButtonHover() {
-    if (!this._sizeButtonRect) throw new Error("SizeButtonRect is undefined");
+    if (!this._sizeButtonRect) throw new Error('SizeButtonRect is undefined');
 
     const btnRect = this._sizeButtonRect;
-    this._setTooltip({
-      text: this._api.isLarge() ? 'Small' : 'Large'
-    }, btnRect.left + btnRect.width/2);
+    this._setTooltip(
+      {
+        text: this._api.isLarge() ? 'Small' : 'Large'
+      },
+      btnRect.left + btnRect.width / 2
+    );
   }
-  
-  private _onSizeButtonEndHover() {
-    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
 
-    this._tooltipComponent.base.style.display = "none";
+  private _onSizeButtonEndHover() {
+    if (!this._tooltipComponent)
+      throw new Error('TooltipComponent is undefined');
+
+    this._tooltipComponent.base.style.display = 'none';
   }
-  
+
   private _onFullscreenButtonHover() {
-    if (!this._fullscreenButtonRect) throw new Error("FullscreenButtonRect is undefined");
+    if (!this._fullscreenButtonRect)
+      throw new Error('FullscreenButtonRect is undefined');
 
     const btnRect = this._fullscreenButtonRect;
-    this._setTooltip({
-      text: this._api.isFullscreen() ? 'Exit full screen' : 'Full screen'
-    }, btnRect.left + btnRect.width/2);
+    this._setTooltip(
+      {
+        text: this._api.isFullscreen() ? 'Exit full screen' : 'Full screen'
+      },
+      btnRect.left + btnRect.width / 2
+    );
   }
-  
-  private _onFullscreenButtonEndHover() {
-    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
 
-    this._tooltipComponent.base.style.display = "none";
+  private _onFullscreenButtonEndHover() {
+    if (!this._tooltipComponent)
+      throw new Error('TooltipComponent is undefined');
+
+    this._tooltipComponent.base.style.display = 'none';
   }
-  
+
   private _onVolumeMuteButtonHover() {
-    if (!this._volumeMuteButtonRect) throw new Error("VolumeMuteButtonRect is undefined");
+    if (!this._volumeMuteButtonRect)
+      throw new Error('VolumeMuteButtonRect is undefined');
 
     const btnRect = this._volumeMuteButtonRect;
-    this._setTooltip({
-      text: (this._api.isMuted() || this._api.getVolume() === 0) ? 'Unmute' : 'Mute'
-    }, btnRect.left + btnRect.width/2);
+    this._setTooltip(
+      {
+        text:
+          this._api.isMuted() || this._api.getVolume() === 0 ? 'Unmute' : 'Mute'
+      },
+      btnRect.left + btnRect.width / 2
+    );
   }
-  
-  private _onVolumeMuteButtonEndHover() {
-    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
 
-    this._tooltipComponent.base.style.display = "none";
+  private _onVolumeMuteButtonEndHover() {
+    if (!this._tooltipComponent)
+      throw new Error('TooltipComponent is undefined');
+
+    this._tooltipComponent.base.style.display = 'none';
   }
 
   private _onSettingsButtonHover() {
     if (this._api.isSettingsOpen()) return;
-    if (!this._settingsButtonRect) throw new Error("SettingsButtonRect is undefined");
+    if (!this._settingsButtonRect)
+      throw new Error('SettingsButtonRect is undefined');
 
     const btnRect = this._settingsButtonRect;
-    this._setTooltip({
-      text: 'Settings'
-    }, btnRect.left + btnRect.width/2);
+    this._setTooltip(
+      {
+        text: 'Settings'
+      },
+      btnRect.left + btnRect.width / 2
+    );
   }
 
   private _onSettingsButtonEndHover() {
-    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+    if (!this._tooltipComponent)
+      throw new Error('TooltipComponent is undefined');
 
-    this._tooltipComponent.base.style.display = "none";
+    this._tooltipComponent.base.style.display = 'none';
   }
 
   private _onSettingsOpen() {
     if (this._tooltipComponent) {
-      this._tooltipComponent.base.style.display = "none";
+      this._tooltipComponent.base.style.display = 'none';
     }
   }
 
   private _onActionMouseDown(e: BrowserEvent) {
     e.preventDefault();
   }
-  
+
   private _onActionClick(e: BrowserEvent) {
     this.base.focus();
-    
-    if (typeof this._actionClickTimer === "number") {
+
+    if (typeof this._actionClickTimer === 'number') {
       window.clearTimeout(this._actionClickTimer);
       this._actionClickTimer = undefined;
 
@@ -796,7 +885,8 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
       this._actionClickTimer = undefined;
       this._actionClickExecuted = true;
 
-      const isPlaying = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
+      const isPlaying =
+        api.getPreferredPlaybackState() === PlaybackState.PLAYING;
       if (isPlaying) {
         api.pauseVideo();
       } else {
@@ -804,15 +894,15 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
       }
     }, 200);
   }
-  
+
   private _onActionDoubleClick(e: BrowserEvent) {
-    if (!this._bezelElement) throw new Error("BezelELement is undefined");
+    if (!this._bezelElement) throw new Error('BezelELement is undefined');
 
     this._bezelElement.stop();
     const api = this._api;
     if (this._actionClickExecuted) {
       this._actionClickExecuted = false;
-      
+
       const playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
       if (playing) {
         api.pauseVideo();
@@ -823,11 +913,11 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
 
     api.toggleFullscreen();
   }
-  
+
   private _onMouseDown() {
     this._mouseDown = true;
   }
-  
+
   private _onMouseUp() {
     this._mouseDown = false;
 
