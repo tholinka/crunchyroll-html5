@@ -62,6 +62,7 @@
 
 .chrome-panel[aria-hidden=true] {
   opacity: 0;
+  z-index: -1;
 }
 
 .chrome-panel-left {
