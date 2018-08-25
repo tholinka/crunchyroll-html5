@@ -48,6 +48,13 @@ export interface IFullscreenButtonState {
 export class FullscreenButton extends Component<IFullscreenButtonProps, IFullscreenButtonState> {
   private _handler = new EventHandler(this);
 
+  constructor() {
+    super();
+    this.state = {
+      fullscreen: false
+    };
+  }
+
   private _isEnabled(): boolean {
     return this.props.api.isFullscreenEnabled();
   }

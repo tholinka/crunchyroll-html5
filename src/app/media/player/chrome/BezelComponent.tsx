@@ -21,7 +21,7 @@ export class BezelComponent extends Component<{}, {}> {
     this._handler.removeAll();
   }
 
-  play(element: JSX.Element): void {
+  private _play(element: JSX.Element): void {
     this.stop();
 
     if (this._iconElement) {
@@ -43,7 +43,7 @@ export class BezelComponent extends Component<{}, {}> {
       </svg>
     );
 
-    this.play(el);
+    this._play(el);
   }
 
   stop(): void {

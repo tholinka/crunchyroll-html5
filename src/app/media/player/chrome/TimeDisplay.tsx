@@ -7,14 +7,25 @@ export interface ITimeDisplayProps {
   api: IPlayerApi
 }
 
-export class TimeDisplay extends Component<ITimeDisplayProps, {}> {
-  private _currentTimeElement?: Element;
-  private _durationTimeElement?: Element;
+export interface ITimeDisplayState {
+  currentTime: string;
+  durationTime: string;
+}
 
+export class TimeDisplay extends Component<ITimeDisplayProps, ITimeDisplayState> {
   private _handler: EventHandler = new EventHandler(this);
 
   private _currentTime: number = NaN;
   private _duration: number = NaN;
+
+  constructor() {
+    super();
+
+    this.state = {
+      currentTime: '--:--',
+      durationTime: '--:--'
+    };
+  }
 
   private _onTimeUpdate(e: TimeUpdateEvent) {
     this._currentTime = e.time;
@@ -27,21 +38,22 @@ export class TimeDisplay extends Component<ITimeDisplayProps, {}> {
   }
 
   private _updateState() {
-    if (!this._currentTimeElement || !this._durationTimeElement) return;
-
     const currentTime = this._currentTime;
     const duration = this._duration;
 
-    if (isNaN(currentTime)) {
-      this._currentTimeElement.textContent = '--:--';
-    } else {
-      this._currentTimeElement.textContent = parseAndFormatTime(currentTime);
+    const newState: ITimeDisplayState = {
+      currentTime: '--:--',
+      durationTime: '--:--'
+    };
+
+    if (!isNaN(currentTime)) {
+      newState.currentTime = parseAndFormatTime(currentTime);
     }
-    if (isNaN(duration)) {
-      this._durationTimeElement.textContent = '--:--';
-    } else {
-      this._durationTimeElement.textContent = parseAndFormatTime(duration);
+    if (!isNaN(duration)) {
+      newState.durationTime = parseAndFormatTime(duration);
     }
+
+    this.setState(newState);
   }
 
   componentDidMount() {
@@ -54,18 +66,12 @@ export class TimeDisplay extends Component<ITimeDisplayProps, {}> {
     this._handler.removeAll();
   }
 
-  render(props: ITimeDisplayProps): JSX.Element {
-    const currentRef = (el?: Element) => this._currentTimeElement = el;
-    const durationRef = (el?: Element) => this._durationTimeElement = el;
-
-    this._currentTime = props.api.getCurrentTime();
-    this._duration = props.api.getDuration();
-
+  render({}: ITimeDisplayProps, { currentTime, durationTime }: ITimeDisplayState): JSX.Element {
     return (
       <div class="chrome-time-display">
-        <span class="chrome-time-current" ref={currentRef}>--:--</span>
+        <span class="chrome-time-current">{ currentTime }</span>
         <span class="chrome-time-separator"> / </span>
-        <span class="chrome-time-duration" ref={durationRef}>--:--</span>
+        <span class="chrome-time-duration">{ durationTime }</span>
       </div>
     );
   }

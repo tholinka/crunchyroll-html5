@@ -6,11 +6,23 @@ export interface IBufferComponentProps {
   api: IPlayerApi;
 }
 
-export class BufferComponent extends Component<IBufferComponentProps, {}> {
+export interface IBufferComponentState {
+  visible: boolean;
+}
+
+export class BufferComponent extends Component<IBufferComponentProps, IBufferComponentState> {
   private _handler: EventHandler = new EventHandler(this);
 
   private _timer?: number;
   private _visibilityDelay: number = 1000;
+
+  constructor() {
+    super();
+
+    this.state = {
+      visible: false
+    };
+  }
 
   private _onPlaybackStateChange() {
     const api = this.props.api;
@@ -19,10 +31,14 @@ export class BufferComponent extends Component<IBufferComponentProps, {}> {
     window.clearTimeout(this._timer);
     if (state === PlaybackState.BUFFERING) {
       this._timer = window.setTimeout(() => {
-        this.base.style.display = "";
+        this.setState({
+          visible: true
+        });
       }, this._visibilityDelay);
     } else {
-      this.base.style.display = "none";
+      this.setState({
+        visible: false
+      });
     }
   }
 
@@ -35,9 +51,14 @@ export class BufferComponent extends Component<IBufferComponentProps, {}> {
     this._handler.removeAll();
   }
 
-  render(): JSX.Element {
+  render({}: IBufferComponentProps, { visible }: IBufferComponentState): JSX.Element {
+    const props: {[key: string]: string} = {};
+    if (!visible) {
+      props["style"] = "display: none";
+    }
+
     return (
-      <div class="chrome-spinner" style="display: none">
+      <div class="chrome-spinner" {...props}>
         <div>
           <div class="chrome-spinner-container">
             <div class="chrome-spinner-rotator">

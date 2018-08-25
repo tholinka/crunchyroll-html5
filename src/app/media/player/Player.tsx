@@ -305,6 +305,10 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
       hide = false;
     }
 
+    if (this._api.isSettingsOpen()) {
+      hide = false;
+    }
+
     const forceHide = this.isForceHide();
     let requireResizeCalculations = false;
 
@@ -387,6 +391,26 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     this._bezelElement.playSvgPath(d);
   }
 
+  private _getStateClassName(): string {
+    try {
+      const state = this._api.getPlaybackState();
+      switch (state) {
+        case PlaybackState.PLAYING:
+        case PlaybackState.BUFFERING:
+          return "playing-mode";
+        case PlaybackState.PAUSED:
+          return "paused-mode";
+        case PlaybackState.ENDED:
+          return "ended-mode";
+        case PlaybackState.UNSTARTED:
+        default:
+          return "unstarted-mode";
+      }
+    } catch (e) {
+      return "unstarted-mode";
+    }
+  }
+
   private _onPlaybackStateChange() {
     const state = this._api.getPlaybackState();
     if (state === PlaybackState.PLAYING) {
@@ -397,18 +421,8 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
 
     const unstarted = this.base.classList.contains('unstarted-mode');
 
-    this.base.classList.remove("playing-mode", "ended-mode", "unstarted-mode");
-    switch (state) {
-      case PlaybackState.PLAYING:
-        this.base.classList.add("playing-mode");
-        break;
-      case PlaybackState.PAUSED:
-        this.base.classList.add("paused-mode");
-        break;
-      case PlaybackState.UNSTARTED:
-        this.base.classList.add("unstarted-mode");
-        break;
-    }
+    this.base.classList.remove("playing-mode", "paused-mode", "ended-mode", "unstarted-mode");
+    this.base.classList.add(this._getStateClassName());
 
     if (unstarted) {
       this.resize();
@@ -573,9 +587,9 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
   }
 
   private _onSettingsOpen() {
-    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
-
-    this._tooltipComponent.base.style.display = "none";
+    if (this._tooltipComponent) {
+      this._tooltipComponent.base.style.display = "none";
+    }
   }
 
   private _onActionMouseDown(e: BrowserEvent) {
@@ -788,12 +802,8 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
       'tabindex': '0'
     };
 
-    let autoplay = true;
-    if (this.props.config && typeof this.props.config.autoplay === 'boolean') {
-      autoplay = this.props.config.autoplay;
-    }
-
-    const className = "html5-video-player unstarted-mode"
+    const className = "html5-video-player"
+      + " " + this._getStateClassName()
       + (this._api.isLarge() ? " html5-video-player--large" : "");
     return (
       <div class={className} {...attributes}>
