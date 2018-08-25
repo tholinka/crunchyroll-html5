@@ -108,6 +108,7 @@ export class LibAss extends EventTarget {
   }
 
   detach() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.video = undefined;
     this.videoHandler.removeAll();
   }

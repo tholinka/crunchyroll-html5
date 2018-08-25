@@ -8,6 +8,7 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   private _player: ChromelessPlayer|undefined;
   private _nextVideo: IVideoDetail|undefined = undefined;
   private _large: boolean = false;
+  private _settingsOpen: boolean = false;
 
   constructor(
     player?: ChromelessPlayer
@@ -161,8 +162,27 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
     return this._player.getSubtitleTracks();
   }
 
+  getSubtitleTrack(): number {
+    if (!this._player) throw new Error("Not initialized");
+    return this._player.getCurrentSubtitleTrack();
+  }
+
   setSubtitleTrack(index: number): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.setSubtitleTrack(index);
+  }
+
+  isSettingsOpen(): boolean {
+    return this._settingsOpen;
+  }
+
+  openSettings(): void {
+    this._settingsOpen = true;
+    this.dispatchEvent('settingsopen');
+  }
+
+  closeSettings(): void {
+    this._settingsOpen = false;
+    this.dispatchEvent('settingsclose');
   }
 }

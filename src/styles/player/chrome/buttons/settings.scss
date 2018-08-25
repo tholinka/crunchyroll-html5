@@ -1,0 +1,7 @@
+.chrome-settings-button svg {
+  transition: transform .1s cubic-bezier(0.4,0.0,1,1);
+}
+
+.chrome-settings-button[aria-expanded=true] svg {
+  transform: rotateZ(30deg);
+}

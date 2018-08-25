@@ -45,10 +45,39 @@
   & svg {
     pointer-events: none;
   }
+
+  --bottom-gradient-size: 49px;
+}
+
+.html5-video-player ::-webkit-scrollbar {
+  width: 10px;
+  background-color: #424242;
+}
+
+.html5-video-player ::-webkit-scrollbar-thumb {
+  background-color: #8e8e8e;
+  border: 1px solid #424242;
+  border-radius: 5px;
+}
+
+.html5-video-player ::-webkit-scrollbar-track {
+  background-color: #424242;
 }
 
 .chrome-big-mode {
   font-size: 17px;
+}
+
+.chrome-big-mode ::-webkit-scrollbar {
+  width: 15px;
+}
+
+.chrome-big-mode ::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+}
+
+.chrome-big-mode .html5-video-player {
+  --bottom-gradient-size: 70px;
 }
 
 .html5-video-player.html5-video-player--autohide.html5-video-player--autohide--hide-cursor {

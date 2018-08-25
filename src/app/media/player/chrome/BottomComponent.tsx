@@ -8,6 +8,7 @@ import { VolumeMuteButton } from "./VolumeMuteButton";
 import { TimeDisplay } from "./TimeDisplay";
 import { SizeButton } from "./SizeButton";
 import { FullscreenButton } from "./FullscreenButton";
+import { SettingsButton } from './SettingsButton';
 
 export interface IChromeBottomProps {
   api: IPlayerApi;
@@ -22,6 +23,8 @@ export interface IChromeBottomProps {
   onFullscreenButtonEndHover: () => void;
   onVolumeMuteButtonHover: () => void;
   onVolumeMuteButtonEndHover: () => void;
+  onSettingsButtonHover: () => void;
+  onSettingsButtonEndHover: () => void;
 }
 
 export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
@@ -108,6 +111,10 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
             <TimeDisplay api={props.api}></TimeDisplay>
           </div>
           <div class="chrome-controls__right">
+            <SettingsButton
+              api={props.api}
+              onHover={props.onSettingsButtonHover}
+              onEndHover={props.onSettingsButtonEndHover}></SettingsButton>
             <SizeButton
               api={props.api}
               visible={props.sizeButtonVisible}

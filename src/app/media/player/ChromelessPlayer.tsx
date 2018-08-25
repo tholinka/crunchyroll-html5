@@ -560,6 +560,10 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     }
   }
 
+  getCurrentSubtitleTrack(): number {
+    return this._currentSubtitleTrack
+  }
+
   setSubtitleTracks(tracks: ISubtitleTrack[]): void {
     if (!this._api) throw new Error("API is undefined");
 

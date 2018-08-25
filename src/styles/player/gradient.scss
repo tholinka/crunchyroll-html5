@@ -1,6 +1,8 @@
 .html5-video-gradient-bottom {
   height: 49px;
   padding-top: 49px;
+  height: var(--bottom-gradient-size);
+  padding-top: var(--bottom-gradient-size);
   bottom: 0;
   z-index: 22;
   background-position: bottom;

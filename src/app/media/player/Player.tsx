@@ -22,12 +22,17 @@ import { SubtitleToAss } from '../../converter/SubtitleToAss';
 import { IActionable } from '../../libs/actions/IActionable';
 import { IAction } from '../../libs/actions/IAction';
 import { PlayerAction } from './PlayerAction';
+import { ChromeSettingsPopup } from './chrome/SettingsPopup';
 
 export interface IPlayerProps {
   config?: IPlayerConfig;
   large?: boolean;
   sizeEnabled?: boolean;
   onSizeChange?: (large: boolean) => void;
+}
+
+export interface IPlayerState {
+  maxPopupHeight: number;
 }
 
 export interface IPlayerConfig {
@@ -43,7 +48,7 @@ export interface IPlayerConfig {
   muted?: boolean;
 }
 
-export class Player extends Component<IPlayerProps, {}> implements IActionable {
+export class Player extends Component<IPlayerProps, IPlayerState> implements IActionable {
   private _configCued: boolean = false;
   private _config: IPlayerConfig|undefined = undefined;
   private _actionElement?: Element;
@@ -60,6 +65,7 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
   private _sizeButtonRect?: IRect;
   private _fullscreenButtonRect?: IRect;
   private _volumeMuteButtonRect?: IRect;
+  private _settingsButtonRect?: IRect;
 
   private _autoHide: boolean = true;
   private _autoHideTimer?: number;
@@ -84,6 +90,9 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
       this._config = props.config;
     }
     this._api.setLarge(!!props.large);
+    this.state = {
+      maxPopupHeight: 0,
+    };
   }
 
   getActions(): IAction[] {
@@ -547,6 +556,28 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
     this._tooltipComponent.base.style.display = "none";
   }
 
+  private _onSettingsButtonHover() {
+    if (this._api.isSettingsOpen()) return;
+    if (!this._settingsButtonRect) throw new Error("SettingsButtonRect is undefined");
+
+    const btnRect = this._settingsButtonRect;
+    this._setTooltip({
+      text: 'Settings'
+    }, btnRect.left + btnRect.width/2);
+  }
+
+  private _onSettingsButtonEndHover() {
+    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+
+    this._tooltipComponent.base.style.display = "none";
+  }
+
+  private _onSettingsOpen() {
+    if (!this._tooltipComponent) throw new Error("TooltipComponent is undefined");
+
+    this._tooltipComponent.base.style.display = "none";
+  }
+
   private _onActionMouseDown(e: BrowserEvent) {
     e.preventDefault();
   }
@@ -625,6 +656,10 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
 
     const rect = this.base.getBoundingClientRect();
 
+    this.setState({
+      maxPopupHeight: rect.height - 49 /* from css: .html5-video-gradient-bottom */ - 12,
+    });
+
     const bottomRect = this._bottomComponent.base
       .querySelector(".chrome-progress-bar-padding")!.getBoundingClientRect();
     const nextVideoRect = this._bottomComponent.base
@@ -635,6 +670,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
       .querySelector(".chrome-fullscreen-button")!.getBoundingClientRect();
     const volumeMuteButtonRect = this._bottomComponent.base
       .querySelector(".chrome-mute-button")!.getBoundingClientRect();
+    const settingsMuteButtonRect = this._bottomComponent.base
+      .querySelector(".chrome-settings-button")!.getBoundingClientRect();
 
     this._tooltipBottomRect = {
       width: bottomRect.width,
@@ -666,6 +703,12 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
       left: volumeMuteButtonRect.left - rect.left,
       top: volumeMuteButtonRect.top - rect.top
     };
+    this._settingsButtonRect = {
+      width: settingsMuteButtonRect.width,
+      height: settingsMuteButtonRect.height,
+      left: settingsMuteButtonRect.left - rect.left,
+      top: settingsMuteButtonRect.top - rect.top
+    };
   }
 
   componentDidMount() {
@@ -694,6 +737,7 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
       .listen(this._api, 'fullscreenchange', this._onFullscreenChange, false)
       .listen(this._api, 'sizechange', this._onSizeChange, false)
       .listen(this._api, 'loadedmetadata', this._onLoadedMetadata, false)
+      .listen(this._api, 'settingsopen', this._onSettingsOpen, false)
       .listen(window, "resize", this.resize, { 'passive': true });
   }
 
@@ -701,7 +745,7 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
     this._handler.removeAll();
   }
 
-  render(): JSX.Element {
+  render({}: IPlayerProps, { maxPopupHeight }: IPlayerState): JSX.Element {
     const chromelessRef = (el: ChromelessPlayer) => {
       this._chromelessPlayer = el;
       if (this.base) {
@@ -724,6 +768,8 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
     const onFullscreenButtonEndHover = () => this._onFullscreenButtonEndHover();
     const onVolumeMuteButtonHover = () => this._onVolumeMuteButtonHover();
     const onVolumeMuteButtonEndHover = () => this._onVolumeMuteButtonEndHover();
+    const onSettingsButtonHover = () => this._onSettingsButtonHover();
+    const onSettingsButtonEndHover = () => this._onSettingsButtonEndHover();
     const onCuedThumbnailClick = () => {
       if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
       if (this._config && this._configCued) {
@@ -763,6 +809,7 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
           ref={actionRef}
           class="html5-video-action"></div>
         <ChromeTooltip ref={tooltipRef}></ChromeTooltip>
+        <ChromeSettingsPopup api={this.getApi()} maxHeight={maxPopupHeight}/>
         <div class="html5-video-gradient-bottom"></div>
         <ChromeBottomComponent
           ref={bottomRef}
@@ -777,7 +824,9 @@ export class Player extends Component<IPlayerProps, {}> implements IActionable {
           onFullscreenButtonHover={onFullscreenButtonHover}
           onFullscreenButtonEndHover={onFullscreenButtonEndHover}
           onVolumeMuteButtonHover={onVolumeMuteButtonHover}
-          onVolumeMuteButtonEndHover={onVolumeMuteButtonEndHover}></ChromeBottomComponent>
+          onVolumeMuteButtonEndHover={onVolumeMuteButtonEndHover}
+          onSettingsButtonHover={onSettingsButtonHover}
+          onSettingsButtonEndHover={onSettingsButtonEndHover}></ChromeBottomComponent>
       </div>
     );
   }

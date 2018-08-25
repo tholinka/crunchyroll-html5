@@ -86,6 +86,7 @@ export interface IPlayerApi extends EventTarget {
   isFullscreen(): boolean;
 
   getSubtitlesTracks(): ISubtitleTrack[];
+  getSubtitleTrack(): number;
   
   /**
    * Set the subtitle track by its index.
@@ -96,4 +97,8 @@ export interface IPlayerApi extends EventTarget {
 
   getNextVideoDetail(): IVideoDetail|undefined;
   setNextVideoDetail(nextVideo: IVideoDetail|undefined): void;
+
+  isSettingsOpen(): boolean;
+  openSettings(): void;
+  closeSettings(): void;
 }
