@@ -1,9 +1,11 @@
-import { h, Component } from "preact";
-import { vendorPrefix } from "../../../utils/style";
-import { IPlayerApi, TimeUpdateEvent, DurationChangeEvent } from "../IPlayerApi";
-import { EventHandler } from "../../../libs/events/EventHandler";
-import { parseAndFormatTime } from "../../../utils/time";
+import { Component, h } from "preact";
 import { BrowserEvent } from "../../../libs/events/BrowserEvent";
+import { EventHandler } from "../../../libs/events/EventHandler";
+import { vendorPrefix } from "../../../utils/style";
+import { parseAndFormatTime } from "../../../utils/time";
+import { DurationChangeEvent } from "../DurationChangeEvent";
+import { IPlayerApi } from "../IPlayerApi";
+import { TimeUpdateEvent } from "../TimeUpdateEvent";
 
 export interface IChromeProgressBarProps {
   api: IPlayerApi;
@@ -32,11 +34,71 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
 
   private _visibility: boolean = false;
 
-  setInternalVisibility(visibility: boolean) {
+  public setInternalVisibility(visibility: boolean) {
     this._visibility = visibility;
     if (this._visibility) {
       this._updateState();
     }
+  }
+
+  public componentDidMount() {
+    if (!this._containerElement) return;
+    const rect = this._containerElement.getBoundingClientRect();
+    this._width = rect.width;
+    this._left = rect.left;
+
+    this._handler
+      .listen(this._containerElement, 'mousedown', this._onMouseDown, false)
+      .listen(document, 'mousemove', this._onMouseMove, { passive: true })
+      .listen(document, 'mouseup', this._onMouseUp, false)
+      .listen(this._containerElement, 'mouseenter', this._onMouseEnter, { passive: true })
+      .listen(this._containerElement, 'mouseleave', this._onMouseLeave, { passive: true })
+      .listen(this.props.api, 'durationchange', this._onDurationChange, false)
+      .listen(this.props.api, 'timeupdate', this._onTimeUpdate, false)
+      .listen(this.props.api, 'progress', this._onProgress, false)
+      .listen(this.props.api, 'resize', this._onResize, false);
+    this._updateState();
+  }
+  
+  public componentWillUnmount() {
+    this._handler.removeAll();
+  }
+
+  public render(): JSX.Element {
+    const containerRef = (el?: Element) => this._containerElement = el;
+    const progressBarRef = (el?: Element) => this._progressBarElement = el;
+    const scrubberRef = (el?: Element) => this._scrubberElement = el;
+    const playRef = (el?: Element) => this._playElement = el;
+    const loadRef = (el?: Element) => this._loadElement = el;
+    const hoverRef = (el?: Element) => this._hoverElement = el;
+
+    return (
+      <div class="chrome-progress-bar-container" ref={containerRef}>
+        <div
+          ref={progressBarRef}
+          class="chrome-progress-bar"
+          role="slider"
+          aria-label="Seek slider"
+          aria-valuemin={0}
+          aria-valuemax={this._duration}
+          aria-valuenow={this._playTime}
+          aria-valuetext={parseAndFormatTime(this._playTime) + " of " + parseAndFormatTime(this._duration)}
+          draggable={true}
+        >
+          <div class="chrome-progress-bar-padding" />
+          <div class="chrome-progress-list">
+            <div class="chrome-play-progress chrome-swatch-background-color" ref={playRef} />
+            <div class="chrome-load-progress" ref={loadRef} />
+            <div class="chrome-hover-progress chrome-hover-progress--light" ref={hoverRef} />
+          </div>
+          <div class="chrome-scrubber-container" ref={scrubberRef}>
+            <div class="chrome-scrubber-button chrome-swatch-background-color">
+              <div class="chrome-scrubber-pull-indicator" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   private _onDurationChange(e: DurationChangeEvent) {
@@ -147,66 +209,5 @@ export class ChromeProgressBarComponent extends Component<IChromeProgressBarProp
       this._progressBarElement.setAttribute("aria-valuenow", this._playTime + '');
       this._progressBarElement.setAttribute("aria-valuetext", parseAndFormatTime(this._playTime) + " of " + parseAndFormatTime(this._duration));
     }
-  }
-
-  componentDidMount() {
-    if (!this._containerElement) return;
-    const rect = this._containerElement.getBoundingClientRect();
-    this._width = rect.width;
-    this._left = rect.left;
-
-    this._handler
-      .listen(this._containerElement, 'mousedown', this._onMouseDown, false)
-      .listen(document, 'mousemove', this._onMouseMove, { passive: true })
-      .listen(document, 'mouseup', this._onMouseUp, false)
-      .listen(this._containerElement, 'mouseenter', this._onMouseEnter, { passive: true })
-      .listen(this._containerElement, 'mouseleave', this._onMouseLeave, { passive: true })
-      .listen(this.props.api, 'durationchange', this._onDurationChange, false)
-      .listen(this.props.api, 'timeupdate', this._onTimeUpdate, false)
-      .listen(this.props.api, 'progress', this._onProgress, false)
-      .listen(this.props.api, 'resize', this._onResize, false);
-    this._updateState();
-  }
-  
-  componentWillUnmount() {
-    this._handler.removeAll();
-  }
-
-  render(): JSX.Element {
-    const containerRef = (el?: Element) => this._containerElement = el;
-    const progressBarRef = (el?: Element) => this._progressBarElement = el;
-    const scrubberRef = (el?: Element) => this._scrubberElement = el;
-    const playRef = (el?: Element) => this._playElement = el;
-    const loadRef = (el?: Element) => this._loadElement = el;
-    const hoverRef = (el?: Element) => this._hoverElement = el;
-
-    return (
-      <div class="chrome-progress-bar-container" ref={containerRef}>
-        <div
-          ref={progressBarRef}
-          class="chrome-progress-bar"
-          role="slider"
-          aria-label="Seek slider"
-          aria-valuemin={0}
-          aria-valuemax={this._duration}
-          aria-valuenow={this._playTime}
-          aria-valuetext={parseAndFormatTime(this._playTime) + " of " + parseAndFormatTime(this._duration)}
-          draggable={true}
-        >
-          <div class="chrome-progress-bar-padding"></div>
-          <div class="chrome-progress-list">
-            <div class="chrome-play-progress chrome-swatch-background-color" ref={playRef}></div>
-            <div class="chrome-load-progress" ref={loadRef}></div>
-            <div class="chrome-hover-progress chrome-hover-progress--light" ref={hoverRef}></div>
-          </div>
-          <div class="chrome-scrubber-container" ref={scrubberRef}>
-            <div class="chrome-scrubber-button chrome-swatch-background-color">
-              <div class="chrome-scrubber-pull-indicator">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
   }
 }

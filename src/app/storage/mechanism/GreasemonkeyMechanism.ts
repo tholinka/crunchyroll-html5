@@ -1,26 +1,11 @@
-import { IMechanism, StorageTestAvailabilityKey } from "./IMechanism";
-import { StorageError } from "../StorageError";
 import { injectable } from "inversify";
+import { StorageError } from "../StorageError";
+import { IMechanism, StorageTestAvailabilityKey } from "./IMechanism";
 
 @injectable()
 export class GreasemonkeyMechanism implements IMechanism {
-  async set(key: string, value: string): Promise<void> {
-    await GM.setValue(key, value);
-  }
 
-  async get(key: string): Promise<string | undefined> {
-    const value = await GM.getValue(key);
-    if (typeof value !== "string" && value !== undefined) {
-      throw StorageError.InvalidValue;
-    }
-    return value;
-  }
-
-  async remove(key: string): Promise<void> {
-    await GM.deleteValue(key);
-  }
-
-  static async isAvailable(): Promise<boolean> {
+  public static async isAvailable(): Promise<boolean> {
     try {
       await GM.setValue(StorageTestAvailabilityKey, '1');
       await GM.deleteValue(StorageTestAvailabilityKey);
@@ -29,8 +14,24 @@ export class GreasemonkeyMechanism implements IMechanism {
       return false;
     }
   }
+  public async set(key: string, value: string): Promise<void> {
+    await GM.setValue(key, value);
+  }
+
+  public async get(key: string): Promise<string | undefined> {
+    const value = await GM.getValue(key);
+    if (typeof value !== "string" && value !== undefined) {
+      throw StorageError.InvalidValue;
+    }
+    return value;
+  }
+
+  public async remove(key: string): Promise<void> {
+    await GM.deleteValue(key);
+  }
 }
 
+// tslint:disable-next-line:no-namespace
 declare namespace GM {
   /**
    * Deletes an existing name / value pair from the script storage.
@@ -65,6 +66,8 @@ declare namespace GM {
    * @see    {@link http://wiki.greasespot.net/GM_setValue}
    */
   function setValue(name: string, value: string): Promise<void>;
+  // tslint:disable-next-line:unified-signatures
   function setValue(name: string, value: boolean): Promise<void>;
+  // tslint:disable-next-line:unified-signatures
   function setValue(name: string, value: number): Promise<void>;
 }

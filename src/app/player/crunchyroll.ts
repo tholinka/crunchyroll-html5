@@ -1,6 +1,6 @@
-import { IMedia } from 'crunchyroll-lib/models/IMedia';
 import container from 'crunchyroll-lib/config';
 import { IHttpClient } from 'crunchyroll-lib/models/http/IHttpClient';
+import { IMedia } from 'crunchyroll-lib/models/IMedia';
 import { buildQuery } from '../utils/url';
 
 interface IVideoViewBody {
@@ -21,7 +21,7 @@ export async function trackProgress(media: IMedia, currentTime: number, elapsedT
 
   const stream = media.getStream();
 
-  let body: IVideoViewBody = {
+  const body: IVideoViewBody = {
     cbcallcount: callCount,
     h: '',
     cbelapsed: elapsedTime,

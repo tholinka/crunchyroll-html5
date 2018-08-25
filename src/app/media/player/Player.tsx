@@ -1,28 +1,26 @@
-import { h, Component, render } from 'preact';
-import { ChromelessPlayer } from './ChromelessPlayer';
-import { HlsSource } from './HlsSource';
-import { ISource } from './ISource';
-import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
-import { requestFullscreen, exitFullscreen, getFullscreenElement } from '../../utils/fullscreen';
-import { ChromeBottomComponent } from './chrome/BottomComponent';
-import { parseSimpleQuery } from '../../utils/url';
-import { IPlayerApi, PlaybackState, IVideoDetail } from './IPlayerApi';
-import { ChromelessPlayerApi } from './ChromelessPlayerApi';
-import { EventHandler } from '../../libs/events/EventHandler';
-import { BrowserEvent } from '../../libs/events/BrowserEvent';
-import { CuedThumbnailComponent } from './CuedThumbnailComponent';
-import { ChromeTooltip, IChromeTooltip } from './chrome/Tooltip';
-import { parseAndFormatTime } from '../../utils/time';
-import { IRect } from '../../utils/rect';
-import { BezelComponent } from './chrome/BezelComponent';
-import { ICON_PAUSE, ICON_PLAY, ICON_SEEK_BACK_5, ICON_VOLUME, ICON_VOLUME_HIGH, ICON_SEEK_FORWARD, ICON_SEEK_FORWARD_5, ICON_SEEK_BACK_10, ICON_SEEK_FORWARD_10, ICON_VOLUME_MUTE } from './assets';
-import { BufferComponent } from './chrome/BufferComponent';
 import { ISubtitle } from 'crunchyroll-lib/models/ISubtitle';
+import { Component, h } from 'preact';
 import { SubtitleToAss } from '../../converter/SubtitleToAss';
-import { IActionable } from '../../libs/actions/IActionable';
 import { IAction } from '../../libs/actions/IAction';
-import { PlayerAction } from './PlayerAction';
+import { IActionable } from '../../libs/actions/IActionable';
+import { BrowserEvent } from '../../libs/events/BrowserEvent';
+import { EventHandler } from '../../libs/events/EventHandler';
+import { IRect } from '../../utils/rect';
+import { parseAndFormatTime } from '../../utils/time';
+import { parseSimpleQuery } from '../../utils/url';
+import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
+import { ICON_PAUSE, ICON_PLAY, ICON_SEEK_BACK_10, ICON_SEEK_BACK_5, ICON_SEEK_FORWARD, ICON_SEEK_FORWARD_10, ICON_SEEK_FORWARD_5, ICON_VOLUME, ICON_VOLUME_HIGH, ICON_VOLUME_MUTE } from './assets';
+import { BezelComponent } from './chrome/BezelComponent';
+import { ChromeBottomComponent } from './chrome/BottomComponent';
+import { BufferComponent } from './chrome/BufferComponent';
 import { ChromeSettingsPopup } from './chrome/SettingsPopup';
+import { ChromeTooltip, IChromeTooltip } from './chrome/Tooltip';
+import { ChromelessPlayer } from './ChromelessPlayer';
+import { ChromelessPlayerApi } from './ChromelessPlayerApi';
+import { CuedThumbnailComponent } from './CuedThumbnailComponent';
+import { HlsSource } from './HlsSource';
+import { IPlayerApi, IVideoDetail, PlaybackState } from './IPlayerApi';
+import { PlayerAction } from './PlayerAction';
 
 export interface IPlayerProps {
   config?: IPlayerConfig;
@@ -95,7 +93,7 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     };
   }
 
-  getActions(): IAction[] {
+  public getActions(): IAction[] {
     if (!this._actions) {
       const api = this.getApi();
       this._actions = [
@@ -150,7 +148,7 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
         }),
         new PlayerAction("next_video", () => api.playNextVideo()),
         new PlayerAction("play_pause", () => {
-          var playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
+          const playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
           if (playing) {
             this._playSvgBezel(ICON_PAUSE);
             api.pauseVideo();
@@ -165,7 +163,7 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     return this._actions;
   }
 
-  cueVideoByConfig(config: IPlayerConfig) {
+  public cueVideoByConfig(config: IPlayerConfig) {
     if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
 
     this._config = config;
@@ -182,7 +180,7 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     this.resize();
   }
 
-  loadVideoByConfig(config: IPlayerConfig) {
+  public loadVideoByConfig(config: IPlayerConfig) {
     if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
 
     this._config = config;
@@ -201,63 +199,7 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     this.resize();
   }
 
-  private async _updateChromelessPlayer(config: IPlayerConfig) {
-    if (!this._chromelessPlayer) throw new Error("ChromelessPlayer is undefined");
-
-    this._configCued = false;
-    if (config.subtitles) {
-      const tracks: ISubtitleTrack[] = [];
-      let defaultTrack: number = -1;
-      let selectedSubtitleId: number|undefined = undefined;
-      let queries = parseSimpleQuery(location.search);
-
-      for (let i = 0; i < config.subtitles.length; i++) {
-        let useSubtitle = false;
-        if (queries.hasOwnProperty('ssid')) {
-          let id: string = queries['ssid'];
-          useSubtitle = config.subtitles[i].getId().toString() === id;
-        } else {
-          useSubtitle = config.subtitles[i].isDefault();
-        }
-        if (useSubtitle) {
-          defaultTrack = i;
-        }
-        
-        let subtitle = config.subtitles[i];
-        tracks.push({
-          label: subtitle.getTitle(),
-          getContent: async (): Promise<string> => {
-            const converter = new SubtitleToAss(subtitle);
-            return await converter.getContentAsAss();
-          }
-        });
-      }
-      this._chromelessPlayer.setSubtitleTracks(tracks);
-      this._chromelessPlayer.setSubtitleTrack(defaultTrack);
-    }
-
-    if (config.volume !== undefined) {
-      this._chromelessPlayer.setVolume(config.volume);
-    }
-
-    if (config.muted !== undefined) {
-      this._chromelessPlayer.setMuted(config.muted);
-    }
-
-    if (config.url) {
-      this._chromelessPlayer.setVideoSource(new HlsSource(config.url), config.startTime);
-    } else {
-      this._chromelessPlayer.removeVideoSource();
-    }
-    
-    if (typeof config.duration === 'number') {
-      this._chromelessPlayer.setDuration(config.duration);
-    } else {
-      this._chromelessPlayer.setDuration(NaN);
-    }
-  }
-
-  setPreview(preview: boolean): void {
+  public setPreview(preview: boolean): void {
     if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
 
     this._preview = preview;
@@ -273,25 +215,25 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     this.updateInternalAutoHide();
   }
 
-  isPreview(): boolean {
+  public isPreview(): boolean {
     return this._preview;
   }
 
-  setAutoHide(hide: boolean): void {
+  public setAutoHide(hide: boolean): void {
     this._autoHide = hide;
     this.updateInternalAutoHide();
   }
 
-  setForceHide(hide: boolean): void {
+  public setForceHide(hide: boolean): void {
     this._forceHide = hide;
     this.updateInternalAutoHide();
   }
 
-  isForceHide(): boolean {
+  public isForceHide(): boolean {
     return this._forceHide;
   }
 
-  updateInternalAutoHide(): void {
+  public updateInternalAutoHide(): void {
     if (!this._bottomComponent) throw new Error("BottomComponent is undefined");
 
     let hide = this._autoHide;
@@ -338,8 +280,257 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     }
   }
 
-  getApi(): IPlayerApi {
+  public getApi(): IPlayerApi {
     return this._api;
+  }
+
+  public isBigMode(): boolean {
+    return this._bigMode;
+  }
+
+  public setBigMode(bigMode: boolean): void {
+    this._bigMode = bigMode;
+    if (this._bigMode) {
+      this.base.classList.add("chrome-big-mode");
+    } else {
+      this.base.classList.remove("chrome-big-mode");
+    }
+
+    this.resize();
+  }
+
+  public resize() {
+    if (!this._chromelessPlayer) throw new Error("ChromelessPlayer is undefined");
+    if (!this._bottomComponent) throw new Error("BottomComponent is undefined");
+
+    this._chromelessPlayer.resize();
+
+    const rect = this.base.getBoundingClientRect();
+
+    this.setState({
+      maxPopupHeight: rect.height - 49 /* from css: .html5-video-gradient-bottom */ - 12,
+    });
+
+    const bottomRect = this._bottomComponent.base
+      .querySelector(".chrome-progress-bar-padding")!.getBoundingClientRect();
+    const nextVideoRect = this._bottomComponent.base
+      .querySelector(".chrome-next-button")!.getBoundingClientRect();
+    const sizeButtonRect = this._bottomComponent.base
+      .querySelector(".chrome-size-button")!.getBoundingClientRect();
+    const fullscreenButtonRect = this._bottomComponent.base
+      .querySelector(".chrome-fullscreen-button")!.getBoundingClientRect();
+    const volumeMuteButtonRect = this._bottomComponent.base
+      .querySelector(".chrome-mute-button")!.getBoundingClientRect();
+    const settingsMuteButtonRect = this._bottomComponent.base
+      .querySelector(".chrome-settings-button")!.getBoundingClientRect();
+
+    this._tooltipBottomRect = {
+      width: bottomRect.width,
+      height: bottomRect.height,
+      left: bottomRect.left - rect.left,
+      top: bottomRect.top - rect.top
+    };
+    this._nextVideoButtonRect = {
+      width: nextVideoRect.width,
+      height: nextVideoRect.height,
+      left: nextVideoRect.left - rect.left,
+      top: nextVideoRect.top - rect.top
+    };
+    this._sizeButtonRect = {
+      width: sizeButtonRect.width,
+      height: sizeButtonRect.height,
+      left: sizeButtonRect.left - rect.left,
+      top: sizeButtonRect.top - rect.top
+    };
+    this._fullscreenButtonRect = {
+      width: fullscreenButtonRect.width,
+      height: fullscreenButtonRect.height,
+      left: fullscreenButtonRect.left - rect.left,
+      top: fullscreenButtonRect.top - rect.top
+    };
+    this._volumeMuteButtonRect = {
+      width: volumeMuteButtonRect.width,
+      height: volumeMuteButtonRect.height,
+      left: volumeMuteButtonRect.left - rect.left,
+      top: volumeMuteButtonRect.top - rect.top
+    };
+    this._settingsButtonRect = {
+      width: settingsMuteButtonRect.width,
+      height: settingsMuteButtonRect.height,
+      left: settingsMuteButtonRect.left - rect.left,
+      top: settingsMuteButtonRect.top - rect.top
+    };
+  }
+
+  public componentDidMount() {
+    if (!this._actionElement) throw new Error("ActionElement is undefined");
+
+    if (this._chromelessPlayer) {
+      this._chromelessPlayer.setFullscreenElement(this.base);
+    }
+
+    if (this._config) {
+      this.loadVideoByConfig(this._config);
+    }
+
+    this.resize();
+
+    this._handler
+      .listen(this.base, 'mousedown', this._onMouseDown, false)
+      .listen(document, 'mouseup', this._onMouseUp, false)
+      .listen(this.base, 'mouseenter', this._onMouseMouse, false)
+      .listen(this.base, 'mousemove', this._onMouseMouse, false)
+      .listen(this.base, 'mouseleave', this._onMouseLeave, false)
+      .listen(this._actionElement, 'mousedown', this._onActionMouseDown, false)
+      .listen(this._actionElement, 'click', this._onActionClick, false)
+      .listen(this._actionElement, 'dblclick', this._onActionDoubleClick, false)
+      .listen(this._api, 'playbackstatechange', this._onPlaybackStateChange, false)
+      .listen(this._api, 'fullscreenchange', this._onFullscreenChange, false)
+      .listen(this._api, 'sizechange', this._onSizeChange, false)
+      .listen(this._api, 'loadedmetadata', this._onLoadedMetadata, false)
+      .listen(this._api, 'settingsopen', this._onSettingsOpen, false)
+      .listen(window, "resize", this.resize, { 'passive': true });
+  }
+
+  public componentWillUnmount() {
+    this._handler.removeAll();
+  }
+
+  public render({}: IPlayerProps, { maxPopupHeight }: IPlayerState): JSX.Element {
+    const chromelessRef = (el: ChromelessPlayer) => {
+      this._chromelessPlayer = el;
+      if (this.base) {
+        this._chromelessPlayer.setFullscreenElement(this.base);
+      }
+    };
+    const bottomRef = (el: ChromeBottomComponent) => this._bottomComponent = el;
+    const cuedThumbnailRef = (el: CuedThumbnailComponent) => this._cuedThumbnailComponent = el;
+    const tooltipRef = (el: ChromeTooltip) => this._tooltipComponent = el;
+    const actionRef = (el?: Element) => this._actionElement = el;
+    const bezelRef = (el: BezelComponent) => this._bezelElement = el;
+
+    const onProgressHover = (time: number, percentage: number) => this._onProgressHover(time, percentage);
+    const onProgressEndHover = () => this._onProgressEndHover();
+    const onNextVideoHover = (detail: IVideoDetail) => this._onNextVideoHover(detail);
+    const onNextVideoEndHover = () => this._onNextVideoEndHover();
+    const onSizeButtonHover = () => this._onSizeButtonHover();
+    const onSizeButtonEndHover = () => this._onSizeButtonEndHover();
+    const onFullscreenButtonHover = () => this._onFullscreenButtonHover();
+    const onFullscreenButtonEndHover = () => this._onFullscreenButtonEndHover();
+    const onVolumeMuteButtonHover = () => this._onVolumeMuteButtonHover();
+    const onVolumeMuteButtonEndHover = () => this._onVolumeMuteButtonEndHover();
+    const onSettingsButtonHover = () => this._onSettingsButtonHover();
+    const onSettingsButtonEndHover = () => this._onSettingsButtonEndHover();
+    const onCuedThumbnailClick = () => {
+      if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
+      if (this._config && this._configCued) {
+        this._updateChromelessPlayer(this._config);
+
+        this._cuedThumbnailComponent.setVisible(false);
+
+        this.setPreview(false);
+        this.setAutoHide(true);
+
+        this.resize();
+      }
+    };
+
+    const attributes = {
+      'tabindex': '0'
+    };
+
+    const className = "html5-video-player"
+      + " " + this._getStateClassName()
+      + (this._api.isLarge() ? " html5-video-player--large" : "");
+    return (
+      <div class={className} {...attributes}>
+        <ChromelessPlayer
+          ref={chromelessRef}
+          api={this.getApi() as ChromelessPlayerApi} />
+        <CuedThumbnailComponent
+          ref={cuedThumbnailRef}
+          onClick={onCuedThumbnailClick} />
+        <BufferComponent api={this.getApi()} />
+        <BezelComponent ref={bezelRef} />
+        <div
+          ref={actionRef}
+          class="html5-video-action" />
+        <ChromeTooltip ref={tooltipRef} />
+        <ChromeSettingsPopup api={this.getApi()} maxHeight={maxPopupHeight}/>
+        <div class="html5-video-gradient-bottom" />
+        <ChromeBottomComponent
+          ref={bottomRef}
+          api={this.getApi()}
+          onProgressHover={onProgressHover}
+          onProgressEndHover={onProgressEndHover}
+          onNextVideoHover={onNextVideoHover}
+          onNextVideoEndHover={onNextVideoEndHover}
+          sizeButtonVisible={this.props.sizeEnabled}
+          onSizeButtonHover={onSizeButtonHover}
+          onSizeButtonEndHover={onSizeButtonEndHover}
+          onFullscreenButtonHover={onFullscreenButtonHover}
+          onFullscreenButtonEndHover={onFullscreenButtonEndHover}
+          onVolumeMuteButtonHover={onVolumeMuteButtonHover}
+          onVolumeMuteButtonEndHover={onVolumeMuteButtonEndHover}
+          onSettingsButtonHover={onSettingsButtonHover}
+          onSettingsButtonEndHover={onSettingsButtonEndHover} />
+      </div>
+    );
+  }
+
+  private async _updateChromelessPlayer(config: IPlayerConfig) {
+    if (!this._chromelessPlayer) throw new Error("ChromelessPlayer is undefined");
+
+    this._configCued = false;
+    if (config.subtitles) {
+      const tracks: ISubtitleTrack[] = [];
+      let defaultTrack: number = -1;
+      const queries = parseSimpleQuery(location.search);
+
+      for (let i = 0; i < config.subtitles.length; i++) {
+        let useSubtitle = false;
+        if (queries.hasOwnProperty('ssid')) {
+          const id: string = queries.ssid;
+          useSubtitle = config.subtitles[i].getId().toString() === id;
+        } else {
+          useSubtitle = config.subtitles[i].isDefault();
+        }
+        if (useSubtitle) {
+          defaultTrack = i;
+        }
+        
+        const subtitle = config.subtitles[i];
+        tracks.push({
+          label: subtitle.getTitle(),
+          getContent: async (): Promise<string> => {
+            const converter = new SubtitleToAss(subtitle);
+            return await converter.getContentAsAss();
+          }
+        });
+      }
+      this._chromelessPlayer.setSubtitleTracks(tracks);
+      this._chromelessPlayer.setSubtitleTrack(defaultTrack);
+    }
+
+    if (config.volume !== undefined) {
+      this._chromelessPlayer.setVolume(config.volume);
+    }
+
+    if (config.muted !== undefined) {
+      this._chromelessPlayer.setMuted(config.muted);
+    }
+
+    if (config.url) {
+      this._chromelessPlayer.setVideoSource(new HlsSource(config.url), config.startTime);
+    } else {
+      this._chromelessPlayer.removeVideoSource();
+    }
+    
+    if (typeof config.duration === 'number') {
+      this._chromelessPlayer.setDuration(config.duration);
+    } else {
+      this._chromelessPlayer.setDuration(NaN);
+    }
   }
 
   private _onSizeChange(): void {
@@ -427,21 +618,6 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
     if (unstarted) {
       this.resize();
     }
-  }
-
-  isBigMode(): boolean {
-    return this._bigMode;
-  }
-
-  setBigMode(bigMode: boolean): void {
-    this._bigMode = bigMode;
-    if (this._bigMode) {
-      this.base.classList.add("chrome-big-mode");
-    } else {
-      this.base.classList.remove("chrome-big-mode");
-    }
-
-    this.resize();
   }
 
   private _onFullscreenChange() {
@@ -620,8 +796,8 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
       this._actionClickTimer = undefined;
       this._actionClickExecuted = true;
 
-      const playing = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
-      if (playing) {
+      const isPlaying = api.getPreferredPlaybackState() === PlaybackState.PLAYING;
+      if (isPlaying) {
         api.pauseVideo();
       } else {
         api.playVideo();
@@ -660,184 +836,5 @@ export class Player extends Component<IPlayerProps, IPlayerState> implements IAc
 
   private _onLoadedMetadata() {
     this.setPreview(false);
-  }
-
-  resize() {
-    if (!this._chromelessPlayer) throw new Error("ChromelessPlayer is undefined");
-    if (!this._bottomComponent) throw new Error("BottomComponent is undefined");
-
-    this._chromelessPlayer.resize();
-
-    const rect = this.base.getBoundingClientRect();
-
-    this.setState({
-      maxPopupHeight: rect.height - 49 /* from css: .html5-video-gradient-bottom */ - 12,
-    });
-
-    const bottomRect = this._bottomComponent.base
-      .querySelector(".chrome-progress-bar-padding")!.getBoundingClientRect();
-    const nextVideoRect = this._bottomComponent.base
-      .querySelector(".chrome-next-button")!.getBoundingClientRect();
-    const sizeButtonRect = this._bottomComponent.base
-      .querySelector(".chrome-size-button")!.getBoundingClientRect();
-    const fullscreenButtonRect = this._bottomComponent.base
-      .querySelector(".chrome-fullscreen-button")!.getBoundingClientRect();
-    const volumeMuteButtonRect = this._bottomComponent.base
-      .querySelector(".chrome-mute-button")!.getBoundingClientRect();
-    const settingsMuteButtonRect = this._bottomComponent.base
-      .querySelector(".chrome-settings-button")!.getBoundingClientRect();
-
-    this._tooltipBottomRect = {
-      width: bottomRect.width,
-      height: bottomRect.height,
-      left: bottomRect.left - rect.left,
-      top: bottomRect.top - rect.top
-    };
-    this._nextVideoButtonRect = {
-      width: nextVideoRect.width,
-      height: nextVideoRect.height,
-      left: nextVideoRect.left - rect.left,
-      top: nextVideoRect.top - rect.top
-    };
-    this._sizeButtonRect = {
-      width: sizeButtonRect.width,
-      height: sizeButtonRect.height,
-      left: sizeButtonRect.left - rect.left,
-      top: sizeButtonRect.top - rect.top
-    };
-    this._fullscreenButtonRect = {
-      width: fullscreenButtonRect.width,
-      height: fullscreenButtonRect.height,
-      left: fullscreenButtonRect.left - rect.left,
-      top: fullscreenButtonRect.top - rect.top
-    };
-    this._volumeMuteButtonRect = {
-      width: volumeMuteButtonRect.width,
-      height: volumeMuteButtonRect.height,
-      left: volumeMuteButtonRect.left - rect.left,
-      top: volumeMuteButtonRect.top - rect.top
-    };
-    this._settingsButtonRect = {
-      width: settingsMuteButtonRect.width,
-      height: settingsMuteButtonRect.height,
-      left: settingsMuteButtonRect.left - rect.left,
-      top: settingsMuteButtonRect.top - rect.top
-    };
-  }
-
-  componentDidMount() {
-    if (!this._actionElement) throw new Error("ActionElement is undefined");
-
-    if (this._chromelessPlayer) {
-      this._chromelessPlayer.setFullscreenElement(this.base);
-    }
-
-    if (this._config) {
-      this.loadVideoByConfig(this._config);
-    }
-
-    this.resize();
-
-    this._handler
-      .listen(this.base, 'mousedown', this._onMouseDown, false)
-      .listen(document, 'mouseup', this._onMouseUp, false)
-      .listen(this.base, 'mouseenter', this._onMouseMouse, false)
-      .listen(this.base, 'mousemove', this._onMouseMouse, false)
-      .listen(this.base, 'mouseleave', this._onMouseLeave, false)
-      .listen(this._actionElement, 'mousedown', this._onActionMouseDown, false)
-      .listen(this._actionElement, 'click', this._onActionClick, false)
-      .listen(this._actionElement, 'dblclick', this._onActionDoubleClick, false)
-      .listen(this._api, 'playbackstatechange', this._onPlaybackStateChange, false)
-      .listen(this._api, 'fullscreenchange', this._onFullscreenChange, false)
-      .listen(this._api, 'sizechange', this._onSizeChange, false)
-      .listen(this._api, 'loadedmetadata', this._onLoadedMetadata, false)
-      .listen(this._api, 'settingsopen', this._onSettingsOpen, false)
-      .listen(window, "resize", this.resize, { 'passive': true });
-  }
-
-  componentWillUnmount() {
-    this._handler.removeAll();
-  }
-
-  render({}: IPlayerProps, { maxPopupHeight }: IPlayerState): JSX.Element {
-    const chromelessRef = (el: ChromelessPlayer) => {
-      this._chromelessPlayer = el;
-      if (this.base) {
-        this._chromelessPlayer.setFullscreenElement(this.base);
-      }
-    };
-    const bottomRef = (el: ChromeBottomComponent) => this._bottomComponent = el;
-    const cuedThumbnailRef = (el: CuedThumbnailComponent) => this._cuedThumbnailComponent = el;
-    const tooltipRef = (el: ChromeTooltip) => this._tooltipComponent = el;
-    const actionRef = (el?: Element) => this._actionElement = el;
-    const bezelRef = (el: BezelComponent) => this._bezelElement = el;
-
-    const onProgressHover = (time: number, percentage: number) => this._onProgressHover(time, percentage);
-    const onProgressEndHover = () => this._onProgressEndHover();
-    const onNextVideoHover = (detail: IVideoDetail) => this._onNextVideoHover(detail);
-    const onNextVideoEndHover = () => this._onNextVideoEndHover();
-    const onSizeButtonHover = () => this._onSizeButtonHover();
-    const onSizeButtonEndHover = () => this._onSizeButtonEndHover();
-    const onFullscreenButtonHover = () => this._onFullscreenButtonHover();
-    const onFullscreenButtonEndHover = () => this._onFullscreenButtonEndHover();
-    const onVolumeMuteButtonHover = () => this._onVolumeMuteButtonHover();
-    const onVolumeMuteButtonEndHover = () => this._onVolumeMuteButtonEndHover();
-    const onSettingsButtonHover = () => this._onSettingsButtonHover();
-    const onSettingsButtonEndHover = () => this._onSettingsButtonEndHover();
-    const onCuedThumbnailClick = () => {
-      if (!this._cuedThumbnailComponent) throw new Error("CuedThumbnailComponent is undefined");
-      if (this._config && this._configCued) {
-        this._updateChromelessPlayer(this._config);
-
-        this._cuedThumbnailComponent.setVisible(false);
-
-        this.setPreview(false);
-        this.setAutoHide(true);
-
-        this.resize();
-      }
-    };
-
-    const attributes = {
-      'tabindex': '0'
-    };
-
-    const className = "html5-video-player"
-      + " " + this._getStateClassName()
-      + (this._api.isLarge() ? " html5-video-player--large" : "");
-    return (
-      <div class={className} {...attributes}>
-        <ChromelessPlayer
-          ref={chromelessRef}
-          api={this.getApi() as ChromelessPlayerApi}></ChromelessPlayer>
-        <CuedThumbnailComponent
-          ref={cuedThumbnailRef}
-          onClick={onCuedThumbnailClick}></CuedThumbnailComponent>
-        <BufferComponent api={this.getApi()}></BufferComponent>
-        <BezelComponent ref={bezelRef}></BezelComponent>
-        <div
-          ref={actionRef}
-          class="html5-video-action"></div>
-        <ChromeTooltip ref={tooltipRef}></ChromeTooltip>
-        <ChromeSettingsPopup api={this.getApi()} maxHeight={maxPopupHeight}/>
-        <div class="html5-video-gradient-bottom"></div>
-        <ChromeBottomComponent
-          ref={bottomRef}
-          api={this.getApi()}
-          onProgressHover={onProgressHover}
-          onProgressEndHover={onProgressEndHover}
-          onNextVideoHover={onNextVideoHover}
-          onNextVideoEndHover={onNextVideoEndHover}
-          sizeButtonVisible={this.props.sizeEnabled}
-          onSizeButtonHover={onSizeButtonHover}
-          onSizeButtonEndHover={onSizeButtonEndHover}
-          onFullscreenButtonHover={onFullscreenButtonHover}
-          onFullscreenButtonEndHover={onFullscreenButtonEndHover}
-          onVolumeMuteButtonHover={onVolumeMuteButtonHover}
-          onVolumeMuteButtonEndHover={onVolumeMuteButtonEndHover}
-          onSettingsButtonHover={onSettingsButtonHover}
-          onSettingsButtonEndHover={onSettingsButtonEndHover}></ChromeBottomComponent>
-      </div>
-    );
   }
 }

@@ -1,8 +1,9 @@
-import { h, Component } from "preact";
-import { IPlayerApi, VolumeChangeEvent } from "../IPlayerApi";
-import { EventHandler } from "../../../libs/events/EventHandler";
+import { Component, h } from "preact";
 import { BrowserEvent } from "../../../libs/events/BrowserEvent";
+import { EventHandler } from "../../../libs/events/EventHandler";
 import { IRect } from "../../../utils/rect";
+import { IPlayerApi } from "../IPlayerApi";
+import { VolumeChangeEvent } from "../VolumeChangeEvent";
 
 export interface IVolumeSliderComponentProps {
   api: IPlayerApi;
@@ -39,6 +40,100 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
       this._value = volume;
     }
     this._muted = props.api.isMuted();
+  }
+
+  public getValue(): number {
+    if (!this._value) return 0;
+    return this._value;
+  }
+
+  public getMinValue(): number {
+    return this._minValue;
+  }
+
+  public getMaxValue(): number {
+    return this._maxValue;
+  }
+
+  public setValue(value: number, internal: boolean = false): void {
+    if (this._value === value) return; // No need to update
+    if (value < this.getMinValue() ||value > this.getMaxValue())
+      throw new RangeError("Value is out of bounds.");
+    this._value = value;
+
+    this.props.api.setVolume(value);
+    if (this.props.api.isMuted()) {
+      this.props.api.unmute();
+    }
+  }
+
+  public setMinValue(minValue: number, internal: boolean = false): void {
+    if (this._minValue === minValue) return;
+    const maxValue = this.getMaxValue();
+    if (minValue >= maxValue)
+      throw new RangeError("Minimum value can't be bigger than or equal to the maximum value.");
+
+    this._minValue = minValue;
+
+    // Restrain value if it's outside bounds.
+    this.setValue(Math.min(Math.max(minValue, this.getValue()), maxValue), true);
+  }
+
+  public setMaxValue(maxValue: number, internal: boolean = false): void {
+    if (this._maxValue === maxValue) return;
+    const minValue = this.getMinValue();
+    if (maxValue <= minValue)
+      throw new RangeError("Maximum value can't be less than or equal to the minimum value.");
+
+    this._maxValue = maxValue;
+    
+    // Restrain value if it's outside bounds.
+    this.setValue(Math.min(Math.max(minValue, this.getValue()), maxValue), true);
+  }
+
+  public componentDidMount() {
+    this._handler
+      .listen(this.base, 'mousedown', this._onMouseDown, false)
+      .listen(document, 'mousemove', this._onMouseMove, false)
+      .listen(document, 'mouseup', this._onMouseUp, false)
+      .listen(this.base, 'keydown', this._onKeyDown, false)
+      .listen(this.props.api, 'volumechange', this._onVolumeChange, false)
+      .listen(this.props.api, 'resize', this._onResize, false);
+
+    this._value = this.props.api.getVolume();
+    this._muted = this.props.api.isMuted();
+    this._onResize();
+  }
+
+  public componentWillUnmount() {
+    this._handler.removeAll();
+  }
+
+  public render(props: IVolumeSliderComponentProps): JSX.Element {
+    const sliderRef = (el?: Element) => this._sliderElement = el;
+    const handleRef = (el?: Element) => this._handleElement = el as HTMLElement;
+
+    const attributes = {
+      'tabindex': '0'
+    };
+    return (
+      <div
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
+        class="chrome-volume-panel"
+        role="slider"
+        {...attributes}>
+        <div
+          ref={sliderRef}
+          class="chrome-volume-slider"
+          draggable={true}
+          style="touchAction: none;">
+          <div
+            ref={handleRef}
+            class="chrome-volume-slider-handle" />
+        </div>
+      </div>
+    );
   }
 
   private _onVolumeChange(e: VolumeChangeEvent): void {
@@ -158,99 +253,5 @@ export class VolumeSliderComponent extends Component<IVolumeSliderComponentProps
     const percentage = (value - minValue)/(maxValue - minValue);
 
     this._handleElement.style.left = (percentage * width) + 'px';
-  }
-
-  getValue(): number {
-    if (!this._value) return 0;
-    return this._value;
-  }
-
-  getMinValue(): number {
-    return this._minValue;
-  }
-
-  getMaxValue(): number {
-    return this._maxValue;
-  }
-
-  setValue(value: number, internal: boolean = false): void {
-    if (this._value === value) return; // No need to update
-    if (value < this.getMinValue() ||value > this.getMaxValue())
-      throw new RangeError("Value is out of bounds.");
-    this._value = value;
-
-    this.props.api.setVolume(value);
-    if (this.props.api.isMuted()) {
-      this.props.api.unmute();
-    }
-  }
-
-  setMinValue(minValue: number, internal: boolean = false): void {
-    if (this._minValue === minValue) return;
-    const maxValue = this.getMaxValue();
-    if (minValue >= maxValue)
-      throw new RangeError("Minimum value can't be bigger than or equal to the maximum value.");
-
-    this._minValue = minValue;
-
-    // Restrain value if it's outside bounds.
-    this.setValue(Math.min(Math.max(minValue, this.getValue()), maxValue), true);
-  }
-
-  setMaxValue(maxValue: number, internal: boolean = false): void {
-    if (this._maxValue === maxValue) return;
-    const minValue = this.getMinValue();
-    if (maxValue <= minValue)
-      throw new RangeError("Maximum value can't be less than or equal to the minimum value.");
-
-    this._maxValue = maxValue;
-    
-    // Restrain value if it's outside bounds.
-    this.setValue(Math.min(Math.max(minValue, this.getValue()), maxValue), true);
-  }
-
-  componentDidMount() {
-    this._handler
-      .listen(this.base, 'mousedown', this._onMouseDown, false)
-      .listen(document, 'mousemove', this._onMouseMove, false)
-      .listen(document, 'mouseup', this._onMouseUp, false)
-      .listen(this.base, 'keydown', this._onKeyDown, false)
-      .listen(this.props.api, 'volumechange', this._onVolumeChange, false)
-      .listen(this.props.api, 'resize', this._onResize, false);
-
-    this._value = this.props.api.getVolume();
-    this._muted = this.props.api.isMuted();
-    this._onResize();
-  }
-
-  componentWillUnmount() {
-    this._handler.removeAll();
-  }
-
-  render(props: IVolumeSliderComponentProps): JSX.Element {
-    const sliderRef = (el?: Element) => this._sliderElement = el;
-    const handleRef = (el?: Element) => this._handleElement = el as HTMLElement;
-
-    const attributes = {
-      'tabindex': '0'
-    };
-    return (
-      <div
-        onFocus={props.onFocus}
-        onBlur={props.onBlur}
-        class="chrome-volume-panel"
-        role="slider"
-        {...attributes}>
-        <div
-          ref={sliderRef}
-          class="chrome-volume-slider"
-          draggable={true}
-          style="touchAction: none;">
-          <div
-            ref={handleRef}
-            class="chrome-volume-slider-handle"></div>
-        </div>
-      </div>
-    );
   }
 }

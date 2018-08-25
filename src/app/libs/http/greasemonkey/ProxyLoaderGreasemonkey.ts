@@ -1,7 +1,7 @@
 import { Event } from '../../events/Event';
 import { CrossXMLHttpRequest } from "./CrossXMLHttpRequest";
 
-export interface LoaderStats extends Hls.LoaderStats {
+export interface ILoaderStats extends Hls.LoaderStats {
   aborted: boolean;
   retry: number;
   loaded: number;
@@ -31,15 +31,15 @@ export class ProxyLoaderGreasemonkey {
   private stats?: IStats;
   private retryDelay?: number;
 
-  destroy(): void {
+  public destroy(): void {
     this.abort();
     this.loader = undefined;
   }
 
-  abort(): void {
+  public abort(): void {
     if (!this.stats) throw new Error("Stats is undefined");
 
-    let loader = this.loader;
+    const loader = this.loader;
     if (loader && loader.readyState !== 4) {
       this.stats.aborted = true;
       loader.abort();
@@ -56,7 +56,7 @@ export class ProxyLoaderGreasemonkey {
     }
   }
 
-  load(context: Hls.LoaderContext, config: Hls.LoaderConfig, callbacks: Hls.LoaderCallbacks) {
+  public load(context: Hls.LoaderContext, config: Hls.LoaderConfig, callbacks: Hls.LoaderCallbacks) {
     this.context = context;
     this.config = config;
     this.callbacks = callbacks;
@@ -65,26 +65,27 @@ export class ProxyLoaderGreasemonkey {
     this.loadInternal();
   }
 
-  loadInternal() {
+  public loadInternal() {
     if (!this.stats) throw new Error("Stats is undefined");
     if (!this.context) throw new Error("Context is undefined");
     if (!this.callbacks) throw new Error("Callbacks is undefined");
     if (!this.config) throw new Error("Config is undefined");
 
-    let xhr, context = this.context;
+    let xhr: CrossXMLHttpRequest|XMLHttpRequest;
+    const context = this.context;
     if (useGreasemonkeyProxy) {
       xhr = this.loader = new CrossXMLHttpRequest();
     } else {
       xhr = this.loader = new XMLHttpRequest();
     }
 
-    let stats = this.stats;
+    const stats = this.stats;
     stats.tfirst = 0;
     stats.loaded = 0;
 
     try {
       if (!xhr.readyState)
-        xhr.open('GET', context.url, true);
+        (xhr as CrossXMLHttpRequest).open('GET', context.url, true);
     } catch (e) {
       // IE11 throws an exception on xhr.open if attempting to access an HTTP resource over HTTPS
       this.callbacks.onError({ code: xhr.status, text: e.message }, context);
@@ -102,6 +103,95 @@ export class ProxyLoaderGreasemonkey {
     // setup timeout before we perform request
     this.requestTimeout = window.setTimeout(this.loadtimeout.bind(this), this.config.timeout);
     (xhr as any).send();
+  }
+
+  public readystatechange(event: Event) {
+    if (!this.stats) throw new Error("Stats is undefined");
+    if (!this.context) throw new Error("Context is undefined");
+    if (!this.callbacks) throw new Error("Callbacks is undefined");
+    if (!this.config) throw new Error("Config is undefined");
+    if (this.retryDelay === undefined) throw new Error("Config is undefined");
+
+    const xhr = event.currentTarget as CrossXMLHttpRequest;
+    const readyState = xhr.readyState;
+    const stats = this.stats;
+    const context = this.context;
+    const config = this.config;
+
+    // don't proceed if xhr has been aborted
+    if (stats.aborted)
+      return;
+
+    // >= HEADERS_RECEIVED
+    if (readyState >= 2) {
+      // clear xhr timeout and rearm it if readyState less than 4
+      if (this.requestTimeout !== undefined) {
+        window.clearTimeout(this.requestTimeout);
+      }
+      if (stats.tfirst === 0)
+        stats.tfirst = Math.max(performance.now(), stats.trequest);
+
+      if (readyState === 4) {
+        const status = xhr.status;
+        // http status between 200 to 299 are all successful
+        if (status >= 200 && status < 300) {
+          stats.tload = Math.max(stats.tfirst || 0, performance.now());
+          let data;
+          let len;
+          if (context.responseType === 'arraybuffer') {
+            data = xhr.response;
+            len = data.byteLength;
+          } else {
+            data = xhr.responseText;
+            len = data.length;
+          }
+          stats.loaded = stats.total = len;
+          const response = { url: xhr.responseURL, data };
+          this.callbacks.onSuccess(response, stats as any as Hls.LoaderStats, context);
+        } else if (useGreasemonkeyProxy || status !== 0) {
+          // if max nb of retries reached or if http status between 400 and 499 (such error cannot be recovered, retrying is useless), return error
+          if (stats.retry >= config.maxRetry || (status >= 400 && status < 499)) {
+            this.callbacks.onError({ code: status, text: xhr.statusText }, context);
+          } else {
+            // retry
+            // aborts and resets internal state
+            this.destroy();
+            // schedule retry
+            this.retryTimeout = window.setTimeout(this.loadInternal.bind(this), this.retryDelay);
+            // set exponential backoff
+            this.retryDelay = Math.min(2 * this.retryDelay, config.maxRetryDelay);
+            stats.retry++;
+          }
+        }
+      } else {
+        // readyState >= 2 AND readyState !==4 (readyState = HEADERS_RECEIVED || LOADING) rearm timeout as xhr not finished yet
+        this.requestTimeout = window.setTimeout(this.loadtimeout.bind(this), config.timeout);
+      }
+    }
+  }
+
+  public loadtimeout () {
+    if (!this.context) throw new Error("Context is undefined");
+    if (!this.callbacks) throw new Error("Callbacks is undefined");
+
+    this.callbacks.onTimeout(this.stats as any as Hls.LoaderStats, this.context);
+  }
+
+  public loadprogress(event: Event) {
+    if (!this.stats) throw new Error("Stats is undefined");
+    if (!this.callbacks) throw new Error("Callbacks is undefined");
+
+    const stats = this.stats;
+
+    stats.loaded = (event as any).loaded as number;
+    if ((event as any).lengthComputable as boolean)
+      stats.total = (event as any).total as number;
+
+    const onProgress = this.callbacks.onProgress;
+    if (onProgress) {
+      // third arg is to provide on progress data
+      onProgress(stats as any, this.context as any, null as any);
+    }
   }
 
   private _error(event: Event): void {
@@ -126,93 +216,5 @@ export class ProxyLoaderGreasemonkey {
     this.stats = { trequest: performance.now(), retry: 0 };
     this.retryDelay = this.config.retryDelay;
     this.loadInternal();
-  }
-
-  readystatechange(event: Event) {
-    if (!this.stats) throw new Error("Stats is undefined");
-    if (!this.context) throw new Error("Context is undefined");
-    if (!this.callbacks) throw new Error("Callbacks is undefined");
-    if (!this.config) throw new Error("Config is undefined");
-    if (this.retryDelay === undefined) throw new Error("Config is undefined");
-
-    let xhr = event.currentTarget as CrossXMLHttpRequest,
-      readyState = xhr.readyState,
-      stats = this.stats,
-      context = this.context,
-      config = this.config;
-
-    // don't proceed if xhr has been aborted
-    if (stats.aborted)
-      return;
-
-    // >= HEADERS_RECEIVED
-    if (readyState >= 2) {
-      // clear xhr timeout and rearm it if readyState less than 4
-      if (this.requestTimeout !== undefined) {
-        window.clearTimeout(this.requestTimeout);
-      }
-      if (stats.tfirst === 0)
-        stats.tfirst = Math.max(performance.now(), stats.trequest);
-
-      if (readyState === 4) {
-        let status = xhr.status;
-        // http status between 200 to 299 are all successful
-        if (status >= 200 && status < 300) {
-          stats.tload = Math.max(stats.tfirst || 0, performance.now());
-          let data, len;
-          if (context.responseType === 'arraybuffer') {
-            data = xhr.response;
-            len = data.byteLength;
-          } else {
-            data = xhr.responseText;
-            len = data.length;
-          }
-          stats.loaded = stats.total = len;
-          let response = { url: xhr.responseURL, data: data };
-          this.callbacks.onSuccess(response, stats as any as Hls.LoaderStats, context);
-        } else if (useGreasemonkeyProxy || status !== 0) {
-          // if max nb of retries reached or if http status between 400 and 499 (such error cannot be recovered, retrying is useless), return error
-          if (stats.retry >= config.maxRetry || (status >= 400 && status < 499)) {
-            this.callbacks.onError({ code: status, text: xhr.statusText }, context);
-          } else {
-            // retry
-            // aborts and resets internal state
-            this.destroy();
-            // schedule retry
-            this.retryTimeout = window.setTimeout(this.loadInternal.bind(this), this.retryDelay);
-            // set exponential backoff
-            this.retryDelay = Math.min(2 * this.retryDelay, config.maxRetryDelay);
-            stats.retry++;
-          }
-        }
-      } else {
-        // readyState >= 2 AND readyState !==4 (readyState = HEADERS_RECEIVED || LOADING) rearm timeout as xhr not finished yet
-        this.requestTimeout = window.setTimeout(this.loadtimeout.bind(this), config.timeout);
-      }
-    }
-  }
-
-  loadtimeout () {
-    if (!this.context) throw new Error("Context is undefined");
-    if (!this.callbacks) throw new Error("Callbacks is undefined");
-
-    this.callbacks.onTimeout(this.stats as any as Hls.LoaderStats, this.context);
-  }
-
-  loadprogress(event: Event) {
-    if (!this.stats) throw new Error("Stats is undefined");
-    if (!this.callbacks) throw new Error("Callbacks is undefined");
-
-    let stats = this.stats;
-
-    stats.loaded = (event as any).loaded as number;
-    if ((event as any).lengthComputable as boolean)
-      stats.total = (event as any).total as number;
-
-    let onProgress = this.callbacks.onProgress;
-    if (onProgress) {
-      // third arg is to provide on progress data
-      (onProgress as Function)(stats, this.context, null);
-    }
   }
 }

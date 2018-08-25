@@ -1,42 +1,5 @@
-import { ISubtitleTrack } from "../subtitles/ISubtitleTrack";
 import { EventTarget } from '../../libs/events/EventTarget';
-import { Event } from '../../libs/events/Event';
-
-export class PlaybackStateChangeEvent extends Event {
-  constructor(public state: PlaybackState) {
-    super('playbackstatechange');
-  }
-}
-
-export class SeekEvent extends Event {
-  constructor(public time: number) {
-    super('seek');
-  }
-}
-
-export class TimeUpdateEvent extends Event {
-  constructor(public time: number) {
-    super('timeupdate');
-  }
-}
-
-export class DurationChangeEvent extends Event {
-  constructor(public duration: number) {
-    super('durationchange');
-  }
-}
-
-export class VolumeChangeEvent extends Event {
-  constructor(public volume: number, public muted: boolean) {
-    super('volumechange');
-  }
-}
-
-export class NextVideoEvent extends Event {
-  constructor(public detail: IVideoDetail) {
-    super('nextvideo');
-  }
-}
+import { ISubtitleTrack } from "../subtitles/ISubtitleTrack";
 
 export enum PlaybackState {
   UNSTARTED,

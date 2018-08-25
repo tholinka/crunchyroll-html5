@@ -7,7 +7,7 @@ export function setWorkerUrl(url: string) {
 }
 
 export function addFile(filename: string, url: string) {
-  files[filename] = { url: url };
+  files[filename] = { url };
 }
 
 export function getWorkerUrl() {

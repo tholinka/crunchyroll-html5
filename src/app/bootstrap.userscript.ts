@@ -1,16 +1,16 @@
-import { binaryToBlob } from "./utils/blob";
-import { addFile, setWorkerUrl } from "./SubtitleEngineLoader";
+import container from "../config/inversify.config";
 import { runBootstrap } from './bootstrap';
 import { setCrossHttpClient } from "./config";
 import { GreasemonkeyHttpClient } from "./http/GreasemonkeyHttpClient";
-import { setPlaylistLoader } from "./playlistLoader";
 import { ProxyLoaderGreasemonkey } from "./libs/http/greasemonkey/ProxyLoaderGreasemonkey";
-import container from "../config/inversify.config";
-import { IMechanism, IMechanismSymbol } from "./storage/mechanism/IMechanism";
+import { setPlaylistLoader } from "./playlistLoader";
+import { EmptyMechanism } from "./storage/mechanism/EmptyMechanism";
 import { GreasemonkeyMechanism } from "./storage/mechanism/GreasemonkeyMechanism";
+import { IMechanism, IMechanismSymbol } from "./storage/mechanism/IMechanism";
 import { LegacyGreasemonkeyMechanism } from "./storage/mechanism/LegacyGreasemonkeyMechanism";
 import { LocalStorageMechanism } from "./storage/mechanism/LocalStorageMechanism";
-import { EmptyMechanism } from "./storage/mechanism/EmptyMechanism";
+import { addFile, setWorkerUrl } from "./SubtitleEngineLoader";
+import { binaryToBlob } from "./utils/blob";
 
 setCrossHttpClient(GreasemonkeyHttpClient);
 

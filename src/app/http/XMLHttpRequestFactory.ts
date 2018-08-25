@@ -2,14 +2,15 @@ import { IXMLHttpRequestFactory } from 'crunchyroll-lib/models/http/IXMLHttpRequ
 
 declare function XPCNativeWrapper<T>(obj: T): T;
 
-declare module window {
+// tslint:disable-next-line:no-namespace
+declare namespace window {
   const wrappedJSObject: {
     XMLHttpRequest: { new(): XMLHttpRequest }
   };
 }
 
 export class XMLHttpRequestFactory implements IXMLHttpRequestFactory {
-  create(): XMLHttpRequest {
+  public create(): XMLHttpRequest {
     try {
       return XPCNativeWrapper<XMLHttpRequest>(new window.wrappedJSObject.XMLHttpRequest());
     } catch (e) {

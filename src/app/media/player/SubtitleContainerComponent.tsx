@@ -1,8 +1,4 @@
-import { h, Component } from 'preact';
-import { ISource } from './ISource';
-import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
-import { EventHandler } from '../../libs/events/EventHandler';
-import { BrowserEvent } from '../../libs/events/BrowserEvent';
+import { Component, h } from 'preact';
 import { ISubtitleEngine } from '../subtitles/ISubtitleEngine';
 
 export interface ISubtitleContainerProps {
@@ -14,14 +10,14 @@ export class SubtitleContainerComponent extends Component<ISubtitleContainerProp
     super();
   }
   
-  render(props: ISubtitleContainerProps): JSX.Element {
+  public render(props: ISubtitleContainerProps): JSX.Element {
     const ref = (element?: Element) => {
       if (!element) return;
       
       element.appendChild(props.engine.getElement());
     };
     return (
-      <div class="html5-subtitle-container" ref={ ref }></div>
+      <div class="html5-subtitle-container" ref={ ref } />
     );
   }
 }

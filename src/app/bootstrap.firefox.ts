@@ -1,13 +1,13 @@
-import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
+import container from "../config/inversify.config";
 import { runBootstrap } from './bootstrap';
 import { setCrossHttpClient } from "./config";
 import { GreasemonkeyHttpClient } from "./http/GreasemonkeyHttpClient";
 import { ProxyLoaderGreasemonkey } from "./libs/http/greasemonkey/ProxyLoaderGreasemonkey";
 import { setPlaylistLoader } from "./playlistLoader";
-import { LocalStorageMechanism } from "./storage/mechanism/LocalStorageMechanism";
-import { IMechanismSymbol, IMechanism } from "./storage/mechanism/IMechanism";
-import container from "../config/inversify.config";
 import { EmptyMechanism } from "./storage/mechanism/EmptyMechanism";
+import { IMechanism, IMechanismSymbol } from "./storage/mechanism/IMechanism";
+import { LocalStorageMechanism } from "./storage/mechanism/LocalStorageMechanism";
+import { addFile, fonts, setWorkerUrl } from "./SubtitleEngineLoader";
 
 function getURL(path: string): string {
   return "chrome://crunchyroll-html5/content" + path;

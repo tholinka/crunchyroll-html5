@@ -1,8 +1,9 @@
-import { h, Component, render } from "preact";
-import { IPlayerApi, VolumeChangeEvent } from "../IPlayerApi";
-import { EventHandler } from "../../../libs/events/EventHandler";
+import { Component, h, render } from "preact";
 import { SvgTranslateAnimation } from "../../../libs/animation/SvgTranslateAnimation";
-import { ICON_VOLUME, ICON_VOLUME_HIGH, ICON_VOLUME_MUTE, ICON_VOLUME_LOW } from "../assets";
+import { EventHandler } from "../../../libs/events/EventHandler";
+import { ICON_VOLUME, ICON_VOLUME_HIGH, ICON_VOLUME_LOW, ICON_VOLUME_MUTE } from "../assets";
+import { IPlayerApi } from "../IPlayerApi";
+import { VolumeChangeEvent } from "../VolumeChangeEvent";
 
 export interface IVolumeMuteButtonProps {
   api: IPlayerApi;
@@ -32,6 +33,96 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
   private _state: VolumeMuteState = VolumeMuteState.HIGH;
 
   private _mouseover: boolean = false;
+
+  public componentDidMount() {
+    if (!this._speakerPathElement || !this._maskPathElement || !this._slashMaskPathElement) return;
+    this._animation = new SvgTranslateAnimation(this._speakerPathElement, [this._maskPathElement, this._slashMaskPathElement]);
+
+    this._handler
+      .listen(this.base, 'mouseover', this._onMouseOver, { passive: true })
+      .listen(this.base, 'mouseout', this._onMouseOut, { passive: true })
+      .listen(this._animation, 'animationend', this._onAnimationEnd, false)
+      .listen(this.props.api, 'volumechange', this._onVolumeChange, false);
+    
+    this._onVolumeData(this.props.api.getVolume(), this.props.api.isMuted());
+  }
+
+  public componentWillUnmount() {
+    this._handler.removeAll();
+  }
+
+  public render(): JSX.Element {
+    const onClick = () => this._onClick();
+    const svgRef = (el?: Element) => this._svgElement = el as SVGElement;
+    const defsRef = (el?: Element) => this._defsElement = el as SVGDefsElement;
+    const maskRef = (el?: Element) => this._maskPathElement = el as SVGPathElement;
+    const slashMaskRef = (el?: Element) => this._slashMaskPathElement = el as SVGPathElement;
+    const speakerRef = (el?: Element) => this._speakerPathElement = el as SVGPathElement;
+    const hiderRef = (el?: Element) => this._hiderPathElement = el as SVGPathElement;
+    const muteRef = (el?: Element) => {
+      if (el && el.parentNode && typeof el.parentNode.removeChild === 'function') {
+        el.parentNode.removeChild(el);
+      }
+      
+      this._mutePathElement = el as SVGPathElement;
+    };
+
+    const hiddenSpace = document.createElement("div");
+    render(
+      (
+        <svg width="100%" height="100%" version="1.1" viewBox="0 0 36 36">
+          <path
+            ref={muteRef}
+            d={ICON_VOLUME_MUTE}
+            fill="#ffffff" />
+        </svg>
+      ),
+      hiddenSpace
+    );
+
+    return (
+      <button
+        class="chrome-mute-button chrome-button"
+        onClick={onClick}>
+        <svg
+          ref={svgRef}
+          width="100%"
+          height="100%"
+          version="1.1"
+          viewBox="0 0 36 36">
+          <defs ref={defsRef}>
+            <clipPath id="chrome-svg-volume-animation-mask">
+              <path d="m 14.35,-0.14 -5.86,5.86 20.73,20.78 5.86,-5.91 z" />
+              <path d="M 7.07,6.87 -1.11,15.33 19.61,36.11 27.80,27.60 z" />
+              <path
+                ref={maskRef}
+                class="chrome-svg-volume-animation-mover"
+                d="M 9.09,5.20 6.47,7.88 26.82,28.77 29.66,25.99 z"
+                transform="translate(0,0)" />
+            </clipPath>
+            <clipPath id="chrome-svg-volume-animation-slash-mask">
+              <path
+                ref={slashMaskRef}
+                class="chrome-svg-volume-animation-mover"
+                d="m -11.45,-15.55 -4.44,4.51 20.45,20.94 4.55,-4.66 z"
+                transform="translate(0,0)" />
+            </clipPath>
+          </defs>
+          <path
+            ref={speakerRef}
+            d={ICON_VOLUME + " " + ICON_VOLUME_HIGH}
+            fill="#ffffff"
+            clip-path="url(#chrome-svg-volume-animation-mask)" />
+          <path
+            ref={hiderRef}
+            d="M 9.25,9 7.98,10.27 24.71,27 l 1.27,-1.27 Z"
+            fill="#ffffff"
+            clip-path="url(#chrome-svg-volume-animation-slash-mask)"
+            style="display: none;" />
+        </svg>
+      </button>
+    );
+  }
 
   private _onClick(): void {
     const api = this.props.api;
@@ -181,7 +272,8 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
     this._animation.setFromPath(path);
     
     const transform = this._maskPathElement.getAttribute('transform');
-    let x = 0, y = 0;
+    let x = 0;
+    let y = 0;
 
     if (transform) {
       const m = transform.match(/translate\((\-?[0-9]+(?:\.[0-9]+)?)\s*,\s*(\-?[0-9]+(?:\.[0-9]+)?)\)/);
@@ -205,96 +297,5 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
     if (this.props.onEndHover) {
       this.props.onEndHover();
     }
-  }
-
-  componentDidMount() {
-    if (!this._speakerPathElement || !this._maskPathElement || !this._slashMaskPathElement) return;
-    this._animation = new SvgTranslateAnimation(this._speakerPathElement, [this._maskPathElement, this._slashMaskPathElement]);
-
-    this._handler
-      .listen(this.base, 'mouseover', this._onMouseOver, { passive: true })
-      .listen(this.base, 'mouseout', this._onMouseOut, { passive: true })
-      .listen(this._animation, 'animationend', this._onAnimationEnd, false)
-      .listen(this.props.api, 'volumechange', this._onVolumeChange, false);
-    
-    this._onVolumeData(this.props.api.getVolume(), this.props.api.isMuted());
-  }
-
-  componentWillUnmount() {
-    this._handler.removeAll();
-  }
-
-  render(): JSX.Element {
-    const onClick = () => this._onClick();
-    const svgRef = (el?: Element) => this._svgElement = el as SVGElement;
-    const defsRef = (el?: Element) => this._defsElement = el as SVGDefsElement;
-    const maskRef = (el?: Element) => this._maskPathElement = el as SVGPathElement;
-    const slashMaskRef = (el?: Element) => this._slashMaskPathElement = el as SVGPathElement;
-    const speakerRef = (el?: Element) => this._speakerPathElement = el as SVGPathElement;
-    const hiderRef = (el?: Element) => this._hiderPathElement = el as SVGPathElement;
-    const muteRef = (el?: Element) => {
-      if (el && el.parentNode && typeof el.parentNode.removeChild === 'function') {
-        el.parentNode.removeChild(el);
-      }
-      
-      this._mutePathElement = el as SVGPathElement;
-    };
-
-    const hiddenSpace = document.createElement("div");
-    render(
-      (
-        <svg width="100%" height="100%" version="1.1" viewBox="0 0 36 36">
-          <path
-            ref={muteRef}
-            d={ICON_VOLUME_MUTE}
-            fill="#ffffff">
-          </path>
-        </svg>
-      ),
-      hiddenSpace
-    );
-
-    return (
-      <button
-        class="chrome-mute-button chrome-button"
-        onClick={onClick}>
-        <svg
-          ref={svgRef}
-          width="100%"
-          height="100%"
-          version="1.1"
-          viewBox="0 0 36 36">
-          <defs ref={defsRef}>
-            <clipPath id="chrome-svg-volume-animation-mask">
-              <path d="m 14.35,-0.14 -5.86,5.86 20.73,20.78 5.86,-5.91 z"></path>
-              <path d="M 7.07,6.87 -1.11,15.33 19.61,36.11 27.80,27.60 z"></path>
-              <path
-                ref={maskRef}
-                class="chrome-svg-volume-animation-mover"
-                d="M 9.09,5.20 6.47,7.88 26.82,28.77 29.66,25.99 z"
-                transform="translate(0,0)"></path>
-            </clipPath>
-            <clipPath id="chrome-svg-volume-animation-slash-mask">
-              <path
-                ref={slashMaskRef}
-                class="chrome-svg-volume-animation-mover"
-                d="m -11.45,-15.55 -4.44,4.51 20.45,20.94 4.55,-4.66 z"
-                transform="translate(0,0)"></path>
-            </clipPath>
-          </defs>
-          <path
-            ref={speakerRef}
-            d={ICON_VOLUME + " " + ICON_VOLUME_HIGH}
-            fill="#ffffff"
-            clip-path="url(#chrome-svg-volume-animation-mask)"></path>
-          <path
-            ref={hiderRef}
-            d="M 9.25,9 7.98,10.27 24.71,27 l 1.27,-1.27 Z"
-            fill="#ffffff"
-            clip-path="url(#chrome-svg-volume-animation-slash-mask)"
-            style="display: none;"></path>
-        </svg>
-      </button>
-    );
   }
 }

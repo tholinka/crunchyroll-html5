@@ -1,38 +1,50 @@
-import { Listenable } from './Listenable';
-import { ListenableKey } from './ListenableKey';
+import { IListenable, ListneableFunction } from './IListenable';
+import { IListenableKey } from './IListenableKey';
 import { Listener } from './Listener';
 
 export class ListenerMap {
+  private static _findListenerIndex(listenerArray: Listener[], listener: ListneableFunction, useCapture?: boolean, scope?: any) {
+    for (let i = 0; i < listenerArray.length; ++i) {
+      const listenerObj = listenerArray[i];
+      if (!listenerObj.removed && listenerObj.listener === listener &&
+          listenerObj.capture === !!useCapture &&
+          listenerObj.handler === scope) {
+        return i;
+      }
+    }
+    return -1;
+  }
   public listeners: { [key: string]: Listener[] } = {};
   private _typeCount: number = 0;
 
   constructor(
-    public src: EventTarget|Listenable|undefined
+    public src: EventTarget|IListenable|undefined
   ) {}
 
-  getTypeCount(): number {
+  public getTypeCount(): number {
     return this._typeCount;
   }
 
-  getListenerCount(): number {
+  public getListenerCount(): number {
     let count = 0;
-    for (let type in this.listeners) {
-      count += this.listeners[type].length;
+    for (const type in this.listeners) {
+      if (this.listeners.hasOwnProperty(type)) {
+        count += this.listeners[type].length;
+      }
     }
     return count;
   }
 
-  add(type: string, listener: Function, callOnce: boolean, useCapture?: boolean,
-      listenerScope?: Object): ListenableKey {
-        let listenerArray = this.listeners[type];
+  public add(type: string, listener: ListneableFunction, callOnce: boolean, useCapture?: boolean, scope?: any): IListenableKey {
+    let listenerArray = this.listeners[type];
     if (!listenerArray) {
       listenerArray = this.listeners[type] = [];
       this._typeCount++;
     }
   
     let listenerObj;
-    let index = ListenerMap._findListenerIndex(
-        listenerArray, listener, useCapture, listenerScope);
+    const index = ListenerMap._findListenerIndex(
+        listenerArray, listener, useCapture, scope);
     if (index > -1) {
       listenerObj = listenerArray[index];
       if (!callOnce) {
@@ -41,29 +53,28 @@ export class ListenerMap {
         listenerObj.callOnce = false;
       }
     } else {
-      listenerObj = new Listener(
-          listener, undefined, this.src, type, !!useCapture, listenerScope);
+      listenerObj = new Listener(listener, undefined, this.src, type, !!useCapture, scope);
       listenerObj.callOnce = callOnce;
       listenerArray.push(listenerObj);
     }
     return listenerObj;
   }
 
-  remove(type: string, listener: Function, useCapture?: boolean, listenerScope?: Object): boolean {
+  public remove(type: string, listener: ListneableFunction, useCapture?: boolean, scope?: any): boolean {
     if (!(type in this.listeners)) {
       return false;
     }
   
-    let listenerArray = this.listeners[type];
-    let index = ListenerMap._findListenerIndex(
-        listenerArray, listener, useCapture, listenerScope);
+    const listenerArray = this.listeners[type];
+    const index = ListenerMap._findListenerIndex(
+        listenerArray, listener, useCapture, scope);
     if (index > -1) {
-      let listenerObj = listenerArray[index];
+      const listenerObj = listenerArray[index];
       if (listenerObj instanceof Listener) {
         listenerObj.markAsRemoved();
       }
       listenerArray.splice(index, 1);
-      if (listenerArray.length == 0) {
+      if (listenerArray.length === 0) {
         delete this.listeners[type];
         this._typeCount--;
       }
@@ -72,19 +83,19 @@ export class ListenerMap {
     return false;
   }
 
-  removeByKey(listener: ListenableKey): boolean {
-    let type = listener.type;
+  public removeByKey(listener: IListenableKey): boolean {
+    const type = listener.type;
     if (!(type in this.listeners)) {
       return false;
     }
 
-    let index = (<ListenableKey[]> this.listeners[type]).indexOf(listener);
+    const index = (this.listeners[type] as IListenableKey[]).indexOf(listener);
     if (index !== -1) {
       this.listeners[type].splice(index, 1);
       if (listener instanceof Listener) {
         listener.markAsRemoved();
       }
-      if (this.listeners[type].length == 0) {
+      if (this.listeners[type].length === 0) {
         delete this.listeners[type];
         this._typeCount--;
       }
@@ -92,14 +103,14 @@ export class ListenerMap {
     return index !== -1;
   }
 
-  removeAll(type?: string): number {
+  public removeAll(type?: string): number {
     let count = 0;
-    for (let _type in this.listeners) {
+    for (const _type in this.listeners) {
       if (!type || _type === type) {
-        let listenerArray = this.listeners[_type];
-        for (let i = 0; i < listenerArray.length; i++) {
+        const listenerArray = this.listeners[_type];
+        for (const listener of listenerArray) {
           ++count;
-          listenerArray[i].markAsRemoved();
+          listener.markAsRemoved();
         }
         delete this.listeners[_type];
         this._typeCount--;
@@ -108,56 +119,45 @@ export class ListenerMap {
     return count;
   }
 
-  getListeners(type: string, capture: boolean): ListenableKey[] {
-    let listenerArray = this.listeners[type.toString()];
-    let rv: ListenableKey[] = [];
+  public getListeners(type: string, capture: boolean): IListenableKey[] {
+    const listenerArray = this.listeners[type.toString()];
+    const rv: IListenableKey[] = [];
     if (listenerArray) {
-      for (let i = 0; i < listenerArray.length; i++) {
-        let listenerObj = listenerArray[i];
-        if (listenerObj.capture === capture) {
-          rv.push(listenerObj);
+      for (const listener of listenerArray) {
+        if (listener.capture === capture) {
+          rv.push(listener);
         }
       }
     }
     return rv;
   }
 
-  getListener(type: string, listener: Function, capture: boolean, listenerScope?: Object): ListenableKey|undefined {
-    let listenerArray = this.listeners[type];
+  public getListener(type: string, listener: ListneableFunction, capture: boolean, scope?: any): IListenableKey|undefined {
+    const listenerArray = this.listeners[type];
     let i = -1;
     if (listenerArray) {
       i = ListenerMap._findListenerIndex(
-          listenerArray, listener, capture, listenerScope);
+          listenerArray, listener, capture, scope);
     }
     return i > -1 ? listenerArray[i] : undefined;
   }
 
-  hasListener(type?: string, capture?: boolean): boolean {
-    let hasType = type !== undefined;
-    let typeStr = hasType ? type : '';
-    let hasCapture = capture !== undefined;
+  public hasListener(type?: string, capture?: boolean): boolean {
+    const hasType = type !== undefined;
+    const typeStr = hasType ? type : '';
+    const hasCapture = capture !== undefined;
 
-    for (let type in this.listeners) {
-      let listenerArray = this.listeners[type];
-      for (let i = 0; i < listenerArray.length; i++) {
-        if ((!hasType || listenerArray[i].type === typeStr) &&
-            (!hasCapture || listenerArray[i].capture === capture)) {
-          return true;
+    for (const x in this.listeners) {
+      if (this.listeners.hasOwnProperty(x)) {
+        const listenerArray = this.listeners[x];
+        for (const listener of listenerArray) {
+          if ((!hasType || listener.type === typeStr) &&
+              (!hasCapture || listener.capture === capture)) {
+            return true;
+          }
         }
       }
     }
     return false;
-  }
-
-  private static _findListenerIndex(listenerArray: Listener[], listener: Function, useCapture?: boolean, listenerScope?: Object) {
-    for (let i = 0; i < listenerArray.length; ++i) {
-      let listenerObj = listenerArray[i];
-      if (!listenerObj.removed && listenerObj.listener === listener &&
-          listenerObj.capture === !!useCapture &&
-          listenerObj.handler === listenerScope) {
-        return i;
-      }
-    }
-    return -1;
   }
 }

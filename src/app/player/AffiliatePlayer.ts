@@ -42,7 +42,7 @@ export function parseUrlFragments(url: string): IAffiliateMediaData|undefined {
       videoFormat: "0",
       videoQuality: undefined,
       autoPlay: query.auto_play === "1",
-      startTime: startTime
+      startTime
     };
   }
 
@@ -54,6 +54,6 @@ export function parseUrlFragments(url: string): IAffiliateMediaData|undefined {
     videoFormat: query.video_format,
     videoQuality: query.video_quality,
     autoPlay: query.auto_play === "1",
-    startTime: startTime
+    startTime
   };
 }

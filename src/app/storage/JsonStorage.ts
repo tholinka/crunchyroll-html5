@@ -1,7 +1,7 @@
-import { IMechanism, IMechanismSymbol } from "./mechanism/IMechanism";
+import { inject, injectable } from "inversify";
 import { IStorage } from "./IStorage";
+import { IMechanism, IMechanismSymbol } from "./mechanism/IMechanism";
 import { StorageError } from "./StorageError";
-import { injectable, inject } from "inversify";
 
 @injectable()
 export class JsonStorage implements IStorage {
@@ -14,7 +14,7 @@ export class JsonStorage implements IStorage {
    * @param key the key of the value to be set.
    * @param value the value to be set.
    */
-  async set(key: string, value: any): Promise<void> {
+  public async set(key: string, value: any): Promise<void> {
     if (value === undefined) {
       return await this._mechanism.remove(key);
     }
@@ -25,7 +25,7 @@ export class JsonStorage implements IStorage {
    * Returns the value with key.
    * @param key the key of the value.
    */
-  async get(key: string): Promise<any> {
+  public async get(key: string): Promise<any> {
     let json: string|undefined;
     try {
       json = await this._mechanism.get(key);
@@ -48,7 +48,7 @@ export class JsonStorage implements IStorage {
    * Removes the value with key.
    * @param key 
    */
-  async remove(key: string): Promise<void> {
+  public async remove(key: string): Promise<void> {
     await this._mechanism.remove(key);
   }
 }

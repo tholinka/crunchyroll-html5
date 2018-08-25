@@ -8,34 +8,6 @@ enum State {
 }
 
 export class CrossXMLHttpRequest {
-  private _state: State = State.Closed;
-
-  private _readyState: number = 0;
-  private _status: number = 0;
-  private _statusText: string = "";
-
-  private _response: any;
-  private _responseText: string = "";
-  private _responseType: XMLHttpRequestResponseType = "";
-  private _responseUrl: string = "";
-
-  private _opened: boolean = false;
-  private _headers: {[key: string]: string} = {};
-
-  private _method: string = "GET";
-  private _url: string = "";
-  private _async: boolean = true;
-  private _user?: string;
-  private _password?: string;
-
-  public onabort?: Function;
-  public onerror?: Function;
-  public onload?: Function;
-  public onprogress?: Function;
-  public onreadystatechange?: Function;
-  public ontimeout?: Function;
-
-  private loader?: GMXMLHttpRequestResult;
 
   get readyState(): number {
     return this._readyState;
@@ -69,12 +41,40 @@ export class CrossXMLHttpRequest {
     this._responseType = type;
   }
 
-  setRequestHeader(header: string, value: string): void {
+  public onabort?: (event: Event) => void;
+  public onerror?: (event: Event) => void;
+  public onload?: (event: Event) => void;
+  public onprogress?: (event: Event) => void;
+  public onreadystatechange?: (event: Event) => void;
+  public ontimeout?: (event: Event) => void;
+  private _state: State = State.Closed;
+
+  private _readyState: number = 0;
+  private _status: number = 0;
+  private _statusText: string = "";
+
+  private _response: any;
+  private _responseText: string = "";
+  private _responseType: XMLHttpRequestResponseType = "";
+  private _responseUrl: string = "";
+
+  private _opened: boolean = false;
+  private _headers: {[key: string]: string} = {};
+
+  private _method: string = "GET";
+  private _url: string = "";
+  private _async: boolean = true;
+  private _user?: string;
+  private _password?: string;
+
+  private loader?: GMXMLHttpRequestResult;
+
+  public setRequestHeader(header: string, value: string): void {
     if (this._state !== State.Opened) throw new Error("XMLHttpRequest has not been opened.");
     this._headers[header] = value;
   }
 
-  abort(): void {
+  public abort(): void {
     if (!this.loader || !this.loader.abort) {
       console.warn("abort() is not supported for this GM_xmlhttpRequest implementation!");
       return;
@@ -82,7 +82,7 @@ export class CrossXMLHttpRequest {
     this.loader.abort();
   }
 
-  open(method: string, url: string, async: boolean = true, user?: string | null, password?: string | null): void {
+  public open(method: string, url: string, async: boolean = true, user?: string | null, password?: string | null): void {
     if (this._state !== State.Closed) throw new Error("XMLHttpRequest has already been opened.");
     this._state = State.Opened;
 
@@ -93,7 +93,7 @@ export class CrossXMLHttpRequest {
     this._password = password === null ? undefined : password;
   }
 
-  send(body?: BodyInit): void {
+  public send(body?: BodyInit): void {
     if (this._state !== State.Opened) throw new Error("XMLHttpRequest has not been opened.");
 
     if (body) console.warn("Body is not supported");
@@ -181,6 +181,7 @@ function request(options: GMXMLHttpRequestOptions): GMXMLHttpRequestResult {
   }
 }
 
+// tslint:disable-next-line:no-namespace
 declare namespace GM {
   function xmlHttpRequest(options: GMXMLHttpRequestOptions): GMXMLHttpRequestResult;
 }

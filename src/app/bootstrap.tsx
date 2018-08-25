@@ -1,11 +1,13 @@
-import { importCSS, importCSSByUrl } from './utils/css';
-import { PlayerController, IPlayerControllerOptions } from './player/PlayerController';
-import { getMediaId, getSelectedQuality, getStartTime, getAutoPlay, updateQualitySettings } from './player/StandardPlayer';
-import { parseUrlFragments } from './player/AffiliatePlayer';
-import { Formats, FORMAT_IDS } from 'crunchyroll-lib/media';
+import { FORMAT_IDS, Formats } from 'crunchyroll-lib/media';
 import { bindCrossHttpClientAsDefault } from './config';
-import { ReadyStateChange, ReadyStateChangeEvent, ReadyState } from './libs/ReadyStateChange';
 import { EventHandler } from './libs/events/EventHandler';
+import { ReadyState } from './libs/ReadyState';
+import { ReadyStateChange } from './libs/ReadyStateChange';
+import { ReadyStateChangeEvent } from './libs/ReadyStateChangeEvent';
+import { parseUrlFragments } from './player/AffiliatePlayer';
+import { IPlayerControllerOptions, PlayerController } from './player/PlayerController';
+import { getAutoPlay, getMediaId, getSelectedQuality, getStartTime, updateQualitySettings } from './player/StandardPlayer';
+import { importCSS, importCSSByUrl } from './utils/css';
 
 const css = require('../styles/bootstrap.scss');
 
@@ -34,7 +36,7 @@ export function runBootstrap() {
   const currentReadyState = readyStateChange.getCurrentReadyState();
   if (currentReadyState === undefined || currentReadyState < ReadyState.Interactive) {
     eventHandler.listen(document, 'readystatechange', () => readyStateChange.tick(), false);
-    window.setInterval(() => readyStateChange.tick(), 100);
+    timer = window.setInterval(() => readyStateChange.tick(), 100);
   }
 }
 
@@ -96,7 +98,7 @@ class Bootstrap {
     importCSS(css);
   }
 
-  async run(mediaId: number, options?: IPlayerControllerOptions) {
+  public async run(mediaId: number, options?: IPlayerControllerOptions) {
     this._wrapper.innerHTML = "";
 
     const player = new PlayerController(this._wrapper, window.location.href, mediaId, options);

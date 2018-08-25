@@ -18,7 +18,7 @@ export class SHA1 {
   private _shift: number = 24;
   private _block = new Uint32Array(80);
 
-  digest(): string {
+  public digest(): string {
     // Pad
     this._write(0x80);
     if (this._offset > 14 || (this._offset === 14 && this._shift < 24)) {
@@ -44,7 +44,7 @@ export class SHA1 {
            toHex(this._h4);
   }
 
-  update(chunk: ArrayLike<number>): void {
+  public update(chunk: ArrayLike<number>): void {
     const length = chunk.length;
     this._length += length * 8;
     for (let i = 0; i < length; i++) {
@@ -77,7 +77,8 @@ export class SHA1 {
     let c = this._h2;
     let d = this._h3;
     let e = this._h4;
-    let f, k;
+    let f;
+    let k;
 
     // Main loop:
     for (let i = 0; i < 80; i++) {

@@ -1,9 +1,9 @@
-import { LibAss } from '../libass';
-import { ISubtitleEngine, ISubtitleRect } from './ISubtitleEngine';
 import { EventHandler } from '../../libs/events/EventHandler';
-import { ISubtitleTrack } from './ISubtitleTrack';
 import { EventTarget } from '../../libs/events/EventTarget';
 import { fonts } from '../../SubtitleEngineLoader';
+import { LibAss } from '../libass';
+import { ISubtitleEngine, ISubtitleRect } from './ISubtitleEngine';
+import { ISubtitleTrack } from './ISubtitleTrack';
 
 export class LibAssSubtitleEngine extends EventTarget implements ISubtitleEngine {
   private libass = new LibAss(fonts);
@@ -20,33 +20,19 @@ export class LibAssSubtitleEngine extends EventTarget implements ISubtitleEngine
       .listen(this.libass, 'resize', this.onResize);
   }
 
-  private onReady() {
-    this.dispatchEvent('ready');
-  }
-
-  private onResize() {
-    this.dispatchEvent('resize');
-  }
-
-  protected disposeInternal() {
-    super.disposeInternal();
-
-    this.handler.dispose();
-  }
-
-  attach(element: HTMLVideoElement) {
+  public attach(element: HTMLVideoElement) {
     this.libass.attach(element);
   }
 
-  detach() {
+  public detach() {
     this.libass.detach();
   }
 
-  getElement(): Element {
+  public getElement(): Element {
     return this.libass.getCanvas();
   }
 
-  setTrack(content: string) {
+  public setTrack(content: string) {
     if (this.initialized) {
       this.libass.setTrack(content);
     } else {
@@ -55,8 +41,8 @@ export class LibAssSubtitleEngine extends EventTarget implements ISubtitleEngine
     }
   }
 
-  getRect(): ISubtitleRect {
-    var rect = this.libass.getVideoRect();
+  public getRect(): ISubtitleRect {
+    const rect = this.libass.getVideoRect();
 
     return {
       width: rect.width,
@@ -66,7 +52,21 @@ export class LibAssSubtitleEngine extends EventTarget implements ISubtitleEngine
     };
   }
 
-  resize() {
+  public resize() {
     this.libass.resize();
+  }
+
+  protected disposeInternal() {
+    super.disposeInternal();
+
+    this.handler.dispose();
+  }
+
+  private onReady() {
+    this.dispatchEvent('ready');
+  }
+
+  private onResize() {
+    this.dispatchEvent('resize');
   }
 }

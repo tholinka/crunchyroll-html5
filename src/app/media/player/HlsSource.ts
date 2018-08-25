@@ -1,7 +1,7 @@
 import * as Hls from 'hls.js';
-import { ISource, ISourceLevel, ISourceAudioTrack } from './ISource';
 import { Disposable } from '../../libs/disposable/Disposable';
 import { getPlaylistLoader } from '../../playlistLoader';
+import { ISource, ISourceAudioTrack, ISourceLevel } from './ISource';
 
 export class HlsSource extends Disposable implements ISource {
   private _hls: Hls;
@@ -9,11 +9,11 @@ export class HlsSource extends Disposable implements ISource {
   constructor(url: string) {
     super();
 
-    let config: Hls.Config|undefined = undefined;
+    let config: Hls.Config|undefined;
     const loader = getPlaylistLoader();
     if (loader) {
       config = Object.assign({}, Hls.DefaultConfig, {
-        loader: loader
+        loader
       });
     }
 
@@ -21,20 +21,16 @@ export class HlsSource extends Disposable implements ISource {
 
     this._hls.loadSource(url);
   }
-  
-  protected disposeInternal() {
-    this._hls.destroy();
-  }
 
-  setAudioTrack(id: number): void {
+  public setAudioTrack(id: number): void {
     this._hls.audioTrack = id;
   }
 
-  getAudioTrack(): number {
+  public getAudioTrack(): number {
     return this._hls.audioTrack;
   }
 
-  getAudioTracks(): ISourceAudioTrack[] {
+  public getAudioTracks(): ISourceAudioTrack[] {
     return this._hls.audioTracks.map((track, index) => {
       return {
         id: index,
@@ -45,15 +41,15 @@ export class HlsSource extends Disposable implements ISource {
     });
   }
 
-  setLevel(id: number): void {
+  public setLevel(id: number): void {
     this._hls.currentLevel = id;
   }
 
-  getLevel(): number {
+  public getLevel(): number {
     return this._hls.currentLevel;
   }
 
-  getLevels(): ISourceLevel[] {
+  public getLevels(): ISourceLevel[] {
     return this._hls.levels.map((level, index) => {
       return {
         id: index,
@@ -66,11 +62,15 @@ export class HlsSource extends Disposable implements ISource {
     });
   }
 
-  attach(element: HTMLVideoElement) {
+  public attach(element: HTMLVideoElement) {
     this._hls.attachMedia(element);
   }
 
-  detach() {
+  public detach() {
     this._hls.detachMedia();
+  }
+  
+  protected disposeInternal() {
+    this._hls.destroy();
   }
 }

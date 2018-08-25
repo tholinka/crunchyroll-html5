@@ -1,4 +1,5 @@
 declare global {
+  // tslint:disable-next-line:interface-name
   interface DOMTokenList {
     replace(oldClass: string, newClass: string): void;
     empty(): void;
@@ -8,13 +9,15 @@ declare global {
 DOMTokenList.prototype.replace = DOMTokenList.prototype.replace || 
   // replace preserving order
   function replace(this: DOMTokenList, oldClass: string, newClass: string): void {
-    let list =  Array.from(this).map(x => x === oldClass ? newClass : x);
+    const list =  Array.from(this).map(x => x === oldClass ? newClass : x);
     this.empty();
     this.add(...list);
   };
 DOMTokenList.prototype.empty = function empty(this: DOMTokenList) {
-  for (let el in this) {
-    this.remove(el);
+  for (const el in this) {
+    if (this.hasOwnProperty(el)) {
+      this.remove(el);
+    }
   }
 }
 

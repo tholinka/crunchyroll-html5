@@ -1,7 +1,7 @@
-import { EventTarget } from '../libs/events/EventTarget';
 import { EventHandler } from '../libs/events/EventHandler';
-import { Event } from '../libs/events/Event';
-import { getWorkerUrl, getFiles } from '../SubtitleEngineLoader';
+import { EventTarget } from '../libs/events/EventTarget';
+import { getFiles, getWorkerUrl } from '../SubtitleEngineLoader';
+import { CustomEvent } from './CustomEvent';
 
 export interface IVideoRect {
   width: number,
@@ -21,14 +21,6 @@ export interface IEventData {
 export interface ILibAssOptions {
   fonts: string[];
   availableFonts: string[];
-}
-
-export class CustomEvent extends Event {
-  constructor(
-    public data: IEventData
-  ) {
-    super('custom');
-  }
 }
 
 export class LibAss extends EventTarget {
@@ -60,11 +52,11 @@ export class LibAss extends EventTarget {
     super();
   }
 
-  getCanvas(): Element {
+  public getCanvas(): Element {
     return this.canvas;
   }
 
-  init(content?: string, url?: string) {
+  public init(content?: string, url?: string) {
     this.terminateWorker();
     this.createWorker();
     if (!this.worker) throw new Error("Worker is not available.");
@@ -84,7 +76,7 @@ export class LibAss extends EventTarget {
     });
   }
   
-  attach(video: HTMLVideoElement) {
+  public attach(video: HTMLVideoElement) {
     this.videoHandler.removeAll();
     this.video = video;
 
@@ -107,33 +99,33 @@ export class LibAss extends EventTarget {
     this.resize();
   }
 
-  detach() {
+  public detach() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.video = undefined;
     this.videoHandler.removeAll();
   }
 
-  setTrack(content: string) {
+  public setTrack(content: string) {
     if (!this.worker) throw new Error("Worker is not available.");
     this.worker.postMessage({
       target: 'set-track',
-      content: content
+      content
     });
   }
 
-  setTrackByUrl(url: string) {
+  public setTrackByUrl(url: string) {
     if (!this.worker) throw new Error("Worker is not available.");
     this.worker.postMessage({
       target: 'set-track-by-url',
-      url: url
+      url
     });
   }
 
-  resize(width?: number, height?: number) {
+  public resize(width?: number, height?: number) {
     if (!this.worker) return;
 
     if (!width || !height) {
-      let videoRect: IVideoRect = this.getVideoRect();
+      const videoRect: IVideoRect = this.getVideoRect();
       width = videoRect.width * this.pixelRatio;
       height = videoRect.height * this.pixelRatio;
     }
@@ -147,18 +139,18 @@ export class LibAss extends EventTarget {
 
       this.worker.postMessage({
         target: 'canvas',
-        width: width,
-        height: height
+        width,
+        height
       });
     }
   }
 
-  delayedResize() {
+  public delayedResize() {
     setTimeout(() => this.resize(), 100);
     this.resize();
   }
 
-  getVideoRect(): IVideoRect {
+  public getVideoRect(): IVideoRect {
     if (!this.video) return { width: 0, height: 0, x: 0, y: 0 };
     const videoRatio = this.video.videoWidth / this.video.videoHeight;
     const width = this.video.offsetWidth;
@@ -180,21 +172,27 @@ export class LibAss extends EventTarget {
     return {
       width: realWidth,
       height: realHeight,
-      x: x,
-      y: y
+      x,
+      y
     };
   }
 
-  getOffsetTime(): number {
+  public getOffsetTime(): number {
     return this.offsetTime;
   }
 
-  setOffsetTime(offsetTime: number) {
+  public setOffsetTime(offsetTime: number) {
     this.offsetTime = offsetTime;
 
     if (this.video) {
       this.setCurrentTime(this.video.currentTime + this.getOffsetTime());
     }
+  }
+
+  protected disposeInternal() {
+    super.disposeInternal();
+
+    this.terminateWorker();
   }
 
   private renderFrame() {
@@ -206,8 +204,7 @@ export class LibAss extends EventTarget {
   private renderFrames() {
     const data = this.renderFramesData;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    for (let i = 0; i < data.canvases.length; i++) {
-      const image = data.canvases[i];
+    for (const image of data.canvases) {
       this.bufferCanvas.width = image.w;
       this.bufferCanvas.height = image.h;
       this.bufferCanvasCtx.putImageData(new ImageData(new Uint8ClampedArray(image.buffer), image.w, image.h), 0, 0);
@@ -221,7 +218,7 @@ export class LibAss extends EventTarget {
     this.worker.postMessage({
       target: 'video',
       isPaused: paused,
-      currentTime: currentTime
+      currentTime
     });
   }
 
@@ -230,7 +227,7 @@ export class LibAss extends EventTarget {
     if (!this.worker) throw new Error("Worker is not available.");
     this.worker.postMessage({
       target: 'video',
-      currentTime: currentTime
+      currentTime
     });
   }
 
@@ -238,7 +235,7 @@ export class LibAss extends EventTarget {
     if (!this.worker) throw new Error("Worker is not available.");
     this.worker.postMessage({
       target: 'video',
-      rate: rate
+      rate
     });
   }
 
@@ -271,7 +268,7 @@ export class LibAss extends EventTarget {
     const data = event.data;
     switch (data.target) {
       case 'stdout':
-        //console.log(data.content);
+        // console.log(data.content);
         break;
       case 'stderr':
         console.error(data.content);
@@ -282,7 +279,7 @@ export class LibAss extends EventTarget {
       case 'canvas':
         switch (data.op) {
           case 'getContext':
-            this.ctx = <CanvasRenderingContext2D> this.canvas.getContext(data.type, data.attributes);
+            this.ctx = this.canvas.getContext(data.type, data.attributes) as CanvasRenderingContext2D;
             break;
           case 'resize':
             this.resize(data.width, data.height);
@@ -321,12 +318,12 @@ export class LibAss extends EventTarget {
         const img = new Image();
         img.onload = () => {
           console.assert(img.complete);
-          let canvas = document.createElement('canvas');
+          const canvas = document.createElement('canvas');
           canvas.width = img.width;
           canvas.height = img.height;
-          let ctx = canvas.getContext('2d')!;
+          const ctx = canvas.getContext('2d')!;
           ctx.drawImage(img, 0, 0);
-          let imageData = ctx.getImageData(0, 0, img.width, img.height);
+          const imageData = ctx.getImageData(0, 0, img.width, img.height);
           if (!this.worker) throw new Error("Worker is not available.");
           this.worker.postMessage({
             target: 'Image',
@@ -366,11 +363,5 @@ export class LibAss extends EventTarget {
       this.ready = false;
       this.worker = undefined;
     }
-  }
-
-  protected disposeInternal() {
-    super.disposeInternal();
-
-    this.terminateWorker();
   }
 }

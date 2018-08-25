@@ -1,7 +1,7 @@
-import { h, Component } from "preact";
-import { IPlayerApi } from "../IPlayerApi";
-import { EventHandler } from "../../../libs/events/EventHandler";
+import { Component, h } from "preact";
 import { BrowserEvent } from '../../../libs/events/BrowserEvent';
+import { EventHandler } from "../../../libs/events/EventHandler";
+import { IPlayerApi } from "../IPlayerApi";
 
 export interface IBaseMenuItem {
   label: string;
@@ -69,13 +69,15 @@ function _renderMenuItemContent(menuItem: IMenuItem): JSX.Element | undefined {
   )
 }
 
-function _renderPanel(elems: (JSX.Element|undefined)[], ref: (el?: Element) => void, level: number, title?: string, onreturn?: () => any): JSX.Element {
+function _renderPanel(elems: Array<JSX.Element|undefined>, ref: (el?: Element) => void, level: number, title?: string, onreturn?: () => any): JSX.Element {
+  const onClick = () => onreturn && onreturn();
+
   return (
     <div className={`chrome-panel ${level > 0 ? 'chrome-panel-right' : 'chrome-panel-middle'}`} key={ title || MainMenu } ref={ ref } aria-level={ level } aria-hidden={ !!title }>
       {
         title && (
           <div className="chrome-panel-header">
-            <button className="chrome-button chrome-panel-title" onClick={() => onreturn && onreturn()}>{ title }</button>
+            <button className="chrome-button chrome-panel-title" onClick={onClick}>{ title }</button>
           </div>
         )
       }
@@ -149,6 +151,35 @@ export class ChromeSettingsPopup extends Component<IChromeSettingsPopupProps, IC
     this.state = {menu: this._rebuildMenu()};
   }
 
+  public componentDidMount() {
+    if (!this._containerElement) return;
+
+    this._handler
+      .listen(this.props.api, 'subtitletrackchange', () => this.setState({menu: this._rebuildMenu()}))
+      .listen(this.props.api, 'settingsopen', () => this._onSettingsToggle(true), false)
+      .listen(this.props.api, 'settingsclose', () => this._onSettingsToggle(false), false)
+      .listen(this.props.api, 'resize', () => this._onNavigate(this._currentMenu), false);
+  }
+
+  public componentWillUnmount() {
+    this._handler.removeAll();
+  }
+
+  public render({}: IChromeSettingsPopupProps, { menu }: IChromeSettingsPopupState): JSX.Element {
+    this._menuElements = {};
+
+    const containerRef = (el?: Element) => this._containerElement = el;
+    const menuRefs = (name: string, el?: Element) => this._menuElements[name] = el;
+
+    const onNavigate = (label?: string) => this._onNavigate(label);
+
+    return (
+      <div class="chrome-popup chrome-settings-menu" ref={containerRef} aria-hidden="true">
+        { _renderMenu(menu, menuRefs, onNavigate) }
+      </div>
+    );
+  }
+
   private _setSubtitleTrack(track: number) {
     this.props.api.setSubtitleTrack(track);
     this._onNavigate(this._currentMenu)
@@ -180,12 +211,12 @@ export class ChromeSettingsPopup extends Component<IChromeSettingsPopupProps, IC
     const targetMenuElem = this._menuElements[menu || MainMenu];
     if (!targetMenuElem) return;
 
-    const targetLevel = parseInt(targetMenuElem.getAttribute('aria-level') || '0');
+    const targetLevel = parseInt(targetMenuElem.getAttribute('aria-level') || '0', 10);
     Object.keys(this._menuElements).forEach((menuName: string) => {
-      let menuElem = this._menuElements[menuName];
+      const menuElem = this._menuElements[menuName];
       if (!menuElem) return;
 
-      const menuLevel = parseInt(menuElem.getAttribute('aria-level') || '0');
+      const menuLevel = parseInt(menuElem.getAttribute('aria-level') || '0', 10);
       if (menuLevel < targetLevel) {
         menuElem.className = 'chrome-panel chrome-panel-left';
       } else if (menuLevel > targetLevel) {
@@ -242,34 +273,5 @@ export class ChromeSettingsPopup extends Component<IChromeSettingsPopupProps, IC
     }
 
     return true;
-  }
-
-  componentDidMount() {
-    if (!this._containerElement) return;
-
-    this._handler
-      .listen(this.props.api, 'subtitletrackchange', () => this.setState({menu: this._rebuildMenu()}))
-      .listen(this.props.api, 'settingsopen', () => this._onSettingsToggle(true), false)
-      .listen(this.props.api, 'settingsclose', () => this._onSettingsToggle(false), false)
-      .listen(this.props.api, 'resize', () => this._onNavigate(this._currentMenu), false);
-  }
-
-  componentWillUnmount() {
-    this._handler.removeAll();
-  }
-
-  render({}: IChromeSettingsPopupProps, { menu }: IChromeSettingsPopupState): JSX.Element {
-    this._menuElements = {};
-
-    const containerRef = (el?: Element) => this._containerElement = el;
-    const menuRefs = (name: string, el?: Element) => this._menuElements[name] = el;
-
-    const onNavigate = (label?: string) => this._onNavigate(label);
-
-    return (
-      <div class="chrome-popup chrome-settings-menu" ref={containerRef} aria-hidden="true">
-        { _renderMenu(menu, menuRefs, onNavigate) }
-      </div>
-    );
   }
 }

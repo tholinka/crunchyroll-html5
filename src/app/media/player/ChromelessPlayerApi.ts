@@ -1,8 +1,9 @@
-import { IPlayerApi, PlaybackState, IVideoDetail, NextVideoEvent } from './IPlayerApi';
 import { EventTarget } from '../../libs/events/EventTarget';
+import { isFullscreenEnabled } from '../../utils/fullscreen';
 import { ISubtitleTrack } from '../subtitles/ISubtitleTrack';
 import { ChromelessPlayer } from './ChromelessPlayer';
-import { isFullscreenEnabled } from '../../utils/fullscreen';
+import { IPlayerApi, IVideoDetail, PlaybackState } from './IPlayerApi';
+import { NextVideoEvent } from "./NextVideoEvent";
 
 export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   private _player: ChromelessPlayer|undefined;
@@ -18,46 +19,46 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
     this._player = player;
   }
 
-  setLarge(large: boolean): void {
+  public setLarge(large: boolean): void {
     this._large = large;
 
     this.dispatchEvent('sizechange');
   }
 
-  isLarge(): boolean {
+  public isLarge(): boolean {
     return this._large;
   }
   
-  getNextVideoDetail(): IVideoDetail|undefined {
+  public getNextVideoDetail(): IVideoDetail|undefined {
     return this._nextVideo;
   }
   
-  setNextVideoDetail(nextVideo: IVideoDetail|undefined): void {
+  public setNextVideoDetail(nextVideo: IVideoDetail|undefined): void {
     this._nextVideo = nextVideo;
 
     this.dispatchEvent('nextvideochange');
   }
 
-  setChromelessPlayer(player: ChromelessPlayer) {
+  public setChromelessPlayer(player: ChromelessPlayer) {
     this._player = player;
   }
   
-  setForcePaused(force: boolean): void {
+  public setForcePaused(force: boolean): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.setForcePaused(force);
   }
 
-  getPlaybackState(): PlaybackState {
+  public getPlaybackState(): PlaybackState {
     if (!this._player) throw new Error("Not initialized");
     return this._player.getPlaybackState();
   }
 
-  getPreferredPlaybackState(): PlaybackState {
+  public getPreferredPlaybackState(): PlaybackState {
     if (!this._player) throw new Error("Not initialized");
     return this._player.getPreferredPlaybackState();
   }
 
-  playVideo(force: boolean = false): void {
+  public playVideo(force: boolean = false): void {
     if (!this._player) throw new Error("Not initialized");
     if (force) {
       this._player.getVideoElement().play();
@@ -66,122 +67,122 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
     }
   }
 
-  pauseVideo(): void {
+  public pauseVideo(): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.pauseVideo();
   }
 
-  seekTo(time: number): void {
+  public seekTo(time: number): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.seekTo(time);
   }
 
-  seekBy(seconds: number): void {
+  public seekBy(seconds: number): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.seekBy(seconds);
   }
 
-  playNextVideo(): void {
+  public playNextVideo(): void {
     const detail = this.getNextVideoDetail();
     if (!detail) return;
     const event = new NextVideoEvent(detail);
     this.dispatchEvent(event);
   }
 
-  getDuration(): number {
+  public getDuration(): number {
     if (!this._player) throw new Error("Not initialized");
     return this._player.getDuration();
   }
 
-  getCurrentTime(): number {
+  public getCurrentTime(): number {
     if (!this._player) throw new Error("Not initialized");
     return this._player.getCurrentTime();
   }
 
-  getBufferedTime(): number {
+  public getBufferedTime(): number {
     if (!this._player) throw new Error("Not initialized");
     return this._player.getBufferedTime();
   }
 
-  setVolume(volume: number): void {
+  public setVolume(volume: number): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.setVolume(volume);
   }
 
-  getVolume(): number {
+  public getVolume(): number {
     if (!this._player) throw new Error("Not initialized");
     return this._player.getVolume();
   }
 
-  mute(): void {
+  public mute(): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.mute();
   }
 
-  unmute(): void {
+  public unmute(): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.unmute();
   }
 
-  setMuted(muted: boolean): void {
+  public setMuted(muted: boolean): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.setMuted(muted);
   }
 
-  isMuted(): boolean {
+  public isMuted(): boolean {
     if (!this._player) throw new Error("Not initialized");
     return this._player.isMuted();
   }
 
-  isFullscreenEnabled(): boolean {
+  public isFullscreenEnabled(): boolean {
     return isFullscreenEnabled();
   }
 
-  enterFullscreen(): void {
+  public enterFullscreen(): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.enterFullscreen();
   }
 
-  exitFullscreen(): void {
+  public exitFullscreen(): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.exitFullscreen();
   }
 
-  toggleFullscreen(): void {
+  public toggleFullscreen(): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.toggleFullscreen();
   }
 
-  isFullscreen(): boolean {
+  public isFullscreen(): boolean {
     if (!this._player) throw new Error("Not initialized");
     return this._player.isFullscreen();
   }
 
-  getSubtitlesTracks(): ISubtitleTrack[] {
+  public getSubtitlesTracks(): ISubtitleTrack[] {
     if (!this._player) throw new Error("Not initialized");
     return this._player.getSubtitleTracks();
   }
 
-  getSubtitleTrack(): number {
+  public getSubtitleTrack(): number {
     if (!this._player) throw new Error("Not initialized");
     return this._player.getCurrentSubtitleTrack();
   }
 
-  setSubtitleTrack(index: number): void {
+  public setSubtitleTrack(index: number): void {
     if (!this._player) throw new Error("Not initialized");
     this._player.setSubtitleTrack(index);
   }
 
-  isSettingsOpen(): boolean {
+  public isSettingsOpen(): boolean {
     return this._settingsOpen;
   }
 
-  openSettings(): void {
+  public openSettings(): void {
     this._settingsOpen = true;
     this.dispatchEvent('settingsopen');
   }
 
-  closeSettings(): void {
+  public closeSettings(): void {
     this._settingsOpen = false;
     this.dispatchEvent('settingsclose');
   }

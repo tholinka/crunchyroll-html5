@@ -1,8 +1,11 @@
-import { IPlayerApi, TimeUpdateEvent, SeekEvent, PlaybackStateChangeEvent, PlaybackState } from "../media/player/IPlayerApi";
-import { EventHandler } from "../libs/events/EventHandler";
-import { trackProgress } from "./crunchyroll";
-import { Disposable } from "../libs/disposable/Disposable";
 import { IMedia } from "crunchyroll-lib/models/IMedia";
+import { Disposable } from "../libs/disposable/Disposable";
+import { EventHandler } from "../libs/events/EventHandler";
+import { IPlayerApi, PlaybackState } from "../media/player/IPlayerApi";
+import { PlaybackStateChangeEvent } from "../media/player/PlaybackStateChangeEvent";
+import { SeekEvent } from "../media/player/SeekEvent";
+import { TimeUpdateEvent } from "../media/player/TimeUpdateEvent";
+import { trackProgress } from "./crunchyroll";
 
 export class VideoTracker extends Disposable {
   private _handler: EventHandler = new EventHandler(this);

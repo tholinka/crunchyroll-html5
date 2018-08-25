@@ -1,0 +1,36 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended",
+    "tslint-react",
+    "tslint-config-prettier"
+  ],
+  "jsRules": {},
+  "rules": {
+    "trailing-comma": false,
+    "indent": [ true, "spaces", 2 ],
+    "encoding": true,
+    "prefer-const": [
+      true,
+      {
+        "destructuring": "all"
+      }
+    ],
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore",
+      "allow-pascal-case"
+    ],
+    "curly": false,
+    "object-literal-sort-keys": false,
+    "no-bitwise": false,
+    "no-empty": false,
+    "no-var-requires": false,
+    "no-console": false
+  },
+  "rulesDirectory": [
+    "tslint-plugin-prettier"
+  ]
+}

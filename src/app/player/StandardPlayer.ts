@@ -1,7 +1,7 @@
 import * as parseUrl from 'url-parse';
-import { IStorageSymbol, IStorage } from '../storage/IStorage';
 import container from "../../config/inversify.config";
 import "../libs/polyfill/DOMTokenList";
+import { IStorage, IStorageSymbol } from '../storage/IStorage';
 
 export function getMediaId(url: string): number|undefined {
   // https://www.crunchyroll.com/boruto-naruto-next-generations/episode-17-run-sarada-740239
@@ -42,24 +42,26 @@ let storedQuality: string|undefined = ""; // empty string means this hasn't run 
 export async function updateQualitySettings(): Promise<void> {
   let quality: string|undefined; 
   
-  const fmtElements = document.querySelectorAll("a[token^=showmedia\\.]");
-  for (let i = 0; i < fmtElements.length; i++) {
-    const href = fmtElements[i].getAttribute("href");
-    if (!href || href.indexOf("/freetrial") === 0 || !fmtElements[i].classList.contains('selected'))
+  const fmtElements = Array.from(document.querySelectorAll("a[token^=showmedia\\.]"));
+  for (const fmtElement of fmtElements) {
+    const href = fmtElement.getAttribute("href");
+    if (!href || href.indexOf("/freetrial") === 0 || !fmtElement.classList.contains('selected'))
       continue;
-    const token = fmtElements[i].getAttribute("token");
+    const token = fmtElement.getAttribute("token");
     if (!token) continue;
 
     quality = parseToken(token);
   }
   
   // get the quality from the URL
-  let qualityOverride: string|undefined = undefined;
-  let curl = parseUrl(window.location.href, true);
-  for (let key in curl.query) {
-    let m = key.match(/p(\d{2,3}0)/);
-    if (m !== null && curl.query[key] === "1") {
-      qualityOverride = m[1] + "p";
+  let qualityOverride: string|undefined;
+  const curl = parseUrl(window.location.href, true);
+  for (const key in curl.query) {
+    if (curl.query.hasOwnProperty(key)) {
+      const m = key.match(/p(\d{2,3}0)/);
+      if (m !== null && curl.query[key] === "1") {
+        qualityOverride = m[1] + "p";
+      }
     }
   }
   
@@ -77,8 +79,8 @@ export async function updateQualitySettings(): Promise<void> {
     quality = qualityOverride;
   
   // update quality selector buttons
-  let selectedQualityElement = document.querySelector("a.selected[token^=showmedia\\.]");
-  let targetQualityElement = document.querySelector("a[token^=showmedia\\." + quality + "]");
+  const selectedQualityElement = document.querySelector("a.selected[token^=showmedia\\.]");
+  const targetQualityElement = document.querySelector("a[token^=showmedia\\." + quality + "]");
 
   if (selectedQualityElement && targetQualityElement) {
     if (selectedQualityElement !== targetQualityElement) {
@@ -91,7 +93,7 @@ export async function updateQualitySettings(): Promise<void> {
     
     storedQuality = quality;
   } else if (selectedQualityElement) {
-    var token = selectedQualityElement.getAttribute("token");
+    const token = selectedQualityElement.getAttribute("token");
 
     if (token) {
       storedQuality = parseToken(token);

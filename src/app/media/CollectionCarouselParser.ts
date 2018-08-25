@@ -20,8 +20,8 @@ export function getCollectionCarouselDetail(url: string): ICollectionCarouselDet
     const media = medias[i];
     if (mediaId.toString() === media.getAttribute("media_id")) {
       return {
-        mediaId: mediaId,
-        groupId: groupId,
+        mediaId,
+        groupId,
         index: i
       };
     }
@@ -39,9 +39,9 @@ export interface IMediaMetadata {
 }
 
 export function getMediaMetadataFromDOM(): IMediaMetadata|undefined {
-  const scripts = document.querySelectorAll("script");
-  for (let i = 0; i < scripts.length; i++) {
-    const content = scripts[i].textContent;
+  const scripts = Array.from(document.querySelectorAll("script"));
+  for (const script of scripts) {
+    const content = script.textContent;
     if (!content) continue;
     const match = content.match(/mediaMetadata[\s]*=[\s]*({.*});/);
     if (!match || !match[1]) continue;

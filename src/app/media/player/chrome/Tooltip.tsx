@@ -1,4 +1,4 @@
-import { h, Component } from "preact";
+import { Component, h } from "preact";
 import { ISize } from "../../../utils/size";
 
 export interface IChromeTooltip {
@@ -24,12 +24,12 @@ export class ChromeTooltip extends Component<{}, {}> {
   private _titleElement?: Element;
   private _textElement?: HTMLElement;
 
-  setPosition(left: number, top: number): void {
+  public setPosition(left: number, top: number): void {
     this.base.style.left = left + "px";
     this.base.style.top = top + "px";
   }
 
-  getSize(): ISize {
+  public getSize(): ISize {
     if (!this._textElement) return { width: 0, height: 0 };
 
     return {
@@ -38,7 +38,7 @@ export class ChromeTooltip extends Component<{}, {}> {
     };
   }
 
-  setTooltip(tooltip: IChromeTooltip) {
+  public setTooltip(tooltip: IChromeTooltip) {
     this.base.style.display = "";
 
     if (this._bgElement) {
@@ -98,7 +98,7 @@ export class ChromeTooltip extends Component<{}, {}> {
     }
   }
 
-  render(): JSX.Element {
+  public render(): JSX.Element {
     const bgRef = (el?: Element) => this._bgElement = el as HTMLElement;
     const durationRef = (el?: Element) => this._durationElement = el;
     const imageRef = (el?: Element) => this._imageElement = el;
@@ -108,12 +108,12 @@ export class ChromeTooltip extends Component<{}, {}> {
     return (
       <div class="chrome-tooltip chrome-bottom" style="display: none;">
         <div class="chrome-tooltip-bg" ref={bgRef}>
-          <div class="chrome-tooltip-duration" ref={durationRef}></div>
+          <div class="chrome-tooltip-duration" ref={durationRef} />
         </div>
         <div class="chrome-tooltip-text-wrapper">
-          <div class="chrome-tooltip-image" ref={imageRef}></div>
-          <div class="chrome-tooltip-title" ref={titleRef}></div>
-          <span class="chrome-tooltip-text" ref={textRef}></span>
+          <div class="chrome-tooltip-image" ref={imageRef} />
+          <div class="chrome-tooltip-title" ref={titleRef} />
+          <span class="chrome-tooltip-text" ref={textRef} />
         </div>
       </div>
     );

@@ -7,7 +7,7 @@ export class SubtitleToAss {
     this._subtitle = subtitle;
   }
 
-  async getContentAsAss(): Promise<string> {
+  public async getContentAsAss(): Promise<string> {
     const model = await this._subtitle.getContent();
 
     let output = '[Script Info]\n';
@@ -20,11 +20,11 @@ export class SubtitleToAss {
     output += "[V4+ Styles]\n";
     output += "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n";
     const styles = model.styles;
-    for (let i = 0; i < styles.length; i++) {
+    for (const style of styles) {
       // Sometimes Crunchyroll sets the scaleX and scaleY to 0, which makes no
       // sense.
-      var scaleX = styles[i].scaleX;
-      var scaleY = styles[i].scaleY;
+      let scaleX = style.scaleX;
+      let scaleY = style.scaleY;
       if (scaleX === "0") {
         scaleX = "100";
       }
@@ -32,29 +32,29 @@ export class SubtitleToAss {
         scaleY = "100";
       }
 
-      output += "Style: " + styles[i].name;
-      output += ", " + styles[i].fontName;
-      output += ", " + styles[i].fontSize;
-      output += ", " + styles[i].primaryColour;
-      output += ", " + styles[i].secondaryColour;
-      output += ", " + styles[i].outlineColour;
-      output += ", " + styles[i].backColour;
-      output += ", " + styles[i].bold;
-      output += ", " + styles[i].italic;
-      output += ", " + styles[i].underline;
-      output += ", " + styles[i].strikeout;
+      output += "Style: " + style.name;
+      output += ", " + style.fontName;
+      output += ", " + style.fontSize;
+      output += ", " + style.primaryColour;
+      output += ", " + style.secondaryColour;
+      output += ", " + style.outlineColour;
+      output += ", " + style.backColour;
+      output += ", " + style.bold;
+      output += ", " + style.italic;
+      output += ", " + style.underline;
+      output += ", " + style.strikeout;
       output += ", " + scaleX;
       output += ", " + scaleY;
-      output += ", " + styles[i].spacing;
-      output += ", " + styles[i].angle;
-      output += ", " + styles[i].borderStyle;
-      output += ", " + styles[i].outline;
-      output += ", " + styles[i].shadow;
-      output += ", " + styles[i].alignment;
-      output += ", " + styles[i].marginL;
-      output += ", " + styles[i].marginR;
-      output += ", " + styles[i].marginV;
-      output += ", " + styles[i].encoding;
+      output += ", " + style.spacing;
+      output += ", " + style.angle;
+      output += ", " + style.borderStyle;
+      output += ", " + style.outline;
+      output += ", " + style.shadow;
+      output += ", " + style.alignment;
+      output += ", " + style.marginL;
+      output += ", " + style.marginR;
+      output += ", " + style.marginV;
+      output += ", " + style.encoding;
       output += "\n";
     }
 
@@ -63,17 +63,17 @@ export class SubtitleToAss {
     output += "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n";
 
     const events = model.events;
-    for (let i = 0; i < events.length; i++) {
+    for (const event of events) {
       output += "Dialogue: 0";
-      output += ", " + events[i].start;
-      output += ", " + events[i].end;
-      output += ", " + events[i].style;
-      output += ", " + events[i].name;
-      output += ", " + events[i].marginL;
-      output += ", " + events[i].marginR;
-      output += ", " + events[i].marginV;
-      output += ", " + events[i].effect;
-      output += ", " + events[i].text;
+      output += ", " + event.start;
+      output += ", " + event.end;
+      output += ", " + event.style;
+      output += ", " + event.name;
+      output += ", " + event.marginL;
+      output += ", " + event.marginR;
+      output += ", " + event.marginV;
+      output += ", " + event.effect;
+      output += ", " + event.text;
       output += "\n";
     }
 

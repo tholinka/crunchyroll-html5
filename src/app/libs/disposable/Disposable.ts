@@ -2,26 +2,20 @@ import { IDisposable } from './IDisposable';
 
 export class Disposable implements IDisposable {
   private _disposed: boolean = false;
-  private _onDisposeCallbacks: Function[] = [];
+  private _onDisposeCallbacks: Array<() => void> = [];
 
-  protected disposeInternal() {
-    while (this._onDisposeCallbacks.length) {
-      (this._onDisposeCallbacks.shift() as Function)();
-    }
-  }
-
-  dispose() {
+  public dispose() {
     if (this.isDisposed()) return;
     this._disposed = true;
 
     this.disposeInternal();
   }
 
-  isDisposed(): boolean {
+  public isDisposed(): boolean {
     return this._disposed;
   }
 
-  addOnDisposeCallback(callback: Function, scope?: Object): void {
+  public addOnDisposeCallback(callback: () => void, scope?: object): void {
     if (this._disposed) {
       scope !== undefined ? callback.call(scope) : callback();
       return;
@@ -29,5 +23,11 @@ export class Disposable implements IDisposable {
     this._onDisposeCallbacks.push(
       scope !== undefined ? callback.bind(scope) : callback
     );
+  }
+
+  protected disposeInternal() {
+    while (this._onDisposeCallbacks.length) {
+      (this._onDisposeCallbacks.shift() as () => void)();
+    }
   }
 }

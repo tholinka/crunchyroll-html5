@@ -6,9 +6,9 @@ export function parseSeconds(seconds: number): { hours: number, minutes: number,
   seconds = Math.floor(seconds - hours * 3600 - minutes * 60);
 
   return {
-    hours: hours,
-    minutes: minutes,
-    seconds: seconds
+    hours,
+    minutes,
+    seconds
   }
 }
 

@@ -1,10 +1,12 @@
-import { EventTarget } from './EventTarget';
+import { EventTarget as MyEventTarget } from './EventTarget';
+import { IListenable, ListneableFunction } from './IListenable';
+import { IProxyFunction } from './IProxyFunction';
 
-export interface ListenableKey {
+export interface IListenableKey {
   /**
    * The source event target.
    */
-  src: Object|EventTarget|undefined;
+  src: IListenable|MyEventTarget|EventTarget|undefined;
 
   /**
    * The event type the listener is listening to.
@@ -14,7 +16,7 @@ export interface ListenableKey {
   /**
    * The listener function.
    */
-  listener: Function;
+  listener: ListneableFunction;
 
   /**
    * Whether the listener works on capture phase.
@@ -24,7 +26,7 @@ export interface ListenableKey {
   /**
    * The 'this' object for the listener function's scope.
    */
-  handler?: Object;
+  handler?: any;
 
   /**
    * A globally unique number to identify the key.
@@ -34,7 +36,7 @@ export interface ListenableKey {
   /**
    * Wrapper for the listener that patches the event.
    */
-  proxy: Function|undefined;
+  proxy: IProxyFunction|undefined;
 }
 
 let _counter: number = 0;

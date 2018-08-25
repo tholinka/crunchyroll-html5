@@ -1,11 +1,6 @@
 import { EventTarget } from "./events/EventTarget";
-import { Event } from "./events/Event";
-
-export enum ReadyState {
-  Loading,
-  Interactive,
-  Complete
-}
+import { ReadyState } from "./ReadyState";
+import { ReadyStateChangeEvent } from "./ReadyStateChangeEvent";
 
 /**
  * Convert a DocumentReadyState to ReadyState.
@@ -32,11 +27,11 @@ export class ReadyStateChange extends EventTarget {
     this._document = document;
   }
 
-  getCurrentReadyState(): ReadyState|undefined {
+  public getCurrentReadyState(): ReadyState|undefined {
     return this._currentReadyState;
   }
 
-  tick() {
+  public tick() {
     const readyState = toReadyState(this._document.readyState);
     const currentReadyStatePriority
       = this._currentReadyState === undefined
@@ -47,15 +42,5 @@ export class ReadyStateChange extends EventTarget {
       this._currentReadyState = i;
       this.dispatchEvent(new ReadyStateChangeEvent(i, this));
     }
-  }
-}
-
-export class ReadyStateChangeEvent extends Event {
-  public readyState: ReadyState;
-
-  constructor(readyState: ReadyState, target?: Object) {
-    super("readystatechange", target);
-
-    this.readyState = readyState;
   }
 }

@@ -1,7 +1,7 @@
-import { IHttpClient } from "crunchyroll-lib/models/http/IHttpClient";
-import { ContainerConstructor } from "crunchyroll-lib/utils/container";
 import container from 'crunchyroll-lib/config';
+import { IHttpClient } from "crunchyroll-lib/models/http/IHttpClient";
 import { IXMLHttpRequestFactory } from "crunchyroll-lib/models/http/IXMLHttpRequestFactory";
+import { ContainerConstructor } from "crunchyroll-lib/utils/container";
 
 // Set default HttpClient
 let crossHttpClient = container.getConstructor<IHttpClient>("IHttpClient");

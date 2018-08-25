@@ -1,11 +1,11 @@
-import { addFile, setWorkerUrl, fonts } from "./SubtitleEngineLoader";
-import { runBootstrap } from './bootstrap';
-import { BackgroundHttpClient } from "./http/BackgroundHttpClient";
-import { setCrossHttpClient, setXMLHttpRequestFactory } from "./config";
 import container from "../config/inversify.config";
+import { runBootstrap } from './bootstrap';
+import { setCrossHttpClient, setXMLHttpRequestFactory } from "./config";
+import { BackgroundHttpClient } from "./http/BackgroundHttpClient";
+import { XMLHttpRequestFactory } from "./http/XMLHttpRequestFactory";
 import { IMechanism, IMechanismSymbol } from "./storage/mechanism/IMechanism";
 import { WebExtensionMechanism } from "./storage/mechanism/WebExtensionMechanism";
-import { XMLHttpRequestFactory } from "./http/XMLHttpRequestFactory";
+import { addFile, fonts, setWorkerUrl } from "./SubtitleEngineLoader";
 
 function getURL(path: string): string {
   if (chrome && chrome.extension && typeof chrome.extension.getURL === "function") {

@@ -1,7 +1,9 @@
-import { IPlayerApi, DurationChangeEvent, TimeUpdateEvent } from "../IPlayerApi";
-import { h, Component } from "preact";
+import { Component, h } from "preact";
 import { EventHandler } from "../../../libs/events/EventHandler";
 import { parseAndFormatTime } from "../../../utils/time";
+import { DurationChangeEvent } from "../DurationChangeEvent";
+import { IPlayerApi } from "../IPlayerApi";
+import { TimeUpdateEvent } from "../TimeUpdateEvent";
 
 export interface ITimeDisplayProps {
   api: IPlayerApi
@@ -25,6 +27,26 @@ export class TimeDisplay extends Component<ITimeDisplayProps, ITimeDisplayState>
       currentTime: '--:--',
       durationTime: '--:--'
     };
+  }
+
+  public componentDidMount() {
+    this._handler
+      .listen(this.props.api, 'timeupdate', this._onTimeUpdate, false)
+      .listen(this.props.api, 'durationchange', this._onDurationChange, false);
+  }
+
+  public componentWillUnmount() {
+    this._handler.removeAll();
+  }
+
+  public render({}: ITimeDisplayProps, { currentTime, durationTime }: ITimeDisplayState): JSX.Element {
+    return (
+      <div class="chrome-time-display">
+        <span class="chrome-time-current">{ currentTime }</span>
+        <span class="chrome-time-separator"> / </span>
+        <span class="chrome-time-duration">{ durationTime }</span>
+      </div>
+    );
   }
 
   private _onTimeUpdate(e: TimeUpdateEvent) {
@@ -54,25 +76,5 @@ export class TimeDisplay extends Component<ITimeDisplayProps, ITimeDisplayState>
     }
 
     this.setState(newState);
-  }
-
-  componentDidMount() {
-    this._handler
-      .listen(this.props.api, 'timeupdate', this._onTimeUpdate, false)
-      .listen(this.props.api, 'durationchange', this._onDurationChange, false);
-  }
-
-  componentWillUnmount() {
-    this._handler.removeAll();
-  }
-
-  render({}: ITimeDisplayProps, { currentTime, durationTime }: ITimeDisplayState): JSX.Element {
-    return (
-      <div class="chrome-time-display">
-        <span class="chrome-time-current">{ currentTime }</span>
-        <span class="chrome-time-separator"> / </span>
-        <span class="chrome-time-duration">{ durationTime }</span>
-      </div>
-    );
   }
 }

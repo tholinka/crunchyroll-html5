@@ -1,18 +1,18 @@
-import { IMechanism, StorageTestAvailabilityKey } from "./IMechanism";
-import { StorageError } from "../StorageError";
 import { injectable } from "inversify";
+import { StorageError } from "../StorageError";
+import { IMechanism, StorageTestAvailabilityKey } from "./IMechanism";
 
 @injectable()
 export class EmptyMechanism implements IMechanism {
-  async set(key: string, value: string): Promise<void> {
+  public async set(key: string, value: string): Promise<void> {
     
   }
 
-  async get(key: string): Promise<string | undefined> {
+  public async get(key: string): Promise<string | undefined> {
     return undefined;
   }
 
-  async remove(key: string): Promise<void> {
+  public async remove(key: string): Promise<void> {
     
   }
 }

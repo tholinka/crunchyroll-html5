@@ -10,7 +10,7 @@ export class PlayerAction implements IAction {
     this._action = action;
   }
 
-  execute() {
+  public execute() {
     this._action();
   }
 }

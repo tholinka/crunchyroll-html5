@@ -2,6 +2,7 @@
   "name": "crunchyroll-html5",
   "productName": "Crunchyroll HTML5",
   "description": "A fully fledged HTML5 player for Crunchyroll.",
+  "version": "0.12.0",
   "author": {
     "name": "Jeppe Rune Mortensen",
     "email": "jepperm@gmail.com"
@@ -25,12 +26,21 @@
     "type": "git",
     "url": "https://github.com/YePpHa/crunchyroll-html5.git"
   },
-  "version": "0.12.0",
+  "keywords": [
+    "html5",
+    "player",
+    "video",
+    "crunchyroll",
+    "html5 player",
+    "crunchyroll html5"
+  ],
   "main": "dist/crunchyroll-html5.user.js",
   "license": "MIT",
   "scripts": {
     "clean": "shx rm -rf dist",
-    "test": "npm run build",
+    "test": "npm run tslint && npm run build",
+    "tslint": "tslint -p tsconfig.json",
+    "tslint:fix": "tslint -p tsconfig.json --fix",
     "package": "npm run package:webextension && npm run package:firefox",
     "package:firefox": "node build/package.firefox.js",
     "package:webextension": "node build/package.webextension.js",
@@ -59,6 +69,7 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.72",
+    "@types/firefox-webext-browser": "^58.0.3",
     "@types/greasemonkey": "^0.0.28",
     "@types/hls.js": "^0.10.1",
     "@types/lodash": "^4.14.78",
@@ -74,12 +85,17 @@
     "postcss-cssnext": "^3.1.0",
     "postcss-import": "^12.0.0",
     "postcss-loader": "^3.0.0",
+    "prettier": "^1.14.2",
     "sass-loader": "^7.0.3",
     "shx": "^0.3.2",
     "sign-addon": "^0.3.0",
     "stream-replace": "^1.0.0",
     "to-string-loader": "^1.1.5",
     "ts-loader": "^4.1.0",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-plugin-prettier": "^1.3.0",
+    "tslint-react": "^3.6.0",
     "typescript": "^2.4.2",
     "uglify-es": "^3.3.9",
     "uglifyjs-webpack-plugin": "^1.2.4",

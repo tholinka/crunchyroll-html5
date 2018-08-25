@@ -3,6 +3,7 @@
  * assumes that any `valueOf` function is pure, without analyzing its contents.
  * @param fn 
  */
+// tslint:disable-next-line:ban-types
 function purify<T>(fn: Function): T {
   return ({valueOf: fn}).valueOf();
 }
@@ -17,7 +18,7 @@ export const PASSIVE_EVENTS: boolean = purify(() => {
 
   let passive = false;
   const options = Object.defineProperty({}, 'passive', {
-    get: function() {
+    get() {
       passive = true;
     }
   });

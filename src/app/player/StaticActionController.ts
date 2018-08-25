@@ -1,9 +1,9 @@
-import { IActionKey } from "./IActionKey";
 import { IAction } from "../libs/actions/IAction";
-import { EventHandler } from "../libs/events/EventHandler";
 import { Disposable } from "../libs/disposable/Disposable";
-import { Event } from "../libs/events/Event";
 import { BrowserEvent } from "../libs/events/BrowserEvent";
+import { Event } from "../libs/events/Event";
+import { EventHandler } from "../libs/events/EventHandler";
+import { IActionKey } from "./IActionKey";
 
 export class StaticActionController extends Disposable {
   private _keyMapping: {[key: string]: IActionKey[]} = {
@@ -44,26 +44,46 @@ export class StaticActionController extends Disposable {
     this._actions = actions;
   }
 
+  public getKeyMappingById(id: string): IActionKey[] {
+    if (!this._keyMapping.hasOwnProperty(id))
+      return [];
+    return this._keyMapping[id];
+  }
+
+  public getHandler(): EventHandler {
+    if (!this._handler) {
+      this._handler = new EventHandler(this);
+    }
+
+    return this._handler;
+  }
+
+  public enterDocument(): void {
+    for (const action of this._actions) {
+
+      const keyMappings = this.getKeyMappingById(action.id);
+      for (const keyMapping of keyMappings) {
+        if (keyMapping.global) {
+          this._listenGlobal(action, keyMapping);
+        } else {
+          this._listenLocal(action, keyMapping);
+        }
+      }
+    }
+  }
+
+  public exitDocument(): void {
+    if (this._handler) {
+      this.getHandler().removeAll();
+    }
+  }
+
   protected disposeInternal() {
     super.disposeInternal();
 
     if (this._handler) {
       this._handler.dispose();
     }
-  }
-
-  getKeyMappingById(id: string): IActionKey[] {
-    if (!this._keyMapping.hasOwnProperty(id))
-      return [];
-    return this._keyMapping[id];
-  }
-
-  getHandler(): EventHandler {
-    if (!this._handler) {
-      this._handler = new EventHandler(this);
-    }
-
-    return this._handler;
   }
 
   protected _isKeyActive(mapping: IActionKey, e: BrowserEvent): boolean {
@@ -116,26 +136,5 @@ export class StaticActionController extends Disposable {
 
       e.preventDefault();
     }, false);
-  }
-
-  enterDocument(): void {
-    for (let i = 0; i < this._actions.length; i++) {
-      let action = this._actions[i];
-
-      let keyMappings = this.getKeyMappingById(action.id);
-      for (let i = 0; i < keyMappings.length; i++) {
-        if (keyMappings[i].global) {
-          this._listenGlobal(action, keyMappings[i]);
-        } else {
-          this._listenLocal(action, keyMappings[i]);
-        }
-      }
-    }
-  }
-
-  exitDocument(): void {
-    if (this._handler) {
-      this.getHandler().removeAll();
-    }
   }
 }

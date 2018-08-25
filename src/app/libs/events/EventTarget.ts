@@ -1,14 +1,13 @@
-import { Listener } from './Listener';
-import { ListenableKey } from './ListenableKey';
-import { Disposable } from '../disposable/Disposable';
-import { Listenable, addImplementation } from './Listenable';
-import { ListenerMap } from './ListenerMap';
-import { Event, EventLike } from './Event';
 import * as _ from 'lodash';
+import { Disposable } from '../disposable/Disposable';
+import { Event, EventLike } from './Event';
+import { addImplementation, IListenable, ListneableFunction } from './IListenable';
+import { IListenableKey } from './IListenableKey';
+import { ListenerMap } from './ListenerMap';
 
 const MAX_ANCESTORS = 1000;
 
-export class EventTarget extends Disposable implements Listenable {
+export class EventTarget extends Disposable implements IListenable {
   private _eventTargetListeners: ListenerMap = new ListenerMap(this);
   private _parentEventTarget?: EventTarget;
   private _actualEventTarget: EventTarget = this;
@@ -17,52 +16,56 @@ export class EventTarget extends Disposable implements Listenable {
     super();
   }
 
-  protected disposeInternal() {
-    super.disposeInternal();
-
-    this.removeAllListeners();
-  }
-
-  setParentEventTarget(parent?: EventTarget) {
+  public setParentEventTarget(parent?: EventTarget) {
     this._parentEventTarget = parent;
   }
 
-  getParentEventTarget(): EventTarget | undefined {
+  public getParentEventTarget(): EventTarget | undefined {
     return this._parentEventTarget;
   }
   
-  dispatchEvent(event: EventLike): boolean {
-    let ancestorsTree: EventTarget[]|undefined,
-      ancestor = this.getParentEventTarget();
+  public dispatchEvent(event: EventLike): boolean {
+    let ancestorsTree: EventTarget[]|undefined;
+    let ancestor = this.getParentEventTarget();
     if (ancestor) {
       ancestorsTree = [];
       let ancestorCount = 1;
       for (; ancestor; ancestor = ancestor.getParentEventTarget()) {
         ancestorsTree.push(ancestor);
-        console.assert((++ancestorCount < MAX_ANCESTORS), 'infinite loop');
+        if (++ancestorCount >= MAX_ANCESTORS) throw new Error("Infinite loop");
       }
     }
 
     return this._dispatchEventInternal(this._actualEventTarget, event, ancestorsTree);
   }
+
+  /** @deprecated */
+  public addEventListener(type: string, listener: ListneableFunction, useCapture?: boolean, scope?: any): IListenableKey {
+    return this.listen(type, listener, useCapture, scope);
+  }
+
+  /** @deprecated */
+  public removeEventListener(type: string, listener: ListneableFunction, useCapture?: boolean, scope?: any): boolean {
+    return this.unlisten(type, listener, useCapture, scope);
+  }
   
-  listen(type: string, listener: Function, useCapture?: boolean, listenerScope?: Object): ListenableKey {
-    return this._eventTargetListeners.add(type, listener, false, useCapture, listenerScope);
+  public listen(type: string, listener: ListneableFunction, useCapture?: boolean, scope?: any): IListenableKey {
+    return this._eventTargetListeners.add(type, listener, false, useCapture, scope);
   }
 
-  listenOnce(type: string, listener: Function, useCapture?: boolean, listenerScope?: Object): ListenableKey {
-    return this._eventTargetListeners.add(type, listener, true, useCapture, listenerScope);
+  public listenOnce(type: string, listener: ListneableFunction, useCapture?: boolean, scope?: any): IListenableKey {
+    return this._eventTargetListeners.add(type, listener, true, useCapture, scope);
   }
 
-  unlisten(type: string, listener: Function, useCapture?: boolean, listenerScope?: Object): boolean {
-    return this._eventTargetListeners.remove(type, listener, useCapture, listenerScope);
+  public unlisten(type: string, listener: ListneableFunction, useCapture?: boolean, scope?: any): boolean {
+    return this._eventTargetListeners.remove(type, listener, useCapture, scope);
   }
 
-  unlistenByKey(key: ListenableKey): boolean {
+  public unlistenByKey(key: IListenableKey): boolean {
     return this._eventTargetListeners.removeByKey(key);
   }
   
-  removeAllListeners(): number {
+  public removeAllListeners(): number {
     if (!this._eventTargetListeners) {
       return 0;
     }
@@ -70,7 +73,7 @@ export class EventTarget extends Disposable implements Listenable {
     return this._eventTargetListeners.removeAll();
   }
 
-  fireListeners(type: string, capture: boolean, event: Event) {
+  public fireListeners(type: string, capture: boolean, event: Event): boolean {
     let listenerArray = this._eventTargetListeners.listeners[String(type)];
     if (!listenerArray) {
       return true;
@@ -78,12 +81,11 @@ export class EventTarget extends Disposable implements Listenable {
     listenerArray = listenerArray.concat();
   
     let rv = true;
-    for (let i = 0; i < listenerArray.length; i++) {
-      let listener = listenerArray[i];
+    for (const listener of listenerArray) {
       // We might not have a listener if the listener was removed.
       if (listener && !listener.removed && listener.capture === capture) {
-        let listenerFn = listener.listener;
-        let listenerHandler = listener.handler || listener.src;
+        const listenerFn = listener.listener;
+        const listenerHandler = listener.handler || listener.src;
   
         if (listener.callOnce) {
           this.unlistenByKey(listener);
@@ -95,16 +97,22 @@ export class EventTarget extends Disposable implements Listenable {
     return rv && !event.isReturnValue();
   }
 
-  getListeners(type: string, capture: boolean): ListenableKey[] {
+  public getListeners(type: string, capture: boolean): IListenableKey[] {
     return this._eventTargetListeners.getListeners(type, capture);
   }
 
-  getListener(type: string, listener: Function, capture: boolean, listenerScope?: Object): ListenableKey|undefined {
-    return this._eventTargetListeners.getListener(type, listener, capture, listenerScope);
+  public getListener(type: string, listener: ListneableFunction, capture: boolean, scope?: any): IListenableKey|undefined {
+    return this._eventTargetListeners.getListener(type, listener, capture, scope);
   }
 
-  hasListener(type?: string, capture?: boolean): boolean {
+  public hasListener(type?: string, capture?: boolean): boolean {
     return this._eventTargetListeners.hasListener(type, capture);
+  }
+
+  protected disposeInternal() {
+    super.disposeInternal();
+
+    this.removeAllListeners();
   }
   
   private _dispatchEventInternal(target: EventTarget, eventLike: EventLike, ancestorsTree?: EventTarget[]) {
@@ -118,11 +126,12 @@ export class EventTarget extends Disposable implements Listenable {
       event.target = eventLike.target || target;
     }
 
-    let type = event.type, returnValue = true;
+    const type = event.type;
+    let returnValue = true;
 
     if (ancestorsTree) {
       for (let i = ancestorsTree.length - 1; !event.isPropagationStopped() && i >= 0; i--) {
-        let currentTarget = event.currentTarget = ancestorsTree[i];
+        const currentTarget = event.currentTarget = ancestorsTree[i];
         returnValue = currentTarget.fireListeners(type, true, event)
           && returnValue;
       }
@@ -130,7 +139,7 @@ export class EventTarget extends Disposable implements Listenable {
 
     // Executes capture and bubble listeners on the target.
     if (!event.isPropagationStopped()) {
-      let currentTarget = event.currentTarget = target;
+      const currentTarget = event.currentTarget = target;
       returnValue = currentTarget.fireListeners(type, true, event) && returnValue;
       if (!event.isPropagationStopped()) {
         returnValue = currentTarget.fireListeners(type, false, event) && returnValue;
@@ -140,7 +149,7 @@ export class EventTarget extends Disposable implements Listenable {
     // Executes all bubble listeners on the ancestors, if any.
     if (ancestorsTree) {
       for (let i = 0; !event.isPropagationStopped() && i < ancestorsTree.length; i++) {
-        let currentTarget = event.currentTarget = ancestorsTree[i];
+        const currentTarget = event.currentTarget = ancestorsTree[i];
         returnValue = currentTarget.fireListeners(type, false, event) && returnValue;
       }
     }
