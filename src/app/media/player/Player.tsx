@@ -253,6 +253,12 @@ export class Player extends Component<IPlayerProps, IPlayerState>
     return this._forceHide;
   }
 
+  public focus(): void {
+    if (!this.base) return;
+
+    this.base.focus();
+  }
+
   public updateInternalAutoHide(): void {
     if (!this._bottomComponent) throw new Error('BottomComponent is undefined');
 

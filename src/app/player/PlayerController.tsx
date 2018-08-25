@@ -416,6 +416,10 @@ export class PlayerController {
         mainMedia.insertBefore(showmediaVideo, mainMedia.childNodes[0]);
       }
     }
+
+    // Give player focus again after it has been moved
+    this._player.focus();
+
     if (playing) {
       api.playVideo(true);
     }
