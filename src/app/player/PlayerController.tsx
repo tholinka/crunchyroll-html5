@@ -1,9 +1,9 @@
 import { Formats, getMedia, getMediaByUrl } from 'crunchyroll-lib/media';
 import { IMedia } from 'crunchyroll-lib/models/IMedia';
+import { Container } from 'inversify';
 import { h, render } from 'preact';
 import parse = require('url-parse');
 import { IMediaOptions } from '../../../node_modules/crunchyroll-lib/models/IMediaResolver';
-import container from '../../config/inversify.config';
 import {
   getCollectionCarouselDetail,
   getMediaMetadataFromDOM
@@ -63,12 +63,16 @@ export class PlayerController {
 
   private _cachedCarouselPage?: ICollectionCarouselPage;
 
+  private _storage: IStorage;
+
   constructor(
+    container: Container,
     element: Element,
     url: string,
     mediaId: number,
     options?: IPlayerControllerOptions
   ) {
+    this._storage = container.get<IStorage>(IStorageSymbol);
     this._element = element;
     this._url = url;
     this._mediaId = mediaId;
@@ -133,14 +137,12 @@ export class PlayerController {
     const volume = e.volume;
     const muted = e.muted;
 
-    const storage = container.get<IStorage>(IStorageSymbol);
-
     const data = {
       volume,
       muted
     } as IVolumeData;
 
-    await storage.set<IVolumeData>('volume', data);
+    await this._storage.set<IVolumeData>('volume', data);
   }
 
   private _onFullscreenChange(): void {
@@ -202,9 +204,7 @@ export class PlayerController {
       videoConfig.url = videoConfig.url.replace('http://', 'https://');
     }
 
-    const storage = container.get<IStorage>(IStorageSymbol);
-
-    const volumeData = await storage.get<IVolumeData>('volume');
+    const volumeData = await this._storage.get<IVolumeData>('volume');
     if (volumeData) {
       videoConfig.muted = volumeData.muted;
       videoConfig.volume = volumeData.volume;
@@ -320,6 +320,17 @@ export class PlayerController {
     await this._loadMedia(media);
   }
 
+  private async _loadSettings(player: Player): Promise<void> {
+    const api = player.getApi();
+
+    let autoPlay: boolean|undefined = await this._storage.get("autoplay");
+    if (typeof autoPlay !== "boolean") {
+      autoPlay = true;
+    }
+
+    api.setAutoPlay(autoPlay);
+  }
+
   /**
    * Initial loading of player and the media to play.
    * @param player the player reference
@@ -345,6 +356,9 @@ export class PlayerController {
     api.listen('playbackstatechange', (e: PlaybackStateChangeEvent) =>
       this._onPlaybackStateChange(e)
     );
+    api.listen('autoplaychange', () => {
+      this._storage.set("autoplay", api.isAutoPlay());
+    });
 
     let media: IMedia;
 
@@ -357,6 +371,8 @@ export class PlayerController {
       options.streamFormat = this._mediaFormat;
       options.streamQuality = this._mediaQuality;
     }
+
+    await this._loadSettings(player);
 
     if (this._quality) {
       media = await getMedia(
@@ -375,7 +391,7 @@ export class PlayerController {
   private async _onPlaybackStateChange(
     e: PlaybackStateChangeEvent
   ): Promise<void> {
-    if (e.state !== PlaybackState.ENDED || !this._player) return;
+    if (e.state !== PlaybackState.ENDED || !this._player || !this._player.getApi().isAutoPlay()) return;
 
     const detail = this._player.getApi().getNextVideoDetail();
     if (!detail) return;

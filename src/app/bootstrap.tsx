@@ -1,4 +1,5 @@
 import { FORMAT_IDS, Formats } from 'crunchyroll-lib/media';
+import container from '../config/inversify.config';
 import { bindCrossHttpClientAsDefault } from './config';
 import { EventHandler } from './libs/events/EventHandler';
 import { ReadyState } from './libs/ReadyState';
@@ -123,6 +124,7 @@ class Bootstrap {
     this._wrapper.innerHTML = '';
 
     const player = new PlayerController(
+      container,
       this._wrapper,
       window.location.href,
       mediaId,

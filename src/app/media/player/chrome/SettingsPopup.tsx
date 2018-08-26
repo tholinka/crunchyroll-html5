@@ -1,6 +1,9 @@
 import { Component, h } from 'preact';
+import container, { ISettingsModuleFactorySymbol } from '../../../../config/inversify.config';
 import { BrowserEvent } from '../../../libs/events/BrowserEvent';
 import { EventHandler } from '../../../libs/events/EventHandler';
+import { ISettingsFactory } from '../../../models/ISettingsFactory';
+import { ISettingsModule } from '../../../models/ISettingsModule';
 import { IPlayerApi } from '../IPlayerApi';
 
 export interface IBaseMenuItem {
@@ -191,8 +194,13 @@ export class ChromeSettingsPopup extends Component<
 
   private _currentMenu?: string;
 
+  private _modules: ISettingsModule[];
+
   constructor(props: IChromeSettingsPopupProps) {
     super(props);
+    
+    const factory: ISettingsFactory = container.get(ISettingsModuleFactorySymbol);
+    this._modules = factory(this.props.api);
 
     this.state = { menu: this._rebuildMenu() };
   }
@@ -200,10 +208,14 @@ export class ChromeSettingsPopup extends Component<
   public componentDidMount() {
     if (!this._containerElement) return;
 
+    for (const x of this._modules) {
+      x.attachHandler();
+      this._handler
+        .listen(x, 'rebuild', () => this.setState({ menu: this._rebuildMenu() }))
+        .listen(x, 'navigateToCurrent', () => this._onNavigate(this._currentMenu));
+    }
+
     this._handler
-      .listen(this.props.api, 'subtitletrackchange', () =>
-        this.setState({ menu: this._rebuildMenu() })
-      )
       .listen(
         this.props.api,
         'settingsopen',
@@ -225,6 +237,10 @@ export class ChromeSettingsPopup extends Component<
   }
 
   public componentWillUnmount() {
+    for (const module of this._modules) {
+      module.detachHandler();
+    }
+
     this._handler.removeAll();
   }
 
@@ -248,11 +264,6 @@ export class ChromeSettingsPopup extends Component<
         {_renderMenu(menu, menuRefs, onNavigate)}
       </div>
     );
-  }
-
-  private _setSubtitleTrack(track: number) {
-    this.props.api.setSubtitleTrack(track);
-    this._onNavigate(this._currentMenu);
   }
 
   private _onSettingsToggle(open: boolean) {
@@ -319,26 +330,7 @@ export class ChromeSettingsPopup extends Component<
   }
 
   private _rebuildMenu(): IMenuItem[] {
-    const tracks = this.props.api.getSubtitlesTracks();
-    const currentTrack = this.props.api.getSubtitleTrack();
-    const currentSelection =
-      currentTrack < 0 ? 'Off' : tracks[currentTrack].label;
-
-    return [
-      {
-        label: 'Subtitles',
-        role: 'menuitem',
-        content: currentSelection,
-        items: ['Off', ...tracks.map(track => track.label)].map(
-          (track, index): IRadioMenuItem => ({
-            label: track,
-            selected: currentSelection === track,
-            role: 'menuitemradio',
-            onselect: () => this._setSubtitleTrack(index - 1)
-          })
-        )
-      }
-    ];
+    return this._modules.map(x => x.getMenuItem());
   }
 
   private _maybeClose(event: BrowserEvent) {

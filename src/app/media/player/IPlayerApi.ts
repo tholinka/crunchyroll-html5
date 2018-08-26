@@ -64,4 +64,7 @@ export interface IPlayerApi extends EventTarget {
   isSettingsOpen(): boolean;
   openSettings(): void;
   closeSettings(): void;
+
+  isAutoPlay(): boolean;
+  setAutoPlay(autoPlay: boolean): void;
 }

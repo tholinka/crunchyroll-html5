@@ -10,6 +10,7 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   private _nextVideo: IVideoDetail | undefined = undefined;
   private _large: boolean = false;
   private _settingsOpen: boolean = false;
+  private _autoPlay: boolean = true;
 
   constructor(player?: ChromelessPlayer) {
     super();
@@ -183,5 +184,14 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
   public closeSettings(): void {
     this._settingsOpen = false;
     this.dispatchEvent('settingsclose');
+  }
+
+  public isAutoPlay(): boolean {
+    return this._autoPlay;
+  }
+
+  public setAutoPlay(autoPlay: boolean): void {
+    this._autoPlay = autoPlay;
+    this.dispatchEvent('autoplaychange');
   }
 }
