@@ -67,4 +67,7 @@ export interface IPlayerApi extends EventTarget {
 
   isAutoPlay(): boolean;
   setAutoPlay(autoPlay: boolean): void;
+
+  getPlaybackRate(): number;
+  setPlaybackRate(rate: number): void;
 }

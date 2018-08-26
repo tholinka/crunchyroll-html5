@@ -194,4 +194,14 @@ export class ChromelessPlayerApi extends EventTarget implements IPlayerApi {
     this._autoPlay = autoPlay;
     this.dispatchEvent('autoplaychange');
   }
+
+  public getPlaybackRate(): number {
+    if (!this._player) throw new Error('Not initialized');
+    return this._player.getPlaybackRate();
+  }
+
+  public setPlaybackRate(rate: number): void {
+    if (!this._player) throw new Error('Not initialized');
+    this._player.setPlaybackRate(rate);
+  }
 }

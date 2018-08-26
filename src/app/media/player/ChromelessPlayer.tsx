@@ -13,6 +13,7 @@ import { ChromelessPlayerApi } from './ChromelessPlayerApi';
 import { DurationChangeEvent } from './DurationChangeEvent';
 import { IPlayerApi, PlaybackState } from './IPlayerApi';
 import { ISource } from './ISource';
+import { PlaybackRateChangeEvent } from './PlaybackRateChangeEvent';
 import { PlaybackStateChangeEvent } from './PlaybackStateChangeEvent';
 import { SeekEvent } from './SeekEvent';
 import { SubtitleContainerComponent } from './SubtitleContainerComponent';
@@ -367,6 +368,16 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     }
   }
 
+  public getPlaybackRate(): number {
+    if (!this._videoElement) throw new Error('Video element is undefined');
+    return this._videoElement.playbackRate;
+  }
+
+  public setPlaybackRate(rate: number) {
+    if (!this._videoElement) throw new Error('Video element is undefined');
+    this._videoElement.playbackRate = rate;
+  }
+
   public async setSubtitleTrack(index: number): Promise<any> {
     if (!this._videoElement) throw new Error('Video element is undefined');
     if (!this._api) throw new Error('API is undefined');
@@ -438,6 +449,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
         false
       )
       .listen(this._videoElement, 'timeupdate', this._onTimeUpdate, false)
+      .listen(this._videoElement, 'ratechange', this._onRateChange, false)
       .listen(
         this._videoElement,
         'durationchange',
@@ -609,6 +621,12 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     if (!this._api) throw new Error('API is undefined');
 
     this._api.dispatchEvent(new TimeUpdateEvent(this.getCurrentTime()));
+  }
+
+  private _onRateChange() {
+    if (!this._api) throw new Error('API is undefined');
+
+    this._api.dispatchEvent(new PlaybackRateChangeEvent(this.getPlaybackRate()));
   }
 
   private _onVolumeChange() {
