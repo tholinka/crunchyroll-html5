@@ -569,8 +569,10 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     switch (state) {
       case PlaybackState.PAUSED:
         this._videoElement.pause();
+        break;
       default:
         this._play();
+        break;
     }
   }
 
