@@ -2,7 +2,7 @@
   "name": "crunchyroll-html5",
   "productName": "Crunchyroll HTML5",
   "description": "A fully fledged HTML5 player for Crunchyroll.",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "author": {
     "name": "Jeppe Rune Mortensen",
     "email": "jepperm@gmail.com"
