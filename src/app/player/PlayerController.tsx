@@ -1,24 +1,37 @@
-import { Formats, getMedia, getMediaByUrl } from 'crunchyroll-lib/media';
+import crContainer from 'crunchyroll-lib/config';
+import { Formats, getMediaByUrl } from 'crunchyroll-lib/media';
+import { IHttpClient } from 'crunchyroll-lib/models/http/IHttpClient';
 import { IMedia } from 'crunchyroll-lib/models/IMedia';
 import { Container } from 'inversify';
 import { h, render } from 'preact';
 import parse = require('url-parse');
 import { IMediaOptions } from '../../../node_modules/crunchyroll-lib/models/IMediaResolver';
+import container from '../../config/inversify.config';
 import {
   getCollectionCarouselDetail,
   getMediaMetadataFromDOM
 } from '../media/CollectionCarouselParser';
+import { HlsQualityResolver } from '../media/HlsQualityResolver';
+import { LegacyQualityResolver } from '../media/LegacyQualityResolver';
 import { NextVideo } from '../media/nextvideo';
 import { IVideoDetail, PlaybackState } from '../media/player/IPlayerApi';
 import { NextVideoEvent } from '../media/player/NextVideoEvent';
 import { PlaybackStateChangeEvent } from '../media/player/PlaybackStateChangeEvent';
 import { IPlayerConfig, Player } from '../media/player/Player';
 import { VolumeChangeEvent } from '../media/player/VolumeChangeEvent';
+import { IMediaService } from '../models/IMediaService';
+import {
+  IQualityResolver,
+  IQualityResolverSymbol
+} from '../models/IQualityResolver';
+import { LegacyPlayerService } from '../services/LegacyPlayerService';
+import { VilosPlayerService } from '../services/VilosPlayerService';
 import { IStorage, IStorageSymbol } from '../storage/IStorage';
 import {
   getCollectionCarouselPage,
   ICollectionCarouselPage
 } from './crunchyroll';
+import { getAvailableQualities } from './StandardPlayer';
 import { StaticActionController } from './StaticActionController';
 import { VideoTracker } from './Tracking';
 
@@ -42,6 +55,7 @@ export class PlayerController {
   get large(): boolean {
     return this._element.id === 'showmedia_video_box_wide';
   }
+
   private _element: Element;
   private _url: string;
   private _mediaId: number;
@@ -65,16 +79,20 @@ export class PlayerController {
 
   private _storage: IStorage;
 
+  private _originalHTML: string;
+
   constructor(
-    container: Container,
+    _c: Container,
     element: Element,
     url: string,
+    originalHTML: string,
     mediaId: number,
     options?: IPlayerControllerOptions
   ) {
-    this._storage = container.get<IStorage>(IStorageSymbol);
+    this._storage = _c.get<IStorage>(IStorageSymbol);
     this._element = element;
     this._url = url;
+    this._originalHTML = originalHTML;
     this._mediaId = mediaId;
 
     if (options) {
@@ -163,36 +181,26 @@ export class PlayerController {
     location.href = url.toString();
   }
 
-  private async _loadMedia(media: IMedia): Promise<void> {
+  private async _loadMedia(media: IMediaService): Promise<void> {
     if (!this._player) return;
     if (this._tracking) {
       this._tracking.dispose();
       this._tracking = undefined;
     }
 
-    const metadata = media.getMetadata();
-    const stream = media.getStream();
-
-    // Construct a title
-    const title =
-      metadata.getSeriesTitle() +
-      ' Episode ' +
-      metadata.getEpisodeNumber() +
-      ' – ' +
-      metadata.getEpisodeTitle();
+    const title = media.getTitle();
 
     const videoConfig = {
       title,
-      url: stream.getFile(),
-      duration: stream.getDuration(),
+      url: media.getFile(),
+      duration: media.getDuration(),
       subtitles: media.getSubtitles(),
       startTime:
-        this._startTime === undefined
-          ? media.getStartTime() || 0
-          : this._startTime,
+        this._startTime === undefined ? media.getStartTime() : this._startTime,
       autoplay:
         this._autoPlay === undefined ? media.isAutoPlay() : this._autoPlay,
-      thumbnailUrl: metadata.getEpisodeImageUrl()
+      thumbnailUrl: media.getThumbnailUrl(),
+      quality: this._quality
     } as IPlayerConfig;
 
     // Change the file URL to https if current page is also https
@@ -211,7 +219,7 @@ export class PlayerController {
     }
 
     // Register the next video if there's one
-    const nextVideoUrl = media.getNextVideoUrl();
+    const nextVideoUrl = media.getNextMediaUrl();
     if (nextVideoUrl) {
       let nextVideo = NextVideo.fromUrlUsingDocument(nextVideoUrl);
       if (!nextVideo) {
@@ -260,7 +268,7 @@ export class PlayerController {
     }
 
     this._tracking = new VideoTracker(
-      media,
+      media.getTracking(),
       this._player.getApi(),
       this._affiliateId
     );
@@ -270,6 +278,8 @@ export class PlayerController {
     } else {
       this._player.cueVideoByConfig(videoConfig);
     }
+
+    this._player.getApi().dispatchEvent('rebuild-settings');
   }
 
   private async _onNextVideo(e: NextVideoEvent): Promise<void> {
@@ -311,20 +321,40 @@ export class PlayerController {
       options.streamQuality = this._mediaQuality;
     }
 
-    if (this._quality) {
-      media = await getMediaByUrl(detail.url, this._quality, options);
-    } else {
-      media = await getMediaByUrl(detail.url, options);
-    }
+    const httpClient = crContainer.get<IHttpClient>('IHttpClient');
 
-    await this._loadMedia(media);
+    const res = await httpClient.get(detail.url);
+    const vilos = VilosPlayerService.fromHTML(res.body, res.body);
+    if (vilos) {
+      container
+        .rebind<IQualityResolver>(IQualityResolverSymbol)
+        .toConstantValue(new HlsQualityResolver());
+      await this._loadMedia(new VilosPlayerService(this._player, vilos));
+    } else {
+      container
+        .rebind<IQualityResolver>(IQualityResolverSymbol)
+        .toConstantValue(
+          new LegacyQualityResolver(
+            getAvailableQualities(),
+            this._quality,
+            async (quality?: keyof Formats) => this._getLegacyMedia(quality)
+          )
+        );
+      if (this._quality) {
+        media = await getMediaByUrl(detail.url, this._quality, options);
+      } else {
+        media = await getMediaByUrl(detail.url, options);
+      }
+
+      await this._loadMedia(new LegacyPlayerService(this._player, media));
+    }
   }
 
   private async _loadSettings(player: Player): Promise<void> {
     const api = player.getApi();
 
-    let autoPlay: boolean|undefined = await this._storage.get("autoplay");
-    if (typeof autoPlay !== "boolean") {
+    let autoPlay: boolean | undefined = await this._storage.get('autoplay');
+    if (typeof autoPlay !== 'boolean') {
       autoPlay = true;
     }
 
@@ -357,11 +387,39 @@ export class PlayerController {
       this._onPlaybackStateChange(e)
     );
     api.listen('autoplaychange', () => {
-      this._storage.set("autoplay", api.isAutoPlay());
+      this._storage.set('autoplay', api.isAutoPlay());
     });
 
-    let media: IMedia;
+    await this._loadSettings(player);
 
+    const vilos = VilosPlayerService.fromHTML(
+      document.body.innerHTML,
+      this._originalHTML
+    );
+    if (vilos) {
+      container
+        .rebind<IQualityResolver>(IQualityResolverSymbol)
+        .toConstantValue(new HlsQualityResolver());
+
+      await this._loadMedia(new VilosPlayerService(player, vilos));
+    } else {
+      container
+        .rebind<IQualityResolver>(IQualityResolverSymbol)
+        .toConstantValue(
+          new LegacyQualityResolver(
+            getAvailableQualities(),
+            this._quality,
+            async (quality?: keyof Formats) => this._getLegacyMedia(quality)
+          )
+        );
+
+      const media = await this._getLegacyMedia(this._quality);
+
+      await this._loadMedia(new LegacyPlayerService(player, media));
+    }
+  }
+
+  private async _getLegacyMedia(quality?: keyof Formats): Promise<IMedia> {
     const options = {
       affiliateId: this._affiliateId,
       autoPlay: this._autoPlay
@@ -372,26 +430,22 @@ export class PlayerController {
       options.streamQuality = this._mediaQuality;
     }
 
-    await this._loadSettings(player);
-
-    if (this._quality) {
-      media = await getMedia(
-        this._mediaId.toString(),
-        this._url,
-        this._quality,
-        options
-      );
+    if (quality) {
+      return await getMediaByUrl(this._url, quality, options);
     } else {
-      media = await getMedia(this._mediaId.toString(), this._url, options);
+      return await getMediaByUrl(this._url, options);
     }
-
-    await this._loadMedia(media);
   }
 
   private async _onPlaybackStateChange(
     e: PlaybackStateChangeEvent
   ): Promise<void> {
-    if (e.state !== PlaybackState.ENDED || !this._player || !this._player.getApi().isAutoPlay()) return;
+    if (
+      e.state !== PlaybackState.ENDED ||
+      !this._player ||
+      !this._player.getApi().isAutoPlay()
+    )
+      return;
 
     const detail = this._player.getApi().getNextVideoDetail();
     if (!detail) return;
@@ -404,7 +458,7 @@ export class PlayerController {
     await this._playNextVideo(detail);
   }
 
-  private _onSizeChange(large: boolean): void {
+  private async _onSizeChange(large: boolean): Promise<void> {
     if (!this._player) return;
     const showmedia = document.querySelector('#showmedia');
     const showmediaVideo = document.querySelector('#showmedia_video');
@@ -439,5 +493,7 @@ export class PlayerController {
     if (playing) {
       api.playVideo(true);
     }
+
+    await this._storage.set('large', large);
   }
 }

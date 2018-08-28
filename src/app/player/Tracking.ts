@@ -5,12 +5,12 @@ import { IPlayerApi, PlaybackState } from '../media/player/IPlayerApi';
 import { PlaybackStateChangeEvent } from '../media/player/PlaybackStateChangeEvent';
 import { SeekEvent } from '../media/player/SeekEvent';
 import { TimeUpdateEvent } from '../media/player/TimeUpdateEvent';
-import { trackProgress } from './crunchyroll';
+import { ITrackMedia, trackProgress } from './crunchyroll';
 
 export class VideoTracker extends Disposable {
   private _handler: EventHandler = new EventHandler(this);
 
-  private _media: IMedia;
+  private _media: ITrackMedia;
   private _api: IPlayerApi;
   private _elapsedTime: number = 0;
   private _lastTime: number = 0;
@@ -20,12 +20,12 @@ export class VideoTracker extends Disposable {
 
   private _affiliateCode?: string;
 
-  constructor(media: IMedia, api: IPlayerApi, affiliateCode?: string) {
+  constructor(media: ITrackMedia, api: IPlayerApi, affiliateCode?: string) {
     super();
 
     this._media = media;
     this._api = api;
-    this._intervals = media.getPingIntervals();
+    this._intervals = media.pingIntervals;
     this._affiliateCode = affiliateCode;
 
     this._handler

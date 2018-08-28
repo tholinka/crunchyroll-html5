@@ -1,5 +1,7 @@
 import { Component, h } from 'preact';
-import container, { ISettingsModuleFactorySymbol } from '../../../../config/inversify.config';
+import container, {
+  ISettingsModuleFactorySymbol
+} from '../../../../config/inversify.config';
 import { BrowserEvent } from '../../../libs/events/BrowserEvent';
 import { EventHandler } from '../../../libs/events/EventHandler';
 import { ISettingsFactory } from '../../../models/ISettingsFactory';
@@ -198,8 +200,10 @@ export class ChromeSettingsPopup extends Component<
 
   constructor(props: IChromeSettingsPopupProps) {
     super(props);
-    
-    const factory: ISettingsFactory = container.get(ISettingsModuleFactorySymbol);
+
+    const factory: ISettingsFactory = container.get(
+      ISettingsModuleFactorySymbol
+    );
     this._modules = factory(this.props.api);
 
     this.state = { menu: this._rebuildMenu() };
@@ -211,11 +215,21 @@ export class ChromeSettingsPopup extends Component<
     for (const x of this._modules) {
       x.attachHandler();
       this._handler
-        .listen(x, 'rebuild', () => this.setState({ menu: this._rebuildMenu() }))
-        .listen(x, 'navigateToCurrent', () => this._onNavigate(this._currentMenu));
+        .listen(x, 'rebuild', () =>
+          this.setState({ menu: this._rebuildMenu() })
+        )
+        .listen(x, 'navigateToCurrent', () =>
+          this._onNavigate(this._currentMenu)
+        );
     }
 
     this._handler
+      .listen(
+        this.props.api,
+        'rebuild-settings',
+        () => this.setState({ menu: this._rebuildMenu() }),
+        false
+      )
       .listen(
         this.props.api,
         'settingsopen',

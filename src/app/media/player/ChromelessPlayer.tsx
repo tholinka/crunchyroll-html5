@@ -137,6 +137,8 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     this.resizeVideo();
     this.resizeSubtitle();
 
+    this._subtitleEngine.resize();
+
     this._api.dispatchEvent('resize');
   }
 
@@ -351,6 +353,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
 
     if (this._source) {
       this._source.detach();
+      this._source.dispose();
     }
     this._source = source;
 
@@ -364,6 +367,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   public removeVideoSource(): void {
     if (this._source) {
       this._source.detach();
+      this._source.dispose();
       this._source = undefined;
     }
   }
@@ -626,7 +630,9 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
   private _onRateChange() {
     if (!this._api) throw new Error('API is undefined');
 
-    this._api.dispatchEvent(new PlaybackRateChangeEvent(this.getPlaybackRate()));
+    this._api.dispatchEvent(
+      new PlaybackRateChangeEvent(this.getPlaybackRate())
+    );
   }
 
   private _onVolumeChange() {

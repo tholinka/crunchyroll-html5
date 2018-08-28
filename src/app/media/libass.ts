@@ -91,6 +91,10 @@ export class LibAss extends EventTarget {
         this.setIsPaused(true, video.currentTime + this.getOffsetTime())
       )
       .listen(video, 'seeking', () => (this._updateable = false))
+      .listen(video, 'seeked', () => {
+        this._updateable = true;
+        this.setCurrentTime(video.currentTime + this.getOffsetTime());
+      })
       .listen(video, 'ratechange', () => this.setRate(video.playbackRate))
       .listen(video, 'timeupdate', () =>
         this.setCurrentTime(video.currentTime + this.getOffsetTime())

@@ -13,10 +13,11 @@ import {
 import {
   getAutoPlay,
   getMediaId,
-  getSelectedQuality,
+  getQualitySettings,
   getStartTime,
-  updateQualitySettings
+  updateSelectedElement
 } from './player/StandardPlayer';
+import { IStorage, IStorageSymbol } from './storage/IStorage';
 import { importCSS, importCSSByUrl } from './utils/css';
 
 const css = require('../styles/bootstrap.scss');
@@ -62,10 +63,48 @@ export function runBootstrap() {
   }
 }
 
+function updateSize(large: boolean) {
+  const showmedia = document.querySelector('#showmedia');
+  const showmediaVideo = document.querySelector('#showmedia_video');
+  const mainMedia = document.querySelector('#main_content');
+  const wrapper = getWrapper();
+  if (!showmedia || !showmediaVideo || !mainMedia || !wrapper) return;
+
+  if (large) {
+    wrapper.setAttribute('id', 'showmedia_video_box_wide');
+    wrapper.classList.remove('xsmall-margin-bottom');
+    mainMedia.classList.remove('new_layout');
+    showmedia.parentElement!.classList.add('new_layout');
+    showmedia.parentElement!.classList.add('new_layout_wide');
+    showmedia.parentNode!.insertBefore(showmediaVideo, showmedia);
+  } else {
+    wrapper.setAttribute('id', 'showmedia_video_box');
+    wrapper.classList.add('xsmall-margin-bottom');
+    showmedia.parentElement!.classList.remove('new_layout');
+    showmedia.parentElement!.classList.remove('new_layout_wide');
+    mainMedia.classList.add('new_layout');
+    if (mainMedia.childNodes.length === 0) {
+      mainMedia.appendChild(showmediaVideo);
+    } else {
+      mainMedia.insertBefore(showmediaVideo, mainMedia.childNodes[0]);
+    }
+  }
+}
+
 async function _runOnInteractive() {
   const url = window.location.href;
 
-  await updateQualitySettings();
+  const quality = await getQualitySettings();
+  if (quality) {
+    updateSelectedElement(quality);
+  }
+
+  const storage = container.get<IStorage>(IStorageSymbol);
+  const large = await storage.get<boolean>('large');
+
+  if (large !== undefined) {
+    updateSize(large);
+  }
 
   // Configure the default media options
   let mediaId = getMediaId(url);
@@ -75,7 +114,6 @@ async function _runOnInteractive() {
   } as IPlayerControllerOptions;
 
   if (mediaId) {
-    const quality = getSelectedQuality();
     if (quality && quality in FORMAT_IDS) {
       options.quality = quality as keyof Formats;
     }
@@ -101,19 +139,27 @@ async function _runOnInteractive() {
   new Bootstrap().run(mediaId, options);
 }
 
+function getWrapper(): Element | undefined {
+  let wrapper = document.querySelector('#showmedia_video_box');
+  if (!wrapper) {
+    wrapper = document.querySelector('#showmedia_video_box_wide');
+  }
+  if (!wrapper && document.querySelector('#content > #the_embedded_player')) {
+    wrapper = document.querySelector('#content');
+  }
+
+  return wrapper || undefined;
+}
+
 class Bootstrap {
   private _wrapper: Element;
+  private _originalHTML: string;
 
   constructor() {
-    let wrapper = document.querySelector('#showmedia_video_box');
-    if (!wrapper) {
-      wrapper = document.querySelector('#showmedia_video_box_wide');
-    }
-    if (!wrapper && document.querySelector('#content > #the_embedded_player')) {
-      wrapper = document.querySelector('#content');
-    }
+    const wrapper = getWrapper();
     if (!wrapper) throw new Error('Not able to find video wrapper.');
     this._wrapper = wrapper;
+    this._originalHTML = this._wrapper.innerHTML;
     this._wrapper.innerHTML = '';
 
     importCSSByUrl('https://fonts.googleapis.com/css?family=Noto+Sans');
@@ -127,6 +173,7 @@ class Bootstrap {
       container,
       this._wrapper,
       window.location.href,
+      this._originalHTML,
       mediaId,
       options
     );

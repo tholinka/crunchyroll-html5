@@ -1,10 +1,14 @@
-import { ISubtitle } from 'crunchyroll-lib/models/ISubtitle';
 import { Component, h } from 'preact';
-import { SubtitleToAss } from '../../converter/SubtitleToAss';
+import container from '../../../config/inversify.config';
 import { IAction } from '../../libs/actions/IAction';
 import { IActionable } from '../../libs/actions/IActionable';
 import { BrowserEvent } from '../../libs/events/BrowserEvent';
 import { EventHandler } from '../../libs/events/EventHandler';
+import { IMediaSubtitle } from '../../models/IMediaSubtitle';
+import {
+  IQualityResolver,
+  IQualityResolverSymbol
+} from '../../models/IQualityResolver';
 import { IRect } from '../../utils/rect';
 import { parseAndFormatTime } from '../../utils/time';
 import { parseSimpleQuery } from '../../utils/url';
@@ -48,13 +52,14 @@ export interface IPlayerConfig {
   title?: string;
   url?: string;
   thumbnailUrl?: string;
-  subtitles?: ISubtitle[];
+  subtitles?: IMediaSubtitle[];
   duration?: number;
   nextVideo?: IVideoDetail;
   startTime?: number;
   autoplay?: boolean;
   volume?: number;
   muted?: boolean;
+  quality?: string;
 }
 
 export class Player extends Component<IPlayerProps, IPlayerState>
@@ -488,11 +493,24 @@ export class Player extends Component<IPlayerProps, IPlayerState>
       tabindex: '0'
     };
 
-    const className =
+    let className =
       'html5-video-player' +
       ' ' +
       this._getStateClassName() +
       (this._api.isLarge() ? ' html5-video-player--large' : '');
+
+    if (this._bigMode) {
+      className += ' chrome-big-mode';
+    }
+
+    if (this._api.isFullscreen()) {
+      className += ' html5-video-player--fullscreen';
+    }
+
+    if (this._preview) {
+      className += ' html5-video-player--preview';
+    }
+
     return (
       <div class={className} {...attributes}>
         <ChromelessPlayer
@@ -543,8 +561,11 @@ export class Player extends Component<IPlayerProps, IPlayerState>
       for (let i = 0; i < config.subtitles.length; i++) {
         let useSubtitle = false;
         if (queries.hasOwnProperty('ssid')) {
-          const id: string = queries.ssid;
-          useSubtitle = config.subtitles[i].getId().toString() === id;
+          const id = queries.ssid;
+          const sId = config.subtitles[i].getId();
+          if (sId !== undefined) {
+            useSubtitle = sId.toString() === id;
+          }
         } else {
           useSubtitle = config.subtitles[i].isDefault();
         }
@@ -556,8 +577,7 @@ export class Player extends Component<IPlayerProps, IPlayerState>
         tracks.push({
           label: subtitle.getTitle(),
           getContent: async (): Promise<string> => {
-            const converter = new SubtitleToAss(subtitle);
-            return await converter.getContentAsAss();
+            return await subtitle.getContentAsAss();
           }
         });
       }
@@ -574,10 +594,11 @@ export class Player extends Component<IPlayerProps, IPlayerState>
     }
 
     if (config.url) {
-      this._chromelessPlayer.setVideoSource(
-        new HlsSource(config.url),
-        config.startTime
-      );
+      const hls = new HlsSource(this.getApi(), config.url, config.quality);
+      const resolver = container.get<IQualityResolver>(IQualityResolverSymbol);
+      resolver.bind(this._chromelessPlayer, hls);
+
+      this._chromelessPlayer.setVideoSource(hls, config.startTime);
     } else {
       this._chromelessPlayer.removeVideoSource();
     }

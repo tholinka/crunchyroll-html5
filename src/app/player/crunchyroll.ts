@@ -1,6 +1,5 @@
 import container from 'crunchyroll-lib/config';
 import { IHttpClient } from 'crunchyroll-lib/models/http/IHttpClient';
-import { IMedia } from 'crunchyroll-lib/models/IMedia';
 import { buildQuery } from '../utils/url';
 
 interface IVideoViewBody {
@@ -16,8 +15,15 @@ interface IVideoViewBody {
   affiliate_code?: string;
 }
 
+export interface ITrackMedia {
+  encodeId: string;
+  type: number;
+  id: string;
+  pingIntervals: number[];
+}
+
 export async function trackProgress(
-  media: IMedia,
+  media: ITrackMedia,
   currentTime: number,
   elapsedTime: number,
   callCount: number,
@@ -25,18 +31,16 @@ export async function trackProgress(
 ) {
   const httpClient = container.get<IHttpClient>('IHttpClient');
 
-  const stream = media.getStream();
-
   const body: IVideoViewBody = {
     cbcallcount: callCount,
     h: '',
     cbelapsed: elapsedTime,
-    video_encode_id: stream.getEncodeId(),
+    video_encode_id: media.encodeId,
     req: 'RpcApiVideo_VideoView',
-    media_type: stream.getType(),
+    media_type: media.type,
     ht: '0',
     playhead: currentTime,
-    media_id: media.getId()
+    media_id: media.id
   };
   if (affiliateCode) {
     body.affiliate_code = affiliateCode;

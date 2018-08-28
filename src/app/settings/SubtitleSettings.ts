@@ -1,13 +1,15 @@
-import { EventHandler } from "../libs/events/EventHandler";
-import { EventTarget } from "../libs/events/EventTarget";
-import { IMenuItem, IRadioMenuItem } from "../media/player/chrome/SettingsPopup";
-import { IPlayerApi } from "../media/player/IPlayerApi";
-import { ISettingsModule } from "../models/ISettingsModule";
+import { EventHandler } from '../libs/events/EventHandler';
+import { EventTarget } from '../libs/events/EventTarget';
+import {
+  IMenuItem,
+  IRadioMenuItem
+} from '../media/player/chrome/SettingsPopup';
+import { IPlayerApi } from '../media/player/IPlayerApi';
+import { ISettingsModule } from '../models/ISettingsModule';
 
 export class SubtitleSettings extends EventTarget implements ISettingsModule {
   private _api: IPlayerApi;
   private _handler: EventHandler = new EventHandler(this);
-  
   constructor(api: IPlayerApi) {
     super();
     this._api = api;
@@ -43,10 +45,9 @@ export class SubtitleSettings extends EventTarget implements ISettingsModule {
   }
 
   public attachHandler(): void {
-    this._handler
-      .listen(this._api, 'subtitletrackchange', () =>
-        this.dispatchEvent('rebuild')
-      );
+    this._handler.listen(this._api, 'subtitletrackchange', () =>
+      this.dispatchEvent('rebuild')
+    );
   }
 
   public detachHandler(): void {

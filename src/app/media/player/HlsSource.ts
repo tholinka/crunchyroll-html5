@@ -1,12 +1,13 @@
 import * as Hls from 'hls.js';
 import { Disposable } from '../../libs/disposable/Disposable';
 import { getPlaylistLoader } from '../../playlistLoader';
+import { IPlayerApi } from './IPlayerApi';
 import { ISource, ISourceAudioTrack, ISourceLevel } from './ISource';
 
 export class HlsSource extends Disposable implements ISource {
   private _hls: Hls;
 
-  constructor(url: string) {
+  constructor(api: IPlayerApi, url: string, quality?: string) {
     super();
 
     let config: Hls.Config | undefined;
@@ -20,6 +21,18 @@ export class HlsSource extends Disposable implements ISource {
     this._hls = new Hls(config);
 
     this._hls.loadSource(url);
+
+    this._hls.on(Hls.Events.LEVEL_SWITCHED, () =>
+      api.dispatchEvent('qualitychange')
+    );
+    this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      for (let i = 0; i < this._hls.levels.length; i++) {
+        if (this._hls.levels[i].height + 'p' === quality) {
+          this._hls.currentLevel = i;
+          break;
+        }
+      }
+    });
   }
 
   public setAudioTrack(id: number): void {
@@ -50,6 +63,8 @@ export class HlsSource extends Disposable implements ISource {
   }
 
   public getLevels(): ISourceLevel[] {
+    if (!this._hls.levels) return [];
+
     return this._hls.levels.map((level, index) => {
       return {
         id: index,

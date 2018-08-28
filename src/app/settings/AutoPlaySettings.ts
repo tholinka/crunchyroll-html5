@@ -1,14 +1,12 @@
-import { EventHandler } from "../libs/events/EventHandler";
-import { EventTarget } from "../libs/events/EventTarget";
-import { IMenuItem } from "../media/player/chrome/SettingsPopup";
-import { IPlayerApi } from "../media/player/IPlayerApi";
-import { ISettingsModule } from "../models/ISettingsModule";
-import { IStorage } from "../storage/IStorage";
+import { EventHandler } from '../libs/events/EventHandler';
+import { EventTarget } from '../libs/events/EventTarget';
+import { IMenuItem } from '../media/player/chrome/SettingsPopup';
+import { IPlayerApi } from '../media/player/IPlayerApi';
+import { ISettingsModule } from '../models/ISettingsModule';
 
 export class AutoPlaySettings extends EventTarget implements ISettingsModule {
   private _api: IPlayerApi;
   private _handler = new EventHandler(this);
-  
   constructor(api: IPlayerApi) {
     super();
     this._api = api;
@@ -34,10 +32,9 @@ export class AutoPlaySettings extends EventTarget implements ISettingsModule {
   }
 
   public attachHandler(): void {
-    this._handler
-      .listen(this._api, 'autoplaychange', () =>
-        this.dispatchEvent('rebuild')
-      );
+    this._handler.listen(this._api, 'autoplaychange', () =>
+      this.dispatchEvent('rebuild')
+    );
   }
 
   public detachHandler(): void {
