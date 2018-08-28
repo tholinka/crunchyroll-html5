@@ -8,9 +8,16 @@ is the answer.
 
 ## Features
 - A fully fledged HTML5 player that looks and feels a lot like YouTube's player.
-- Video quality based on the selected quality shown under the video.
-- Subtitles, we all want subtitles for our weeb shows. Otherwise the majority of
-  us won't be able to enjoy our shows.
+- Change video quality in the player.
+- Change subtitles in the player (using libass with [JavascriptSubtitlesOctopus](https://github.com/Dador/JavascriptSubtitlesOctopus)).
+- Speed controls.
+- Auto-play the next video.
+- Shortcuts ([see list of shortcuts](https://github.com/YePpHa/crunchyroll-html5/wiki/Shortcuts))
+
+## Download
+Chrome extension: https://chrome.google.com/webstore/detail/crunchyroll-html5/ihegfgnkffeibpmnajnoiemkcmlbmhmi
+
+Firefox addon (not maintained by me): https://addons.mozilla.org/en-US/firefox/addon/crunchyroll-html5-unofficial/
 
 ## Screenshots
 ![Preview](https://github.com/YePpHa/crunchyroll-html5/raw/master/screenshots/preview.gif)
