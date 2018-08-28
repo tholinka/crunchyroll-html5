@@ -166,7 +166,7 @@ class Bootstrap {
     importCSS(css);
   }
 
-  public async run(mediaId: number, options?: IPlayerControllerOptions) {
+  public async run(mediaId: string, options?: IPlayerControllerOptions) {
     this._wrapper.innerHTML = '';
 
     const player = new PlayerController(

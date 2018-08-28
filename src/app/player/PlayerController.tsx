@@ -1,5 +1,5 @@
 import crContainer from 'crunchyroll-lib/config';
-import { Formats, getMediaByUrl } from 'crunchyroll-lib/media';
+import { Formats, getMedia, getMediaByUrl } from 'crunchyroll-lib/media';
 import { IHttpClient } from 'crunchyroll-lib/models/http/IHttpClient';
 import { IMedia } from 'crunchyroll-lib/models/IMedia';
 import { Container } from 'inversify';
@@ -58,7 +58,7 @@ export class PlayerController {
 
   private _element: Element;
   private _url: string;
-  private _mediaId: number;
+  private _mediaId: string;
 
   private _sizeEnabled: boolean = true;
 
@@ -86,7 +86,7 @@ export class PlayerController {
     element: Element,
     url: string,
     originalHTML: string,
-    mediaId: number,
+    mediaId: string,
     options?: IPlayerControllerOptions
   ) {
     this._storage = _c.get<IStorage>(IStorageSymbol);
@@ -130,7 +130,7 @@ export class PlayerController {
     );
   }
 
-  private _getThumbnailByMediaId(mediaId: number): string | undefined {
+  private _getThumbnailByMediaId(mediaId: string): string | undefined {
     const img = document.querySelector(
       'a.link.block-link.block[href$="-' + mediaId + '"] img.mug'
     );
@@ -345,6 +345,8 @@ export class PlayerController {
       } else {
         media = await getMediaByUrl(detail.url, options);
       }
+      this._mediaId = media.getId();
+      this._url = detail.url;
 
       await this._loadMedia(new LegacyPlayerService(this._player, media));
     }
@@ -431,9 +433,9 @@ export class PlayerController {
     }
 
     if (quality) {
-      return await getMediaByUrl(this._url, quality, options);
+      return await getMedia(this._mediaId, this._url, quality, options);
     } else {
-      return await getMediaByUrl(this._url, options);
+      return await getMedia(this._mediaId, this._url, options);
     }
   }
 
