@@ -17,7 +17,7 @@ is the answer.
 ## Download
 Chrome extension: https://chrome.google.com/webstore/detail/crunchyroll-html5/ihegfgnkffeibpmnajnoiemkcmlbmhmi
 
-Firefox addon (not maintained by me): https://addons.mozilla.org/en-US/firefox/addon/crunchyroll-html5-unofficial/
+Firefox addon: https://addons.mozilla.org/en-US/firefox/addon/crunchyroll-html5-unofficial/
 
 ## Screenshots
 ![Preview](https://github.com/YePpHa/crunchyroll-html5/raw/master/screenshots/preview.gif)
