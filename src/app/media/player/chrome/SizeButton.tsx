@@ -17,6 +17,7 @@ export class SizeButton extends Component<ISizeButtonProps, {}> {
   private _pathElement?: SVGPathElement;
 
   public componentDidMount() {
+    if (!this.base) throw new Error('Base is undefined');
     this._handler
       .listen(this.props.api, 'sizechange', this._onSizeChange, false)
       .listen(this.base, 'mouseover', this._onMouseOver, { passive: true })

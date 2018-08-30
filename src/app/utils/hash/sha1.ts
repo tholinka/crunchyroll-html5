@@ -18,7 +18,7 @@ export class SHA1 {
   private _shift: number = 24;
   private _block = new Uint32Array(80);
 
-  public digest(): string {
+  public rawDigest(): number[] {
     // Pad
     this._write(0x80);
     if (this._offset > 14 || (this._offset === 14 && this._shift < 24)) {
@@ -39,13 +39,17 @@ export class SHA1 {
     }
 
     // At this point one last processBlock() should trigger and we can pull out the result.
-    return (
-      toHex(this._h0) +
-      toHex(this._h1) +
-      toHex(this._h2) +
-      toHex(this._h3) +
-      toHex(this._h4)
-    );
+    return [this._h0, this._h1, this._h2, this._h3, this._h4];
+  }
+
+  public digest(): string {
+    const builder: string[] = [];
+    const digest = this.rawDigest();
+    for (const n of digest) {
+      builder.push(toHex(n));
+    }
+
+    return builder.join('');
   }
 
   public update(chunk: ArrayLike<number>): void {

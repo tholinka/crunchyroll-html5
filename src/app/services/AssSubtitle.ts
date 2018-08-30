@@ -4,10 +4,16 @@ import { IMediaSubtitle } from '../models/IMediaSubtitle';
 import { IVilosSubtitle } from '../models/IVilosConfig';
 
 export class AssSubtitle implements IMediaSubtitle {
+  private _file: string | undefined;
   private _subtitle: IVilosSubtitle;
   private _isDefault: boolean;
 
-  constructor(subtitle: IVilosSubtitle, isDefault: boolean) {
+  constructor(
+    file: string | undefined,
+    subtitle: IVilosSubtitle,
+    isDefault: boolean
+  ) {
+    this._file = file;
     this._subtitle = subtitle;
     this._isDefault = isDefault;
   }
@@ -16,7 +22,11 @@ export class AssSubtitle implements IMediaSubtitle {
     return this._subtitle.title;
   }
 
-  public async getContentAsAss(): Promise<string> {
+  public getFile(): string | undefined {
+    return this._file;
+  }
+
+  public async getContentAsAss(): Promise<string | undefined> {
     const http = container.get<IHttpClient>('IHttpClient');
 
     const response = await http.get(this._subtitle.url);

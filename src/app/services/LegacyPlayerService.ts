@@ -5,6 +5,7 @@ import { Player } from '../media/player/Player';
 import { IMediaService } from '../models/IMediaService';
 import { IMediaSubtitle } from '../models/IMediaSubtitle';
 import { ITrackMedia } from '../player/crunchyroll';
+import { LegacyOffSubtitle } from './LegacyOffSubtitle';
 import { LegacySubtitle } from './LegacySubtitle';
 
 export class LegacyPlayerService implements IMediaService {
@@ -35,7 +36,7 @@ export class LegacyPlayerService implements IMediaService {
     return this._stream.getDuration();
   }
 
-  public getFile(): string | undefined {
+  public getDefaultFile(): string | undefined {
     return this._stream.getFile();
   }
 
@@ -51,7 +52,16 @@ export class LegacyPlayerService implements IMediaService {
   }
 
   public getSubtitles(): IMediaSubtitle[] {
-    return this._media.getSubtitles().map(x => new LegacySubtitle(x));
+    const defaultFile = this.getDefaultFile();
+    const subtitles: IMediaSubtitle[] = this._media
+      .getSubtitles()
+      .map(x => new LegacySubtitle(defaultFile, x));
+
+    const hasDefault = subtitles.filter(x => x.isDefault()).length > 0;
+
+    subtitles.unshift(new LegacyOffSubtitle(defaultFile, !hasDefault));
+
+    return subtitles;
   }
 
   public getStartTime(): number {

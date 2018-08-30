@@ -105,6 +105,7 @@ export class VolumeSliderComponent extends Component<
   }
 
   public componentDidMount() {
+    if (!this.base) throw new Error('Base is undefined');
     this._handler
       .listen(this.base, 'mousedown', this._onMouseDown, false)
       .listen(document, 'mousemove', this._onMouseMove, false)
@@ -156,6 +157,7 @@ export class VolumeSliderComponent extends Component<
   }
 
   private _onMouseDown(e: BrowserEvent): void {
+    if (!this.base) throw new Error('Base is undefined');
     if (this._dragging || e.button !== 0) return;
     this._dragging = true;
     this.base.focus();
@@ -242,6 +244,7 @@ export class VolumeSliderComponent extends Component<
   }
 
   private _updateInternal(): void {
+    if (!this.base) throw new Error('Base is undefined');
     if (
       !this._handleElement ||
       this._sliderWidth === undefined ||

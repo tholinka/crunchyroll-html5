@@ -3,9 +3,11 @@ import { SubtitleToAss } from '../converter/SubtitleToAss';
 import { IMediaSubtitle } from '../models/IMediaSubtitle';
 
 export class LegacySubtitle implements IMediaSubtitle {
+  private _file: string | undefined;
   private _subtitle: ISubtitle;
 
-  constructor(subtitle: ISubtitle) {
+  constructor(file: string | undefined, subtitle: ISubtitle) {
+    this._file = file;
     this._subtitle = subtitle;
   }
 
@@ -13,7 +15,11 @@ export class LegacySubtitle implements IMediaSubtitle {
     return this._subtitle.getTitle();
   }
 
-  public async getContentAsAss(): Promise<string> {
+  public getFile(): string | undefined {
+    return this._file;
+  }
+
+  public async getContentAsAss(): Promise<string | undefined> {
     const converter = new SubtitleToAss(this._subtitle);
 
     return await converter.getContentAsAss();

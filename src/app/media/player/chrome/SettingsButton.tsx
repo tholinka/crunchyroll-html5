@@ -15,6 +15,7 @@ export class SettingsButton extends Component<ISettingsButtonProps, {}> {
   private _svgElement?: SVGElement;
 
   public componentDidMount() {
+    if (!this.base) throw new Error('Base is undefined');
     this._handler
       .listen(
         this.props.api,

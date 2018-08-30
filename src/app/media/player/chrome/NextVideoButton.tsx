@@ -12,6 +12,7 @@ export class NextVideoButton extends Component<INextVideoButtonProps, {}> {
   private _handler = new EventHandler(this);
 
   public componentDidMount() {
+    if (!this.base) throw new Error('Base is undefined');
     this._handler
       .listen(this.base, 'mouseover', this._onMouseOver, { passive: true })
       .listen(this.base, 'mouseout', this._onMouseOut, { passive: true })
@@ -56,6 +57,7 @@ export class NextVideoButton extends Component<INextVideoButtonProps, {}> {
   }
 
   private _onNextVideoChange() {
+    if (!this.base) throw new Error('Base is undefined');
     const nextVideo = this._getNextVideoDetail();
     if (nextVideo) {
       this.base.style.display = '';

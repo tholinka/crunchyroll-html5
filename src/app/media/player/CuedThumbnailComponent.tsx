@@ -35,6 +35,7 @@ export class CuedThumbnailComponent extends Component<
   }
 
   public setButtonVisible(visible: boolean): void {
+    if (!this.base) throw new Error('Base is undefined');
     if (this._buttonElement) {
       this._buttonElement.style.display = visible ? '' : 'none';
     }
@@ -48,6 +49,7 @@ export class CuedThumbnailComponent extends Component<
   }
 
   public setVisible(visible: boolean): void {
+    if (!this.base) throw new Error('Base is undefined');
     visible = visible && !!this._url;
     if (this._visible === visible) return;
     this._visible = visible;
@@ -60,6 +62,7 @@ export class CuedThumbnailComponent extends Component<
   }
 
   public componentDidMount(): void {
+    if (!this.base) throw new Error('Base is undefined');
     this._handler
       .listen(this.base, 'transitionend', this._onTransitionEnd, false)
       .listen(this.base, 'webkitTransitionEnd', this._onTransitionEnd, false)
@@ -100,6 +103,7 @@ export class CuedThumbnailComponent extends Component<
   }
 
   private _onTransitionEnd() {
+    if (!this.base) throw new Error('Base is undefined');
     if (!this._visible) {
       this.base.style.display = 'none';
     }

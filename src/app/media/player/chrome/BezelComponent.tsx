@@ -6,6 +6,7 @@ export class BezelComponent extends Component<{}, {}> {
   private _iconElement?: Element;
 
   public componentDidMount() {
+    if (!this.base) throw new Error('Base is undefined');
     this._handler
       .listen(this.base, 'animationend', this._handleAnimationEnd, false)
       .listen(this.base, 'webkitAnimationEnd', this._handleAnimationEnd, false)
@@ -28,6 +29,7 @@ export class BezelComponent extends Component<{}, {}> {
   }
 
   public stop(): void {
+    if (!this.base) throw new Error('Base is undefined');
     this.base.style.display = 'none';
   }
 
@@ -41,6 +43,7 @@ export class BezelComponent extends Component<{}, {}> {
   }
 
   private _play(element: JSX.Element): void {
+    if (!this.base) throw new Error('Base is undefined');
     this.stop();
 
     if (this._iconElement) {

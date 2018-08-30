@@ -172,10 +172,7 @@ export class PlayerController {
     const api = this._player.getApi();
 
     // Redirect the page to the current media
-    const url = parse(this._url, true);
-    if (!url.query) {
-      url.query = {};
-    }
+    const url = parse(this._url, window.location.href, true);
     url.query.t = Math.floor(api.getCurrentTime()).toString();
 
     location.href = url.toString();
@@ -192,7 +189,7 @@ export class PlayerController {
 
     const videoConfig = {
       title,
-      url: media.getFile(),
+      url: media.getDefaultFile(),
       duration: media.getDuration(),
       subtitles: media.getSubtitles(),
       startTime:
@@ -369,6 +366,7 @@ export class PlayerController {
    */
   private async _onPlayerReady(player: Player): Promise<void> {
     this._player = player;
+    if (!player.base) throw new Error('Player base is undefined');
 
     if (this._playerActionController) {
       this._playerActionController.dispose();

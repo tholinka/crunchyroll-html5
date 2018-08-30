@@ -347,7 +347,11 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
    * Set the video source.
    * @param source the video source.
    */
-  public setVideoSource(source: ISource, startTime: number = 0): void {
+  public setVideoSource(
+    source: ISource,
+    startTime: number = 0,
+    playbackRate: number = 1
+  ): void {
     if (!this._videoElement) throw new Error('Video element is undefined');
     if (!this._api) throw new Error('API is undefined');
 
@@ -360,6 +364,7 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
     this._source.attach(this._videoElement);
 
     this._videoElement.currentTime = startTime;
+    this._videoElement.playbackRate = playbackRate;
 
     this._api.dispatchEvent(new TimeUpdateEvent(startTime));
   }
@@ -397,10 +402,26 @@ export class ChromelessPlayer extends Component<IChromelessPlayerProps, {}> {
         this._videoElement.pause();
       }
       const content = await this._subtitleTracks[index].getContent();
+      const file = this._subtitleTracks[index].getFile();
       if (this._currentSubtitleTrack === index) {
-        this._subtitleEngine.setTrack(content);
-        this._subtitleEngine.attach(this._videoElement);
-        this._subtitleLoading = false;
+        if (content) {
+          this._subtitleEngine.setTrack(content);
+          this._subtitleEngine.attach(this._videoElement);
+          this._subtitleLoading = false;
+        } else {
+          this._subtitleLoading = false;
+          this._subtitleEngine.detach();
+        }
+
+        if (this._source && file) {
+          const currentTime = this._videoElement.currentTime;
+          const playbackRate = this._videoElement.playbackRate;
+          this._source.setUrl(file);
+          this._videoElement.playbackRate = playbackRate;
+          this._videoElement.currentTime = currentTime;
+
+          this._subtitleEngine.resize();
+        }
 
         this._onCanplay();
 

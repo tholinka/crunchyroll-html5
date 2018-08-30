@@ -224,6 +224,7 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   public setPreview(preview: boolean): void {
     if (!this._cuedThumbnailComponent)
       throw new Error('CuedThumbnailComponent is undefined');
+    if (!this.base) throw new Error('Player base is undefined');
 
     this._preview = preview;
 
@@ -266,6 +267,7 @@ export class Player extends Component<IPlayerProps, IPlayerState>
 
   public updateInternalAutoHide(): void {
     if (!this._bottomComponent) throw new Error('BottomComponent is undefined');
+    if (!this.base) throw new Error('Player base is undefined');
 
     let hide = this._autoHide;
 
@@ -322,6 +324,7 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   }
 
   public setBigMode(bigMode: boolean): void {
+    if (!this.base) throw new Error('Player base is undefined');
     this._bigMode = bigMode;
     if (this._bigMode) {
       this.base.classList.add('chrome-big-mode');
@@ -336,6 +339,9 @@ export class Player extends Component<IPlayerProps, IPlayerState>
     if (!this._chromelessPlayer)
       throw new Error('ChromelessPlayer is undefined');
     if (!this._bottomComponent) throw new Error('BottomComponent is undefined');
+    if (!this.base) throw new Error('Player base is undefined');
+    if (!this._bottomComponent.base)
+      throw new Error('BottomComponent base is undefined');
 
     this._chromelessPlayer.resize();
 
@@ -405,6 +411,7 @@ export class Player extends Component<IPlayerProps, IPlayerState>
 
   public componentDidMount() {
     if (!this._actionElement) throw new Error('ActionElement is undefined');
+    if (!this.base) throw new Error('Player base is undefined');
 
     if (this._chromelessPlayer) {
       this._chromelessPlayer.setFullscreenElement(this.base);
@@ -553,9 +560,9 @@ export class Player extends Component<IPlayerProps, IPlayerState>
       throw new Error('ChromelessPlayer is undefined');
 
     this._configCued = false;
+    let defaultTrack: number = -1;
     if (config.subtitles) {
       const tracks: ISubtitleTrack[] = [];
-      let defaultTrack: number = -1;
       const queries = parseSimpleQuery(location.search);
 
       for (let i = 0; i < config.subtitles.length; i++) {
@@ -576,7 +583,8 @@ export class Player extends Component<IPlayerProps, IPlayerState>
         const subtitle = config.subtitles[i];
         tracks.push({
           label: subtitle.getTitle(),
-          getContent: async (): Promise<string> => {
+          getFile: (): string | undefined => subtitle.getFile(),
+          getContent: async (): Promise<string | undefined> => {
             return await subtitle.getContentAsAss();
           }
         });
@@ -593,8 +601,15 @@ export class Player extends Component<IPlayerProps, IPlayerState>
       this._chromelessPlayer.setMuted(config.muted);
     }
 
-    if (config.url) {
-      const hls = new HlsSource(this.getApi(), config.url, config.quality);
+    let url = config.url;
+
+    if (defaultTrack !== -1 && config.subtitles) {
+      const subtitle = config.subtitles[defaultTrack];
+      url = subtitle.getFile() || url;
+    }
+
+    if (url) {
+      const hls = new HlsSource(this.getApi(), url, config.quality);
       const resolver = container.get<IQualityResolver>(IQualityResolverSymbol);
       resolver.bind(this._chromelessPlayer, hls);
 
@@ -613,6 +628,9 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   private _onSizeChange(): void {
     if (!this._tooltipComponent)
       throw new Error('TooltipComponent is undefined');
+    if (!this.base) throw new Error('Player base is undefined');
+    if (!this._tooltipComponent.base)
+      throw new Error('TooltipComponent base is undefined');
 
     const large = this._api.isLarge();
     if (large) {
@@ -637,6 +655,7 @@ export class Player extends Component<IPlayerProps, IPlayerState>
     this.setAutoHide(false);
 
     const el = this._bottomComponent.base;
+    if (!el) throw new Error('BottomComponent base is undefined');
 
     if (e.target !== el && !el.contains(e.target as Node)) {
       this._autoHideTimer = window.setTimeout(
@@ -681,6 +700,7 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   }
 
   private _onPlaybackStateChange() {
+    if (!this.base) throw new Error('Player base is undefined');
     const state = this._api.getPlaybackState();
     if (state === PlaybackState.PLAYING) {
       this.setAutoHide(this._autoHide);
@@ -706,6 +726,9 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   private _onFullscreenChange() {
     if (!this._tooltipComponent)
       throw new Error('TooltipComponent is undefined');
+    if (!this.base) throw new Error('Player base is undefined');
+    if (!this._tooltipComponent.base)
+      throw new Error('TooltipComponent base is undefined');
 
     const fullscreen = this._api.isFullscreen();
     this.setBigMode(fullscreen);
@@ -724,6 +747,8 @@ export class Player extends Component<IPlayerProps, IPlayerState>
       throw new Error('TooltipComponent is undefined');
     if (!this._tooltipBottomRect)
       throw new Error('Tooltip bottom rect is undefined');
+    if (!this._tooltipComponent.base)
+      throw new Error('TooltipComponent base is undefined');
 
     if (this.isPreview()) {
       this._tooltipComponent.base.style.display = 'none';
@@ -747,6 +772,7 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   private _onProgressHover(time: number, percentage: number) {
     if (!this._tooltipBottomRect)
       throw new Error('TooltipBottomRect is undefined');
+    if (!this.base) throw new Error('Player base is undefined');
 
     this.base.classList.add('chrome-progress-bar-hover');
 
@@ -762,6 +788,9 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   private _onProgressEndHover() {
     if (!this._tooltipComponent)
       throw new Error('TooltipComponent is undefined');
+    if (!this._tooltipComponent.base)
+      throw new Error('TooltipComponent base is undefined');
+    if (!this.base) throw new Error('Player base is undefined');
 
     this.base.classList.remove('chrome-progress-bar-hover');
     this._tooltipComponent.base.style.display = 'none';
@@ -793,6 +822,8 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   private _onNextVideoEndHover() {
     if (!this._tooltipComponent)
       throw new Error('TooltipComponent is undefined');
+    if (!this._tooltipComponent.base)
+      throw new Error('TooltipComponent base is undefined');
 
     this._tooltipComponent.base.style.display = 'none';
   }
@@ -812,6 +843,8 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   private _onSizeButtonEndHover() {
     if (!this._tooltipComponent)
       throw new Error('TooltipComponent is undefined');
+    if (!this._tooltipComponent.base)
+      throw new Error('TooltipComponent base is undefined');
 
     this._tooltipComponent.base.style.display = 'none';
   }
@@ -832,6 +865,8 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   private _onFullscreenButtonEndHover() {
     if (!this._tooltipComponent)
       throw new Error('TooltipComponent is undefined');
+    if (!this._tooltipComponent.base)
+      throw new Error('TooltipComponent base is undefined');
 
     this._tooltipComponent.base.style.display = 'none';
   }
@@ -853,6 +888,8 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   private _onVolumeMuteButtonEndHover() {
     if (!this._tooltipComponent)
       throw new Error('TooltipComponent is undefined');
+    if (!this._tooltipComponent.base)
+      throw new Error('TooltipComponent base is undefined');
 
     this._tooltipComponent.base.style.display = 'none';
   }
@@ -874,11 +911,17 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   private _onSettingsButtonEndHover() {
     if (!this._tooltipComponent)
       throw new Error('TooltipComponent is undefined');
+    if (!this._tooltipComponent.base)
+      throw new Error('TooltipComponent base is undefined');
 
     this._tooltipComponent.base.style.display = 'none';
   }
 
   private _onSettingsOpen() {
+    if (!this._tooltipComponent)
+      throw new Error('TooltipComponent is undefined');
+    if (!this._tooltipComponent.base)
+      throw new Error('TooltipComponent base is undefined');
     if (this._tooltipComponent) {
       this._tooltipComponent.base.style.display = 'none';
     }
@@ -889,6 +932,7 @@ export class Player extends Component<IPlayerProps, IPlayerState>
   }
 
   private _onActionClick(e: BrowserEvent) {
+    if (!this.base) throw new Error('Player base is undefined');
     this.base.focus();
 
     if (typeof this._actionClickTimer === 'number') {

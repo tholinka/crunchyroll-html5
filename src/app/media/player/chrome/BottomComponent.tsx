@@ -108,12 +108,14 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
   }
 
   private _onVolumeFocus() {
+    if (!this.base) throw new Error('Base is undefined');
     this._volumeSliderFocus = true;
 
     this.base.classList.add('chrome-volume-slider-active');
   }
 
   private _onVolumeBlur() {
+    if (!this.base) throw new Error('Base is undefined');
     this._volumeSliderFocus = false;
 
     if (!this._volumeSliderFocus && !this._volumeSliderMouse) {
@@ -122,6 +124,7 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
   }
 
   private _onVolumeMouseEnter() {
+    if (!this.base) throw new Error('Base is undefined');
     if (this._volumeSliderMouse) return;
     this._volumeSliderMouse = true;
 
@@ -129,6 +132,7 @@ export class ChromeBottomComponent extends Component<IChromeBottomProps, {}> {
   }
 
   private _onLeftMouseLeave() {
+    if (!this.base) throw new Error('Base is undefined');
     if (!this._volumeSliderMouse) return;
     this._volumeSliderMouse = false;
 

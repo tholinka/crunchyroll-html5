@@ -7,4 +7,6 @@ common.plugins = [
   ...common.plugins
 ];
 
+common.mode = 'production';
+
 module.exports = common;

@@ -60,4 +60,15 @@ export interface ISource extends IDisposable {
    * Returns the quality levels.
    */
   getLevels(): ISourceLevel[];
+
+  /**
+   * Returns the URL.
+   */
+  getUrl(): string;
+
+  /**
+   * Set the URL of the stream
+   * @param url the new HLS url
+   */
+  setUrl(url: string): void;
 }

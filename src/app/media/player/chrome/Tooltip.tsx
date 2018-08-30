@@ -25,12 +25,13 @@ export class ChromeTooltip extends Component<{}, {}> {
   private _textElement?: HTMLElement;
 
   public setPosition(left: number, top: number): void {
+    if (!this.base) throw new Error('Base is undefined');
     this.base.style.left = left + 'px';
     this.base.style.top = top + 'px';
   }
 
   public getSize(): ISize {
-    if (!this._textElement) return { width: 0, height: 0 };
+    if (!this._textElement || !this.base) return { width: 0, height: 0 };
 
     return {
       width: Math.max(this.base.offsetWidth, this._textElement.offsetWidth),
@@ -39,6 +40,7 @@ export class ChromeTooltip extends Component<{}, {}> {
   }
 
   public setTooltip(tooltip: IChromeTooltip) {
+    if (!this.base) throw new Error('Base is undefined');
     this.base.style.display = '';
 
     if (this._bgElement) {

@@ -4,7 +4,7 @@ import { IMediaSubtitle } from './IMediaSubtitle';
 export interface IMediaService {
   getTitle(): string;
   getDuration(): number;
-  getFile(): string | undefined;
+  getDefaultFile(): string | undefined;
   getTracking(): ITrackMedia;
   getSubtitles(): IMediaSubtitle[];
   getStartTime(): number;

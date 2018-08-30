@@ -2,7 +2,7 @@ import { getMediaId } from '../player/StandardPlayer';
 
 export interface ICollectionCarouselDetail {
   groupId: number;
-  mediaId: number;
+  mediaId: string;
   index: number;
 }
 

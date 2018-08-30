@@ -62,7 +62,7 @@ export interface ICollectionCarouselPage {
 }
 
 export async function getCollectionCarouselPage(
-  mediaId: number,
+  mediaId: string,
   groupId: number | undefined,
   collectionId: number,
   index: number

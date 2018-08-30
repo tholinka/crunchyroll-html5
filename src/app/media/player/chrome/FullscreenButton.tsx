@@ -60,6 +60,7 @@ export class FullscreenButton extends Component<
   }
 
   public componentDidMount() {
+    if (!this.base) throw new Error('Base is undefined');
     this._handler
       .listen(
         this.props.api,

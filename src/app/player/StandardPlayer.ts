@@ -18,7 +18,8 @@ interface IQueryStartTime {
 }
 
 export function getStartTime(url: string): number | undefined {
-  const query = parseUrl(url, true).query as IQueryStartTime;
+  const query = parseUrl(url, window.location.href, true)
+    .query as IQueryStartTime;
   if (typeof query.t === 'string') {
     return parseFloat(query.t);
   } else {
@@ -31,7 +32,8 @@ interface IQueryAutoPlay {
 }
 
 export function getAutoPlay(url: string): boolean | undefined {
-  const query = parseUrl(url, true).query as IQueryAutoPlay;
+  const query = parseUrl(url, window.location.href, true)
+    .query as IQueryAutoPlay;
   if (typeof query.auto_play === 'string') {
     return query.auto_play === '1';
   } else {
@@ -81,7 +83,7 @@ function getDefaultQuality(doc?: Document): string | undefined {
  * Returns the quality preferred given in the URL.
  */
 function getPreferredQuality(): keyof Formats | undefined {
-  const curl = parseUrl(window.location.href, true);
+  const curl = parseUrl(window.location.href, window.location.href, true);
   for (const key in curl.query) {
     if (curl.query.hasOwnProperty(key)) {
       const m = key.match(/p(\d{2,3}0)/);

@@ -25,12 +25,12 @@ export class SubtitleSettings extends EventTarget implements ISettingsModule {
       label: 'Subtitles',
       role: 'menuitem',
       content: currentSelection,
-      items: ['Off', ...tracks.map(track => track.label)].map(
+      items: tracks.map(track => track.label).map(
         (track, index): IRadioMenuItem => ({
           label: track,
           selected: currentSelection === track,
           role: 'menuitemradio',
-          onselect: () => this._setSubtitleTrack(index - 1)
+          onselect: () => this._setSubtitleTrack(index)
         })
       )
     };

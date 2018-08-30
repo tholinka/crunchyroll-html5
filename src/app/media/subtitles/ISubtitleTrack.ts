@@ -1,4 +1,5 @@
 export interface ISubtitleTrack {
   label: string;
-  getContent(): Promise<string>;
+  getFile(): string | undefined;
+  getContent(): Promise<string | undefined>;
 }

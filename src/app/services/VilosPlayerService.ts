@@ -9,6 +9,7 @@ import {
 } from '../models/IVilosConfig';
 import { ITrackMedia } from '../player/crunchyroll';
 import { AssSubtitle } from './AssSubtitle';
+import { HardSubtitle } from './HardSubtitle';
 
 export class VilosPlayerService implements IMediaService {
   public static fromHTML(body: string, html: string): IVilosConfig | undefined {
@@ -75,7 +76,7 @@ export class VilosPlayerService implements IMediaService {
     return this._config.metadata.duration;
   }
 
-  public getFile(): string | undefined {
+  public getDefaultFile(): string | undefined {
     const streams = this._config.media.streams;
 
     // Select stream with no hardsubs
@@ -107,9 +108,56 @@ export class VilosPlayerService implements IMediaService {
   }
 
   public getSubtitles(): IMediaSubtitle[] {
-    return this._config.media.subtitles.map(
-      x => new AssSubtitle(x, x.language === this._config.player.language)
+    const file = this.getDefaultFile();
+    const cSubtitles = this._config.media.subtitles;
+    const subtitles: IMediaSubtitle[] = cSubtitles.map(
+      x => new AssSubtitle(file, x, x.language === this._config.player.language)
     );
+
+    const unknownSubtitles: HardSubtitle[] = [];
+
+    const subtitleLanguages = cSubtitles.map(x => x.language);
+
+    const streams = this._config.media.streams;
+    for (const stream of streams) {
+      if (
+        stream.hardsub_lang &&
+        subtitleLanguages.indexOf(stream.hardsub_lang) === -1
+      ) {
+        subtitles.push(
+          new HardSubtitle(
+            stream,
+            stream.hardsub_lang === this._config.player.language
+          )
+        );
+      } else if (!stream.hardsub_lang) {
+        unknownSubtitles.push(
+          new HardSubtitle(
+            stream,
+            stream.hardsub_lang === this._config.player.language
+          )
+        );
+      }
+    }
+
+    const firstUnknown = unknownSubtitles.shift();
+    if (firstUnknown) {
+      firstUnknown.setTitle('Off');
+      subtitles.unshift(firstUnknown);
+    }
+
+    if (unknownSubtitles.length > 0) {
+      for (const subtitle of unknownSubtitles) {
+        subtitles.push(subtitle);
+      }
+    }
+
+    const hasDefault = subtitles.filter(x => x.isDefault()).length > 0;
+    if (!hasDefault && firstUnknown) {
+      firstUnknown.setDefault(true);
+    }
+
+    return subtitles;
   }
 
   public getStartTime(): number {

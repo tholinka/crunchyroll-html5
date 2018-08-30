@@ -2,13 +2,14 @@ const webpack = require("webpack");
 const path = require('path');
 
 module.exports = {
+  mode: "development",
   resolve: {
     extensions: ['.ts', '.tsx', '.js']
   },
   optimization: {
     minimize: false
   },
-  devtool: "cheap-source-map",
+  devtool: "inline-source-map",
   module: {
     rules: [
       {

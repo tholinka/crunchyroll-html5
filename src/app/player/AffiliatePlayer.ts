@@ -25,7 +25,8 @@ export function parseUrlFragments(
   const m = re.exec(url);
   if (!m) return undefined;
 
-  const query = parseUrl(url, true).query as IAffiliateQuery;
+  const query = parseUrl(url, window.location.href, true)
+    .query as IAffiliateQuery;
 
   let startTime = 0;
   if (typeof query.t === 'string') {

@@ -40,6 +40,7 @@ export class VolumeMuteButton extends Component<IVolumeMuteButtonProps, {}> {
   private _mouseover: boolean = false;
 
   public componentDidMount() {
+    if (!this.base) throw new Error('Base is undefined');
     if (
       !this._speakerPathElement ||
       !this._maskPathElement ||

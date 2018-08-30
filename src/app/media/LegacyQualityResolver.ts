@@ -39,6 +39,7 @@ export class LegacyQualityResolver implements IQualityResolver {
     const q = quality ? quality : '_';
 
     const currentTime = this._player.getCurrentTime();
+    const playbackRate = this._player.getPlaybackRate();
     this._player.removeVideoSource();
     let hlsUrl: string | undefined;
     if (this._cache.hasOwnProperty(q)) {
@@ -57,7 +58,8 @@ export class LegacyQualityResolver implements IQualityResolver {
 
     this._player.setVideoSource(
       new HlsSource(this._player.getApi(), hlsUrl, quality),
-      currentTime
+      currentTime,
+      playbackRate
     );
   }
 
