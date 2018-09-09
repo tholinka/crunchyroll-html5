@@ -10,6 +10,7 @@ import {
 import { ITrackMedia } from '../player/crunchyroll';
 import { AssSubtitle } from './AssSubtitle';
 import { HardSubtitle } from './HardSubtitle';
+import { parseSimpleQuery } from '../utils/url';
 
 const languagePriority = [
   "enUS",
@@ -167,7 +168,8 @@ export class VilosPlayerService implements IMediaService {
     }
 
     let hasDefault = subtitles.filter(x => x.isDefault()).length > 0;
-    if (!hasDefault) {
+    const queries = parseSimpleQuery(location.search);
+    if (!hasDefault && !queries.hasOwnProperty('ssid')) {
       for (const language of languagePriority) {
         const items = subtitles.filter(x => x.getLanguage() === language);
         if (items.length > 0) {
