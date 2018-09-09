@@ -8,22 +8,22 @@ import {
   IVilosPlayerMetadata
 } from '../models/IVilosConfig';
 import { ITrackMedia } from '../player/crunchyroll';
+import { parseSimpleQuery } from '../utils/url';
 import { AssSubtitle } from './AssSubtitle';
 import { HardSubtitle } from './HardSubtitle';
-import { parseSimpleQuery } from '../utils/url';
 
 const languagePriority = [
-  "enUS",
-  "enGB",
-  "arME",
-  "frFR",
-  "deDE",
-  "itIT",
-  "ptBR",
-  "ptPT",
-  "ruRU",
-  "esLA",
-  "esES"
+  'enUS',
+  'enGB',
+  'arME',
+  'frFR',
+  'deDE',
+  'itIT',
+  'ptBR',
+  'ptPT',
+  'ruRU',
+  'esLA',
+  'esES'
 ];
 
 export class VilosPlayerService implements IMediaService {
@@ -156,20 +156,25 @@ export class VilosPlayerService implements IMediaService {
     }
 
     const firstUnknown = unknownSubtitles.shift();
-    if (firstUnknown) {
-      firstUnknown.setTitle('Off');
-      subtitles.unshift(firstUnknown);
-    }
-
     if (unknownSubtitles.length > 0) {
       for (const subtitle of unknownSubtitles) {
-        subtitles.push(subtitle);
+        subtitles.unshift(subtitle);
       }
+    }
+    if (firstUnknown) {
+      if (unknownSubtitles.length === 0) {
+        firstUnknown.setTitle('Off');
+      }
+      subtitles.unshift(firstUnknown);
     }
 
     let hasDefault = subtitles.filter(x => x.isDefault()).length > 0;
     const queries = parseSimpleQuery(location.search);
-    if (!hasDefault && !queries.hasOwnProperty('ssid')) {
+    if (
+      !hasDefault &&
+      !queries.hasOwnProperty('ssid') &&
+      (unknownSubtitles.length === 0 || !firstUnknown)
+    ) {
       for (const language of languagePriority) {
         const items = subtitles.filter(x => x.getLanguage() === language);
         if (items.length > 0) {
