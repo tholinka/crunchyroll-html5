@@ -570,7 +570,9 @@ export class Player extends Component<IPlayerProps, IPlayerState>
         if (queries.hasOwnProperty('ssid')) {
           const id = queries.ssid;
           const sId = config.subtitles[i].getId();
-          if (sId !== undefined) {
+          if (sId === undefined) {
+            useSubtitle = config.subtitles[i].isDefault();
+          } else {
             useSubtitle = sId.toString() === id;
           }
         } else {
