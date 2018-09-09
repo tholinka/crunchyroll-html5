@@ -11,6 +11,20 @@ import { ITrackMedia } from '../player/crunchyroll';
 import { AssSubtitle } from './AssSubtitle';
 import { HardSubtitle } from './HardSubtitle';
 
+const languagePriority = [
+  "enUS",
+  "enGB",
+  "arME",
+  "frFR",
+  "deDE",
+  "itIT",
+  "ptBR",
+  "ptPT",
+  "ruRU",
+  "esLA",
+  "esES"
+];
+
 export class VilosPlayerService implements IMediaService {
   public static fromHTML(body: string, html: string): IVilosConfig | undefined {
     const get = <T>(n: string, regex: RegExp) => {
@@ -152,7 +166,18 @@ export class VilosPlayerService implements IMediaService {
       }
     }
 
-    const hasDefault = subtitles.filter(x => x.isDefault()).length > 0;
+    let hasDefault = subtitles.filter(x => x.isDefault()).length > 0;
+    if (!hasDefault) {
+      for (const language of languagePriority) {
+        const items = subtitles.filter(x => x.getLanguage() === language);
+        if (items.length > 0) {
+          hasDefault = true;
+          items[0].setDefault(true);
+          break;
+        }
+      }
+    }
+
     if (!hasDefault && firstUnknown) {
       firstUnknown.setDefault(true);
     }

@@ -4,17 +4,17 @@ import { fromArrayBuffer } from '../utils/base64';
 import { SHA1 } from '../utils/hash/sha1';
 
 const languages: { [key: string]: string } = {
-  arME: 'العربية',
-  deDE: 'Deutsch',
-  en: 'English',
-  enGB: 'English (UK)',
   enUS: 'English (US)',
-  esES: 'Español (España)',
-  esLA: 'Español',
+  enGB: 'English (UK)',
+  arME: 'العربية',
   frFR: 'Français (France)',
+  deDE: 'Deutsch',
   itIT: 'Italiano',
   ptBR: 'Português (Brasil)',
-  ruRU: 'Русский'
+  ptPT: 'Português (Portugal)',
+  ruRU: 'Русский',
+  esLA: 'Español',
+  esES: 'Español (España)'
 };
 
 export class HardSubtitle implements IMediaSubtitle {

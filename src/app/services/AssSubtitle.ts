@@ -38,6 +38,10 @@ export class AssSubtitle implements IMediaSubtitle {
     return this._isDefault;
   }
 
+  public setDefault(isDefault: boolean): void {
+    this._isDefault = isDefault;
+  }
+
   public getId(): number | undefined {
     return undefined;
   }

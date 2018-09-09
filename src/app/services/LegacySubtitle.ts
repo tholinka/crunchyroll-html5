@@ -5,10 +5,13 @@ import { IMediaSubtitle } from '../models/IMediaSubtitle';
 export class LegacySubtitle implements IMediaSubtitle {
   private _file: string | undefined;
   private _subtitle: ISubtitle;
+  private _isDefault = false;
 
   constructor(file: string | undefined, subtitle: ISubtitle) {
     this._file = file;
     this._subtitle = subtitle;
+
+    this._isDefault = subtitle.isDefault();
   }
 
   public getTitle(): string {
@@ -26,7 +29,11 @@ export class LegacySubtitle implements IMediaSubtitle {
   }
 
   public isDefault(): boolean {
-    return this._subtitle.isDefault();
+    return this._isDefault;
+  }
+
+  public setDefault(isDefault: boolean): void {
+    this._isDefault = isDefault;
   }
 
   public getId(): number | undefined {

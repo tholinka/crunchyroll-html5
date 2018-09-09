@@ -5,4 +5,5 @@ export interface IMediaSubtitle {
   getFile(): string | undefined;
   getContentAsAss(): Promise<string | undefined>;
   isDefault(): boolean;
+  setDefault(isDefault: boolean): void;
 }
