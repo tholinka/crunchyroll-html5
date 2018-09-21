@@ -35,7 +35,7 @@ const generateManifest = () => {
         ],
         'js': [
           'vendor/browser-polyfill.min.js',
-          'patch-worker.js',
+          'patch.js',
           'content-script.js'
         ],
         "run_at": "document_start" // run as soon as possible, postpone loading in code
@@ -46,7 +46,7 @@ const generateManifest = () => {
         ],
         'js': [
           'vendor/browser-polyfill.min.js',
-          'patch-worker.js',
+          'patch.js',
           'content-script.js'
         ]
       }
@@ -62,7 +62,8 @@ const generateManifest = () => {
       // Allow the player to access these sites as otherwise it will have some
       // trouble loading the video.
       "*://*.vrv.co/*",
-      "*://*.dlvr1.net/*"
+      "*://*.dlvr1.net/*",
+      "*://*.akamaized.net/*"
     ]
   }, null, 2);
 };
@@ -127,20 +128,5 @@ mkdirp(path.join(__dirname, '../dist/webextension'), (err) => {
       console.error(err);
       process.exit(1);
     }
-  });
-
-  fs.readFile(path.join(__dirname, '../vendor/patch-worker.js'), (err, data) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-      return;
-    }
-
-    fs.writeFile(path.join(__dirname, '../dist/webextension/patch-worker.js'), data, (err) => {
-      if (err) {
-        console.error(err);
-        process.exit(1);
-      }
-    });
   });
 });

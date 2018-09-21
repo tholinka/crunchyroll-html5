@@ -276,8 +276,10 @@ export class LibAss extends EventTarget {
     if (this.worker) return;
 
     this.worker = new Worker(getWorkerUrl());
-    this.worker.onerror = error => this.onWorkerError(error);
-    this.worker.onmessage = event => this.onWorkerMessage(event);
+    this.worker.addEventListener('error', error => this.onWorkerError(error));
+    this.worker.addEventListener('message', event =>
+      this.onWorkerMessage(event)
+    );
   }
 
   private onWorkerError(error: any) {

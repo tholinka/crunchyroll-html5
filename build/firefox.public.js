@@ -7,8 +7,7 @@ const mkdirp = require('mkdirp');
 const UglifyJS = require('uglify-es');
 
 const excludeVendorFilenames = [
-  'browser-polyfill.min.js',
-  'patch-worker.js'
+  'browser-polyfill.min.js'
 ];
 
 const includeAssetsFilenames = [

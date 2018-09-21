@@ -18,29 +18,7 @@ export class HlsSource extends Disposable implements ISource {
     this._url = url;
     this._quality = quality;
 
-    let config: Hls.Config | undefined;
-    const loader = getPlaylistLoader();
-    if (loader) {
-      config = Object.assign({}, Hls.DefaultConfig, {
-        loader
-      });
-    }
-
-    this._hls = new Hls(config);
-
-    this._hls.loadSource(url);
-
-    this._hls.on(Hls.Events.LEVEL_SWITCHED, () =>
-      api.dispatchEvent('qualitychange')
-    );
-    this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      for (let i = 0; i < this._hls.levels.length; i++) {
-        if (this._hls.levels[i].height + 'p' === quality) {
-          this._hls.currentLevel = i;
-          break;
-        }
-      }
-    });
+    this._hls = this._initHls();
   }
 
   public getUrl(): string {
@@ -55,29 +33,7 @@ export class HlsSource extends Disposable implements ISource {
     this._hls.detachMedia();
     this._hls.destroy();
 
-    let config: Hls.Config | undefined;
-    const loader = getPlaylistLoader();
-    if (loader) {
-      config = Object.assign({}, Hls.DefaultConfig, {
-        loader
-      });
-    }
-
-    this._hls = new Hls(config);
-
-    this._hls.loadSource(url);
-
-    this._hls.on(Hls.Events.LEVEL_SWITCHED, () =>
-      this._api.dispatchEvent('qualitychange')
-    );
-    this._hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      for (let i = 0; i < this._hls.levels.length; i++) {
-        if (this._hls.levels[i].height + 'p' === this._quality) {
-          this._hls.currentLevel = i;
-          break;
-        }
-      }
-    });
+    this._hls = this._initHls();
 
     if (this._attachedElement) {
       this._hls.attachMedia(this._attachedElement);
@@ -154,5 +110,36 @@ export class HlsSource extends Disposable implements ISource {
       return levels[level];
     }
     return undefined;
+  }
+
+  private _initHls(): Hls {
+    let config: Hls.Config | undefined;
+    const loader = getPlaylistLoader();
+    if (loader) {
+      config = Object.assign({}, Hls.DefaultConfig, {
+        loader
+      });
+    }
+
+    const hls = new Hls(config);
+
+    hls.on(Hls.Events.ERROR, (evt, data) => {
+      console.error(evt, data);
+    });
+    hls.on(Hls.Events.LEVEL_SWITCHED, () =>
+      this._api.dispatchEvent('qualitychange')
+    );
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      for (let i = 0; i < hls.levels.length; i++) {
+        if (hls.levels[i].height + 'p' === this._quality) {
+          hls.currentLevel = i;
+          break;
+        }
+      }
+    });
+
+    hls.loadSource(this._url);
+
+    return hls;
   }
 }
