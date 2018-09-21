@@ -54,7 +54,17 @@ export class HardSubtitle implements IMediaSubtitle {
   }
 
   public getFile(): string {
-    return this._stream.url;
+    let url = this._stream.url;
+    
+    // Change the file URL to https if current page is also https
+    if (
+      window.location.href.indexOf('https://') === 0 &&
+      url.indexOf('http://') === 0
+    ) {
+      url = url.replace('http://', 'https://');
+    }
+
+    return url;
   }
 
   public async getContentAsAss(): Promise<string | undefined> {

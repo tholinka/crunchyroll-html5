@@ -37,7 +37,18 @@ export class LegacyPlayerService implements IMediaService {
   }
 
   public getDefaultFile(): string | undefined {
-    return this._stream.getFile();
+    let url = this._stream.getFile();
+    
+    // Change the file URL to https if current page is also https
+    if (
+      window.location.href.indexOf('https://') === 0 &&
+      url &&
+      url.indexOf('http://') === 0
+    ) {
+      url = url.replace('http://', 'https://');
+    }
+
+    return url;
   }
 
   public getTracking(): ITrackMedia {
