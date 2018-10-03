@@ -45,7 +45,7 @@ export async function trackProgress(
   if (affiliateCode) {
     body.affiliate_code = affiliateCode;
   }
-  await httpClient.post('http://www.crunchyroll.com/ajax/', body as any, {
+  await httpClient.post('https://www.crunchyroll.com/ajax/', body as any, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
@@ -78,7 +78,7 @@ export async function getCollectionCarouselPage(
   };
 
   const response = await httpClient.get(
-    'http://www.crunchyroll.com/ajax/?' + buildQuery(query)
+    'https://www.crunchyroll.com/ajax/?' + buildQuery(query)
   );
 
   return parseRpc(response.body);
