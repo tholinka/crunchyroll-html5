@@ -57,7 +57,7 @@ export class VilosPlayerService implements IMediaService {
 
     const nextMediaUrl = get<string>(
       html,
-      /^\W*nextMediaLink = (("|')http(.*?));$/m
+      /^\W*var nextMediaUrl = (("|')https?(.*?));$/m
     );
 
     if (!media || !analytics || !playerLanguage || !playerMetadata)
