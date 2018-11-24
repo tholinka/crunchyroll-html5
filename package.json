@@ -71,7 +71,7 @@
     "dev:firefox:webextension": "npm run dev:webextension && shx cp -rf ./dist/webextension ./dist/firefox/webextension"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.74",
+    "@types/chrome": "^0.0.75",
     "@types/firefox-webext-browser": "^64.0.0",
     "@types/greasemonkey": "^0.0.28",
     "@types/hls.js": "^0.10.1",
