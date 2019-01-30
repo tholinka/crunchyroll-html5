@@ -6,11 +6,12 @@ import { IStorage, IStorageSymbol } from '../storage/IStorage';
 
 export function getMediaId(url: string): string | undefined {
   // https://www.crunchyroll.com/boruto-naruto-next-generations/episode-17-run-sarada-740239
-  const re = /https?:\/\/(?:(www|m)\.)?(crunchyroll\.(?:com|fr)\/(?:media(?:-|\/\?id=)|[^/]*\/[^/?&]*?)([0-9]+))(?:[/?&]|$)/g;
+  // const re = /https?:\/\/(?:(www|m)\.)?(crunchyroll\.(?:com|fr)\/(?:media(?:-|\/\?id=)|[^/]*\/[^/?&]*?)([0-9]+))(?:[/?&]|$)/g;
+  const re = /https?:\/\/www\.crunchyroll\.com\/(([\w-]+)\/)?([^\/]+)\/([\w-]+-([\d]+))/g;
   const m = re.exec(url);
   if (!m) return undefined;
 
-  return m[3];
+  return m[5];
 }
 
 interface IQueryStartTime {
