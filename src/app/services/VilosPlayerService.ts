@@ -81,6 +81,17 @@ export class VilosPlayerService implements IMediaService {
   constructor(player: Player, config: IVilosConfig) {
     this._player = player;
     this._config = config;
+
+    const streams = this._config.media.streams.filter(x => x.format === "adaptive_hls");
+
+    if (streams.length > 0) {
+      this._config.media.streams = streams;
+    } else {
+      const multiTrackStreams = this._config.media.streams.filter(x => x.format === "multitrack_adaptive_hls_v2");
+      if (multiTrackStreams.length > 0) {
+        this._config.media.streams = multiTrackStreams;
+      }
+    }
   }
 
   public getTitle(): string {
@@ -183,6 +194,13 @@ export class VilosPlayerService implements IMediaService {
           break;
         }
       }
+    }
+
+    const englishSubtitles = subtitles.filter(x => x.getLanguage() === "enUS");
+
+    if (!hasDefault && englishSubtitles.length > 0) {
+      englishSubtitles[0].setDefault(true);
+      hasDefault = true;
     }
 
     if (!hasDefault && firstUnknown) {
